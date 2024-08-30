@@ -299,4 +299,11 @@ export default StyleSheet.create({
   iconMenu: {
     alignItems: "center",
   },
+  overlay: {
+    flex: 1, // Ensures the overlay takes up the full space of the parent
+    backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent black background
+    justifyContent: "center", // Center content vertically
+    alignItems: "center", // Center content horizontally
+    borderRadius: 8, // Match the border radius of the image
+  },
 });

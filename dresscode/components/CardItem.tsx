@@ -5,6 +5,7 @@ import {
   ImageBackground,
   Dimensions,
   TouchableOpacity,
+  ViewStyle,
 } from "react-native";
 import Icon from "./Icon";
 import { CardItemT } from "../types";
@@ -28,15 +29,13 @@ const CardItem = ({
   // Custom styling
   const fullWidth = Dimensions.get("window").width;
 
-  const imageStyle = [
-    {
-      borderRadius: 8,
-      width: hasVariant ? fullWidth / 2 - 30 : fullWidth - 80,
-      height: hasVariant ? 170 : 600,
-      margin: hasVariant ? 0 : 20,
-      overflow: "hidden", // Ensure the content within the ImageBackground is clipped to the border radius
-    },
-  ];
+  const imageStyle: ViewStyle = {
+    borderRadius: 8,
+    width: hasVariant ? fullWidth / 2 - 30 : fullWidth - 80,
+    height: hasVariant ? 170 : 600,
+    margin: hasVariant ? 0 : 20,
+    overflow: "hidden", // Ensure the content within the ImageBackground is clipped to the border radius
+  };
 
   const nameStyle = [
     {
@@ -51,7 +50,8 @@ const CardItem = ({
     <View style={styles.containerCardItem}>
       {/* IMAGE BACKGROUND */}
       <ImageBackground source={image} style={imageStyle}>
-        <View>
+        <View style={styles.overlay}>
+          {/* MATCHES */}
           {matches && (
             <View style={styles.matchesCardItem}>
               <Text style={styles.matchesTextCardItem}>
