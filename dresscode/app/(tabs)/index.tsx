@@ -12,27 +12,28 @@ export default function HomeScreen() {
         <City />
         <Filters />
       </View>
-
-      <Swiper
-        cards={DEMO}
-        infinite
-        renderCard={(item) => (
-          <CardItem
-            hasActions
-            image={item.image}
-            name={item.name}
-            description={item.description}
-            matches={item.match}
-          />
-        )}
-        verticalSwipe={false}
-        onSwipedAll={() => {
-          console.log("All cards swiped!");
-        }}
-        cardIndex={0}
-        backgroundColor={"#4FD0E9"}
-        stackSize={3}
-      />
+      <View>
+        <Swiper
+          cards={DEMO}
+          infinite
+          renderCard={(item) => (
+            <CardItem
+              hasActions
+              image={item.image}
+              name={item.name}
+              description={item.description}
+              matches={item.match}
+            />
+          )}
+          verticalSwipe={false}
+          onSwipedAll={() => {
+            console.log("All cards swiped!");
+          }}
+          cardIndex={0}
+          backgroundColor={"#4FD0E9"}
+          stackSize={3}
+        />
+      </View>
     </View>
   );
 }
