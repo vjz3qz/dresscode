@@ -46,6 +46,12 @@ export default StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
+  priceCardItem: {
+    color: WHITE,
+    fontSize: 16,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
   status: {
     paddingBottom: 10,
     flexDirection: "row",
@@ -303,10 +309,17 @@ export default StyleSheet.create({
   overlay: {
     position: "absolute", // Position the overlay absolutely within the parent
     bottom: 24, // Align the overlay to the bottom of the card
-    left: 0, // Align to the left edge
-    right: 0, // Align to the right edge
+    left: 4, // Align to the left edge
+    right: 4, // Align to the right edge
     height: 100, // Adjust the height as needed
     justifyContent: "center", // Center content vertically
     alignItems: "center", // Center content horizontally
+  },
+  gradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1, // Ensure the gradient is on top of the image but below the text
   },
 });

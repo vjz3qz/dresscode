@@ -6,8 +6,9 @@ import {
   Dimensions,
   ViewStyle,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { CardItemT } from "../types";
-import styles from "../assets/styles";
+import styles from "@/assets/styles";
 
 const CardItem = ({ description, image, name, price }: CardItemT) => {
   // Custom styling
@@ -30,24 +31,26 @@ const CardItem = ({ description, image, name, price }: CardItemT) => {
     },
   ];
 
+  const gradientHeight = 600 / 2; // 50% of image height
+
   return (
     <View style={styles.containerCardItem}>
       {/* IMAGE BACKGROUND */}
       <ImageBackground source={image} style={imageStyle}>
-        <View style={styles.overlay}>
-          {/* MATCHES */}
-          {/* NAME */}
-          <Text style={nameStyle}>{name}</Text>
-
-          {/* DESCRIPTION */}
-          {description && (
-            <Text style={styles.descriptionCardItem}>{description}</Text>
-          )}
-          {price && <Text style={styles.descriptionCardItem}>{price}</Text>}
-        </View>
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.4)"]}
+          style={[styles.gradient, { height: gradientHeight }]}
+        >
+          <View style={styles.overlay}>
+            <Text style={nameStyle}>{name}</Text>
+            {description && (
+              <Text style={styles.descriptionCardItem}>{description}</Text>
+            )}
+            {price && <Text style={styles.priceCardItem}>{price}</Text>}
+          </View>
+        </LinearGradient>
       </ImageBackground>
     </View>
   );
 };
-
 export default CardItem;

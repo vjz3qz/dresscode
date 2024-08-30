@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, ImageBackground } from "react-native";
+import React from "react";
+import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import { City, Filters, CardItem } from "@/components";
 import styles from "@/assets/styles";
@@ -18,11 +18,10 @@ export default function ExploreScreen() {
           infinite
           renderCard={(item) => (
             <CardItem
-              hasActions
               image={item.image}
               name={item.name}
               description={item.description}
-              matches={item.match}
+              price={item.price}
             />
           )}
           verticalSwipe={false}
