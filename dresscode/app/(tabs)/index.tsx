@@ -7,37 +7,32 @@ import DEMO from "../../assets/data/demo";
 
 export default function HomeScreen() {
   return (
-    <ImageBackground
-      source={require("../../assets/images/bg.png")}
-      style={styles.bg}
-    >
-      <View style={styles.containerHome}>
-        <View style={styles.top}>
-          <City />
-          <Filters />
-        </View>
-
-        <Swiper
-          cards={DEMO}
-          infinite
-          renderCard={(item) => (
-            <CardItem
-              hasActions
-              image={item.image}
-              name={item.name}
-              description={item.description}
-              matches={item.match}
-            />
-          )}
-          verticalSwipe={false}
-          onSwipedAll={() => {
-            console.log("All cards swiped!");
-          }}
-          cardIndex={0}
-          backgroundColor={"#4FD0E9"}
-          stackSize={3}
-        />
+    <View style={styles.containerHome}>
+      <View style={styles.top}>
+        <City />
+        <Filters />
       </View>
-    </ImageBackground>
+
+      <Swiper
+        cards={DEMO}
+        infinite
+        renderCard={(item) => (
+          <CardItem
+            hasActions
+            image={item.image}
+            name={item.name}
+            description={item.description}
+            matches={item.match}
+          />
+        )}
+        verticalSwipe={false}
+        onSwipedAll={() => {
+          console.log("All cards swiped!");
+        }}
+        cardIndex={0}
+        backgroundColor={"#4FD0E9"}
+        stackSize={3}
+      />
+    </View>
   );
 }
