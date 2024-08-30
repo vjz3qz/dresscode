@@ -1,11 +1,8 @@
 export type CardItemT = {
   description?: string;
-  hasActions?: boolean;
-  hasVariant?: boolean;
   image: any;
-  isOnline?: boolean;
-  matches?: string;
   name: string;
+  price?: string;
 };
 
 export type IconT = {
