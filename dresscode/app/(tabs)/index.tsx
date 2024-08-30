@@ -6,8 +6,6 @@ import styles from "../../assets/styles";
 import DEMO from "../../assets/data/demo";
 
 export default function HomeScreen() {
-  const [swiper, setSwiper] = useState<Swiper | null>(null);
-
   return (
     <ImageBackground
       source={require("../../assets/images/bg.png")}
@@ -21,6 +19,7 @@ export default function HomeScreen() {
 
         <Swiper
           cards={DEMO}
+          infinite
           renderCard={(item) => (
             <CardItem
               hasActions
@@ -37,7 +36,6 @@ export default function HomeScreen() {
           cardIndex={0}
           backgroundColor={"#4FD0E9"}
           stackSize={3}
-          ref={(newSwiper): void => setSwiper(newSwiper)}
         />
       </View>
     </ImageBackground>
