@@ -42,7 +42,8 @@ export default StyleSheet.create({
     color: WHITE,
   },
   descriptionCardItem: {
-    color: GRAY,
+    color: WHITE,
+    fontSize: 16,
     textAlign: "center",
   },
   status: {
@@ -300,10 +301,12 @@ export default StyleSheet.create({
     alignItems: "center",
   },
   overlay: {
-    flex: 1, // Ensures the overlay takes up the full space of the parent
-    backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent black background
+    position: "absolute", // Position the overlay absolutely within the parent
+    bottom: 24, // Align the overlay to the bottom of the card
+    left: 0, // Align to the left edge
+    right: 0, // Align to the right edge
+    height: 100, // Adjust the height as needed
     justifyContent: "center", // Center content vertically
     alignItems: "center", // Center content horizontally
-    borderRadius: 8, // Match the border radius of the image
   },
 });
