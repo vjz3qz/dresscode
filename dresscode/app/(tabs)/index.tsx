@@ -5,7 +5,7 @@ import { City, Filters, CardItem } from "../../components";
 import styles from "../../assets/styles";
 import DEMO from "../../assets/data/demo";
 
-export default function HomeScreen() {
+export default function ExploreScreen() {
   return (
     <View style={styles.containerHome}>
       <View style={styles.top}>

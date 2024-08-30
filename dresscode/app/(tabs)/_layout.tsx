@@ -21,8 +21,8 @@ export default function TabLayout() {
         options={{
           title: "explore",
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "home" : "home-outline"}
+            <MaterialCommunityIcons
+              name={focused ? "shopping" : "shopping-outline"}
               color={color}
               size={28}
             />
