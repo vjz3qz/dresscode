@@ -1,5 +1,11 @@
 import React from "react";
-import { Text, View, Image, Dimensions, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  ImageBackground,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import Icon from "./Icon";
 import { CardItemT } from "../types";
 import styles, {
@@ -26,8 +32,9 @@ const CardItem = ({
     {
       borderRadius: 8,
       width: hasVariant ? fullWidth / 2 - 30 : fullWidth - 80,
-      height: hasVariant ? 170 : 350,
+      height: hasVariant ? 170 : 600,
       margin: hasVariant ? 0 : 20,
+      overflow: "hidden", // Ensure the content within the ImageBackground is clipped to the border radius
     },
   ];
 
@@ -35,63 +42,64 @@ const CardItem = ({
     {
       paddingTop: hasVariant ? 10 : 15,
       paddingBottom: hasVariant ? 5 : 7,
-      color: "#363636",
+      color: "#fff", // White text for better contrast on background image
       fontSize: hasVariant ? 15 : 30,
     },
   ];
 
   return (
     <View style={styles.containerCardItem}>
-      {/* IMAGE */}
-      <Image source={image} style={imageStyle} />
+      {/* IMAGE BACKGROUND */}
+      <ImageBackground source={image} style={imageStyle}>
+        <View>
+          {matches && (
+            <View style={styles.matchesCardItem}>
+              <Text style={styles.matchesTextCardItem}>
+                <Icon name="heart" color={WHITE} size={13} /> {matches}% Match!
+              </Text>
+            </View>
+          )}
 
-      {/* MATCHES */}
-      {matches && (
-        <View style={styles.matchesCardItem}>
-          <Text style={styles.matchesTextCardItem}>
-            <Icon name="heart" color={WHITE} size={13} /> {matches}% Match!
-          </Text>
+          {/* NAME */}
+          <Text style={nameStyle}>{name}</Text>
+
+          {/* DESCRIPTION */}
+          {description && (
+            <Text style={styles.descriptionCardItem}>{description}</Text>
+          )}
+
+          {/* STATUS */}
+          {!description && (
+            <View style={styles.status}>
+              <View style={isOnline ? styles.online : styles.offline} />
+              <Text style={styles.statusText}>
+                {isOnline ? "Online" : "Offline"}
+              </Text>
+            </View>
+          )}
+
+          {/* ACTIONS */}
+          {hasActions && (
+            <View style={styles.actionsCardItem}>
+              <TouchableOpacity style={styles.miniButton}>
+                <Icon name="star" color={STAR_ACTIONS} size={14} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.button}>
+                <Icon name="heart" color={LIKE_ACTIONS} size={25} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.button}>
+                <Icon name="close" color={DISLIKE_ACTIONS} size={25} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.miniButton}>
+                <Icon name="flash" color={FLASH_ACTIONS} size={14} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-      )}
-
-      {/* NAME */}
-      <Text style={nameStyle}>{name}</Text>
-
-      {/* DESCRIPTION */}
-      {description && (
-        <Text style={styles.descriptionCardItem}>{description}</Text>
-      )}
-
-      {/* STATUS */}
-      {!description && (
-        <View style={styles.status}>
-          <View style={isOnline ? styles.online : styles.offline} />
-          <Text style={styles.statusText}>
-            {isOnline ? "Online" : "Offline"}
-          </Text>
-        </View>
-      )}
-
-      {/* ACTIONS */}
-      {hasActions && (
-        <View style={styles.actionsCardItem}>
-          <TouchableOpacity style={styles.miniButton}>
-            <Icon name="star" color={STAR_ACTIONS} size={14} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button}>
-            <Icon name="heart" color={LIKE_ACTIONS} size={25} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button}>
-            <Icon name="close" color={DISLIKE_ACTIONS} size={25} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.miniButton}>
-            <Icon name="flash" color={FLASH_ACTIONS} size={14} />
-          </TouchableOpacity>
-        </View>
-      )}
+      </ImageBackground>
     </View>
   );
 };
