@@ -1,3 +1,4 @@
+import os
 import boto3
 from rembg import remove
 from PIL import Image
@@ -26,7 +27,7 @@ def process_image_s3(bucket_name, input_key, output_key):
 
 # Example usage
 process_image_s3(
-    bucket_name='your-bucket-name',
-    input_key='path/to/your/input_image.jpg',
-    output_key='path/to/your/output_image_no_bg.png'
+    bucket_name=os.getenv('S3_BUCKET_NAME'),
+    input_key='01.jpg',
+    output_key='01.png'
 )
