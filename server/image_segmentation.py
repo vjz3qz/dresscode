@@ -7,6 +7,12 @@ from io import BytesIO
 # Initialize S3 client
 s3 = boto3.client('s3')
 
+def upload_image_to_s3(bucket_name, key, image_path):
+    with open(image_path, 'rb') as f:
+        s3.put_object(Bucket=bucket_name, Key=key, Body=f, ContentType='image/jpeg')
+
+    print(f'Image uploaded to s3://{bucket_name}/{key}')
+
 def process_image_s3(bucket_name, input_key, output_key):
     # Download the image from S3
     s3_response = s3.get_object(Bucket=bucket_name, Key=input_key)
