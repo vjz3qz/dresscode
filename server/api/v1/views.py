@@ -23,10 +23,19 @@ async def health():
     return JSONResponse({"text": "OK"})
 
 @router.post("/upload")
-async def upload(photo: UploadFile = File(...)):
-    upload_file_obj_to_s3(photo)
-    process_image_s3("dresscode-ai", photo.filename, "processed_" + photo.filename)
-    return JSONResponse({"filename": photo.filename, "status": "file uploaded successfully", "text": "OK"})
+async def upload(file: UploadFile = File(...)):
+    """
+    Upload a file to S3.
+    Args:
+        file (UploadFile): The file to upload.
+    Returns:
+        JSONResponse: Returns the task ID of the Celery task.
+    """
+    file_content = await file.read()
+    file_name = file.filename  
+    file_content_type = file.content_type
+    task = celery.send_task("tasks.upload", args=[file_content, file_name, file_content_type])
+    return return_task(task)
 
 @router.post("/process-image")
 async def process_image(

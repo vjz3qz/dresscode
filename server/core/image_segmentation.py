@@ -19,17 +19,18 @@ def upload_image_to_s3(bucket_name, key, image_path):
     print(f'Image uploaded to s3://{bucket_name}/{key}')
 
 
-def upload_file_obj_to_s3(file):
+def upload_file_obj_to_s3(file_content, file_name, file_content_type):
 
     try:
+        file_obj = BytesIO(file_content)
         # Upload file to S3
         s3.upload_fileobj(
-            file.file,
+            file_obj,
             os.getenv("S3_BUCKET_NAME"),
-            file.filename,
-            ExtraArgs={"ContentType": file.content_type}
+            file_name,
+            ExtraArgs={"ContentType": file_content_type}
         )
-        return {"filename": file.filename, "status": "file uploaded successfully"}
+        return {"filename": file_name, "status": "file uploaded successfully"}
     except NoCredentialsError:
         return {"error": "Credentials not available"}
 

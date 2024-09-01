@@ -4,7 +4,7 @@ import os
 import threading
 from celery import Celery
 import time
-from core.image_segmentation import process_image_s3, upload_image_to_s3
+from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3
 
 CHECK_EMAIL_LOCK = threading.Lock()
 
@@ -20,6 +20,19 @@ else:
         broker=f"rediss://{REDIS_HOSTNAME}:{REDIS_PORT}/0?ssl_cert_reqs=CERT_REQUIRED",
         backend=f"rediss://{REDIS_HOSTNAME}:{REDIS_PORT}/0?ssl_cert_reqs=CERT_REQUIRED",
     )
+
+@celery.task(name="tasks.upload")
+def upload_task(file_content, file_name, file_content_type):
+    """
+    Upload a file to S3.
+    Args:
+        file (FileStorage): The file to upload.
+    Returns:
+        dict: The result of the upload.
+    """
+    upload_file_obj_to_s3(file_content, file_name, file_content_type)
+    process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
+    return {"filename": "processed_" + file_name, "status": "file uploaded successfully"}
     
 @celery.task(name="tasks.process_image")
 def process_image_task(image_url):
