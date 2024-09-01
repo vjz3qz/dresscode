@@ -1,6 +1,9 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import React, { useState, useRef } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import axios from "axios";
+import * as FileSystem from "expo-file-system";
+import { BACKEND_URL } from "@env";
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>("back");
@@ -37,7 +40,41 @@ export default function App() {
           exif: true, // Optionally include EXIF data
         };
         const photo = await cameraRef.current.takePictureAsync(options);
-        console.log("Photo taken:", photo);
+
+        // Convert the photo to a Blob using the file URI
+        const fileUri = photo.uri;
+        const fileInfo = await FileSystem.getInfoAsync(fileUri);
+        const fileBlob = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Create a FormData object
+        const formData = new FormData();
+        formData.append("photo", {
+          uri: fileUri,
+          name: "photo.jpg",
+          type: "image/jpeg",
+        });
+
+        // // Add any other data you want to send with the request
+        // formData.append("userId", "12345"); // example of additional data
+
+        const apiUrl = `${BACKEND_URL}/upload`;
+        console.log("Sending photo to:", apiUrl);
+        // Send the request to the backend
+        try {
+          const response = await axios.post(apiUrl, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          const result = response.data;
+          console.log("Response from backend:", result);
+        } catch (error) {
+          console.error("Error sending photo:", error);
+        }
+        // console.log("Photo taken:", photo);
       } catch (error) {
         console.error("Error taking picture:", error);
       }
