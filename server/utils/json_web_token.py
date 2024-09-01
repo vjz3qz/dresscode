@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-import jwt
+import jwt # PyJWT
 
 from .custom_exceptions import BadCredentialsException
 from .custom_exceptions import UnableCredentialsException
