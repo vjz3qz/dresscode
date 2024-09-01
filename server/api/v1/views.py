@@ -3,6 +3,7 @@
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, Body, File, Request, UploadFile
 from fastapi.responses import JSONResponse
+import time
 
 from core.celery_worker import celery
 from core.image_segmentation import process_image_s3, upload_file_obj_to_s3
@@ -75,13 +76,20 @@ async def upload_image_to_s3(
 
 
 def return_task(task):
-    # check status of task, return result if ready. loop until ready
-
+    # Loop until the task is complete
     while True:
-        task_status = AsyncResult(task.id, app=celery).status
+        task_async_result = AsyncResult(task.id, app=celery)
+        task_status = task_async_result.status
+
         if task_status == "SUCCESS":
-            return JSONResponse({"status": "complete"})
+            # Retrieve the result of the task
+            result = task_async_result.result
+            return JSONResponse({"status": "complete", "result": result})
         elif task_status == "FAILURE":
-            return JSONResponse({"status": "error"})
+            # Retrieve the exception info
+            result = task_async_result.result
+            return JSONResponse({"status": "error", "result": result})
         else:
+            # Sleep for a short duration before checking again to avoid busy waiting
+            time.sleep(1)
             continue
