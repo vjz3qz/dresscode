@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Body, File, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from core.celery_worker import celery
-from core.image_segmentation import upload_file_obj_to_s3
+from core.image_segmentation import process_image_s3, upload_file_obj_to_s3
 from utils.dependencies import validate_token
 
 router = APIRouter()
@@ -25,6 +25,7 @@ async def health():
 @router.post("/upload")
 async def upload(photo: UploadFile = File(...)):
     upload_file_obj_to_s3(photo)
+    process_image_s3("dresscode-ai", photo.filename, "processed_" + photo.filename)
     return JSONResponse({"filename": photo.filename, "status": "file uploaded successfully", "text": "OK"})
 
 @router.post("/process-image")
