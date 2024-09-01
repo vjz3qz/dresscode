@@ -3,6 +3,7 @@ import boto3
 from rembg import remove
 from PIL import Image
 from io import BytesIO
+from botocore.exceptions import NoCredentialsError
 
 # Initialize S3 client
 s3 = boto3.client('s3', 
@@ -16,6 +17,22 @@ def upload_image_to_s3(bucket_name, key, image_path):
         s3.put_object(Bucket=bucket_name, Key=key, Body=f, ContentType='image/jpeg')
 
     print(f'Image uploaded to s3://{bucket_name}/{key}')
+
+
+def upload_file_obj_to_s3(file):
+
+    try:
+        # Upload file to S3
+        s3.upload_fileobj(
+            file.file,
+            os.getenv("S3_BUCKET_NAME"),
+            file.filename,
+            ExtraArgs={"ContentType": file.content_type}
+        )
+        return {"filename": file.filename, "status": "file uploaded successfully"}
+    except NoCredentialsError:
+        return {"error": "Credentials not available"}
+
 
 def process_image_s3(bucket_name, input_key, output_key):
     # Download the image from S3
