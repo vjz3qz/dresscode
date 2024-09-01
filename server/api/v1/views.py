@@ -21,6 +21,15 @@ async def health():
     """
     return JSONResponse({"text": "OK"})
 
+@router.post("/upload")
+async def upload():
+    """
+    Upload an image to an S3 bucket.
+    Returns:
+        JSONResponse: Returns the task ID of the Celery task.
+    """
+    return JSONResponse({"text": "OK"})
+
 
 @router.post("/process-image")
 async def process_image(
