@@ -4,6 +4,7 @@ import os
 import threading
 from celery import Celery
 import time
+from core.image_segmentation import process_image, upload_image_to_s3
 
 CHECK_EMAIL_LOCK = threading.Lock()
 
@@ -20,6 +21,29 @@ else:
         backend=f"rediss://{REDIS_HOSTNAME}:{REDIS_PORT}/0?ssl_cert_reqs=CERT_REQUIRED",
     )
     
+@celery.task(name="tasks.process_image")
+def process_image(image_url):
+    """
+    Process an image by removing the background.
+    Args:
+        image_url (str): The URL of the image to process.
+    Returns:
+        str: The URL of the processed image.
+    """
+    # process the image
+    output_image_url = process_image(image_url)
+    return output_image_url
+
+@celery.task(name="tasks.upload_image_to_s3")
+def upload_image_to_s3(bucket_name, key, image_path):
+    """
+    Upload an image to an S3 bucket.
+    Args:
+        bucket_name (str): The name of the S3 bucket.
+        key (str): The key of the object in the S3 bucket.
+        image_path (str): The path to the image file.
+    """
+    upload_image_to_s3(bucket_name, key, image_path)
 
 
 if __name__ == "__main__":
