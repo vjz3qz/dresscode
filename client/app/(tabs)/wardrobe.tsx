@@ -50,7 +50,7 @@ export default function App() {
 
         // Create a FormData object
         const formData = new FormData();
-        formData.append("photo", {
+        formData.append("file", {
           uri: fileUri,
           name: "photo.jpg",
           type: "image/jpeg",
