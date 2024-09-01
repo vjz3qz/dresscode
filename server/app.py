@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from api.v1.views import router as v1_router
 from starlette.exceptions import HTTPException as StarletteHTTPException
+import logging
 
 # from backend.api.v2.views import router as v2_router
 
