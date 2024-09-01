@@ -22,7 +22,7 @@ else:
     )
     
 @celery.task(name="tasks.process_image")
-def process_image(image_url):
+def process_image_task(image_url):
     """
     Process an image by removing the background.
     Args:
@@ -35,7 +35,7 @@ def process_image(image_url):
     return output_image_url
 
 @celery.task(name="tasks.upload_image_to_s3")
-def upload_image_to_s3(bucket_name, key, image_path):
+def upload_image_to_s3_task(bucket_name, key, image_path):
     """
     Upload an image to an S3 bucket.
     Args:
