@@ -12,7 +12,7 @@ import axios from "axios";
 import * as FileSystem from "expo-file-system";
 import { BACKEND_URL } from "@env";
 
-export default function Camera() {
+export default function Camera({ exitCamera }) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [photoUri, setPhotoUri] = useState(null); // State to hold the photo URI
@@ -97,6 +97,9 @@ export default function Camera() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.closeButton} onPress={exitCamera}>
+        <Text style={styles.closeButtonText}>X</Text>
+      </TouchableOpacity>
       {photoUri ? (
         <>
           <Image source={{ uri: photoUri }} style={styles.preview} />
@@ -131,6 +134,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    zIndex: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 50,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   message: {
     textAlign: "center",
