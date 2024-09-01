@@ -5,3 +5,4 @@ uvicorn
 celery
 secure
 PyJWT
+redis
