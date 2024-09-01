@@ -4,7 +4,7 @@ import os
 import threading
 from celery import Celery
 import time
-from core.image_segmentation import process_image, upload_image_to_s3
+from core.image_segmentation import process_image_s3, upload_image_to_s3
 
 CHECK_EMAIL_LOCK = threading.Lock()
 
@@ -31,7 +31,7 @@ def process_image(image_url):
         str: The URL of the processed image.
     """
     # process the image
-    output_image_url = process_image(image_url)
+    output_image_url = process_image_s3(image_url)
     return output_image_url
 
 @celery.task(name="tasks.upload_image_to_s3")
