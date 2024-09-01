@@ -5,7 +5,11 @@ from PIL import Image
 from io import BytesIO
 
 # Initialize S3 client
-s3 = boto3.client('s3')
+s3 = boto3.client('s3', 
+                      aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), 
+                      aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'), 
+                      region_name=os.getenv('S3_BUCKET_REGION')
+                      )
 
 def upload_image_to_s3(bucket_name, key, image_path):
     with open(image_path, 'rb') as f:
@@ -32,8 +36,8 @@ def process_image_s3(bucket_name, input_key, output_key):
     print(f'Processed image saved to {output_key} in bucket {bucket_name}')
 
 # Example usage
-process_image_s3(
-    bucket_name=os.getenv('S3_BUCKET_NAME'),
-    input_key='01.jpg',
-    output_key='01.png'
-)
+# process_image_s3(
+#     bucket_name=os.getenv('S3_BUCKET_NAME'),
+#     input_key='01.jpg',
+#     output_key='01.png'
+# )
