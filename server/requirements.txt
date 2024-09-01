@@ -6,3 +6,4 @@ celery
 secure
 PyJWT
 redis
+python-multipart
