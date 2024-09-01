@@ -1,10 +1,11 @@
 """This module contains the API endpoints for the application."""
 
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, File, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from core.celery_worker import celery
+from server.core.image_segmentation import upload_file_obj_to_s3
 from utils.dependencies import validate_token
 
 router = APIRouter()
@@ -22,14 +23,9 @@ async def health():
     return JSONResponse({"text": "OK"})
 
 @router.post("/upload")
-async def upload():
-    """
-    Upload an image to an S3 bucket.
-    Returns:
-        JSONResponse: Returns the task ID of the Celery task.
-    """
-    return JSONResponse({"text": "OK"})
-
+async def upload(file: UploadFile = File(...)):
+    upload_file_obj_to_s3(file)
+    return JSONResponse({"filename": file.filename, "status": "file uploaded successfully", "text": "OK"})
 
 @router.post("/process-image")
 async def process_image(
