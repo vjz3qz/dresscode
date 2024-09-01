@@ -36,23 +36,7 @@ async def process_image(
         JSONResponse: Returns the task ID of the Celery task.
     """
     task = celery.send_task("tasks.process_image", args=[image_url])
-    return JSONResponse({"task_id": task.id})
-
-@router.get("/task-status/{task_id}")
-async def task_status(
-    task_id: str,
-    token: str = Depends(validate_token),
-):
-    """
-    Get the status of a Celery task.
-    Args:
-        task_id (str): The ID of the Celery task.
-        token (str): The JWT token.
-    Returns:
-        JSONResponse: Returns the status of the task.
-    """
-    task = AsyncResult(task_id, app=celery)
-    return JSONResponse({"status": task.status})
+    return return_task(task)
 
 @router.post("/upload-image-to-s3")
 async def upload_image_to_s3(
@@ -72,4 +56,17 @@ async def upload_image_to_s3(
         JSONResponse: Returns the task ID of the Celery task.
     """
     task = celery.send_task("tasks.upload_image_to_s3", args=[bucket_name, key, image_path])
-    return JSONResponse({"task_id": task.id})
+    return return_task(task)
+
+
+def return_task(task):
+    # check status of task, return result if ready. loop until ready
+
+    while True:
+        task_status = AsyncResult(task.id, app=celery).status
+        if task_status == "SUCCESS":
+            return JSONResponse({"status": "complete"})
+        elif task_status == "FAILURE":
+            return JSONResponse({"status": "error"})
+        else:
+            continue
