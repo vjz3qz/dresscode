@@ -1,2 +1,6 @@
 rembg
 boto3
+fastapi
+uvicorn
+celery
+secure
