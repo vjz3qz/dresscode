@@ -4,7 +4,7 @@ import os
 import threading
 from celery import Celery
 import time
-from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3
+from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3, get_image_url_s3
 
 CHECK_EMAIL_LOCK = threading.Lock()
 
@@ -57,6 +57,18 @@ def upload_image_to_s3_task(bucket_name, key, image_path):
         image_path (str): The path to the image file.
     """
     upload_image_to_s3(bucket_name, key, image_path)
+
+@celery.task(name="tasks.get_image_url")
+def get_image_url_task(filename):
+    """
+    Get the URL of an image in the S3 bucket.
+    Args:
+        filename (str): The name of the image file.
+    Returns:
+        str: The URL of the image.
+    """
+    return get_image_url_s3(filename)
+
 
 
 if __name__ == "__main__":

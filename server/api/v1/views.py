@@ -75,6 +75,19 @@ async def upload_image_to_s3(
     return return_task(task)
 
 
+
+@router.get("/get-image-url/{filename}")
+async def get_image_url(filename: str):
+    """
+    Get the URL of an image in the S3 bucket.
+    Args:
+        filename (str): The name of the image file.
+    Returns:
+        JSONResponse: Returns the URL of the image.
+    """
+    task = celery.send_task("tasks.get_image_url", args=[filename])
+    return return_task(task)
+
 def return_task(task):
     # Loop until the task is complete
     while True:
