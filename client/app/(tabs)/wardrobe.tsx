@@ -1,5 +1,5 @@
 import UploadButton from "@/ui/UploadButton";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,15 +7,69 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
 } from "react-native";
+import Gallery from "react-native-awesome-gallery";
 import Camera from "@/components/Camera";
 import ImageViewer from "@/components/ImageViewer";
+import { supabase } from "@/utils/Supabase";
+import axios from "axios";
 
-const tabs = [{ name: "Items" }, { name: "Outfits" }, { name: "Looks" }];
+const tabs = [
+  { name: "Items", tableName: "items" },
+  { name: "Outfits", tableName: "outfits" },
+  { name: "Looks", tableName: "looks" },
+];
 
 export default function WardrobeScreen() {
   const [cameraOpen, setCameraOpen] = useState<boolean>(false);
   const [imageName, setImageName] = useState<string | null>(null);
   const [value, setValue] = useState(0);
+  const [data, setData] = useState<string[]>([]);
+
+  const fetchImageUrl = async (imageName: string) => {
+    if (!imageName) {
+      return;
+    }
+
+    try {
+      const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+      const response = await axios.get(
+        `${BACKEND_URL}/get-image-url/${imageName}`
+      );
+
+      return response.data["result"]["url"];
+    } catch (error) {
+      console.error("Error fetching image URL:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      let { data, error } = await supabase
+        .from(tabs[value]["tableName"])
+        .select("*");
+
+      if (error) {
+        console.error("Error fetching items:", error.message);
+        setData([]);
+        return;
+      }
+      if (!data || data.length === 0) {
+        return;
+      }
+      let items: string[] = [];
+      for (let i = 0; i < data.length; i++) {
+        if (!data[i]["s3_key"]) {
+          continue;
+        }
+        const imageUrl = await fetchImageUrl(data[i]["s3_key"]);
+        items.push(imageUrl);
+      }
+      setData(items);
+      console.log("items", items);
+    };
+
+    fetchItems();
+  }, [value]);
 
   return cameraOpen ? (
     <Camera
@@ -52,6 +106,13 @@ export default function WardrobeScreen() {
           );
         })}
       </View>
+
+      <Gallery
+        data={data}
+        // onIndexChange={(newIndex) => {
+        //   // console.log("newIndex", newIndex);
+        // }}
+      />
       <UploadButton onPress={() => setCameraOpen(true)} />
     </SafeAreaView>
   );
