@@ -108,10 +108,12 @@ export default function WardrobeScreen() {
       </View>
 
       <Gallery
-        data={data}
-        // onIndexChange={(newIndex) => {
-        //   // console.log("newIndex", newIndex);
-        // }}
+        style={{ flex: 5 }} // Ensure the gallery takes up the rest of the space
+        // data={data}
+        data={[
+          "https://cdn.pixabay.com/photo/2021/05/28/13/04/planet-6290805_1280.jpg",
+          "https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w1200/2023/10/free-images.jpg",
+        ]}
       />
       <UploadButton onPress={() => setCameraOpen(true)} />
     </SafeAreaView>
