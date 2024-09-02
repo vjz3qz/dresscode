@@ -9,13 +9,18 @@ import {
   Image,
 } from "react-native";
 import axios from "axios";
-import * as FileSystem from "expo-file-system";
 import { BACKEND_URL } from "@env";
 
-export default function Camera({ exitCamera }: { exitCamera: () => void }) {
+export default function Camera({
+  exitCamera,
+  setImageName,
+}: {
+  exitCamera: () => void;
+  setImageName: React.Dispatch<React.SetStateAction<string | null>>;
+}) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
-  const [photoUri, setPhotoUri] = useState(null); // State to hold the photo URI
+  const [photoUri, setPhotoUri] = useState<string | null>(null); // State to hold the photo URI
   const cameraRef = useRef(null);
 
   if (!permission) {
@@ -51,9 +56,6 @@ export default function Camera({ exitCamera }: { exitCamera: () => void }) {
 
         // Save the photo URI to state
         setPhotoUri(photo.uri);
-
-        // Log the photo for debugging
-        // console.log("Photo taken:", photo);
       } catch (error) {
         console.error("Error taking picture:", error);
       }
@@ -63,12 +65,6 @@ export default function Camera({ exitCamera }: { exitCamera: () => void }) {
   async function uploadPicture() {
     if (photoUri) {
       try {
-        // Convert the photo to a Blob using the file URI
-        const fileInfo = await FileSystem.getInfoAsync(photoUri);
-        const fileBlob = await FileSystem.readAsStringAsync(photoUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
         // Create a FormData object
         const formData = new FormData();
         formData.append("file", {
@@ -80,7 +76,7 @@ export default function Camera({ exitCamera }: { exitCamera: () => void }) {
         const apiUrl = `${BACKEND_URL}/upload`;
         console.log("Sending photo to:", apiUrl);
 
-        // Send the request to the backend
+        // Send the request to the backend to upload the image
         const response = await axios.post(apiUrl, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -89,13 +85,16 @@ export default function Camera({ exitCamera }: { exitCamera: () => void }) {
 
         const result = response.data;
         console.log("Response from backend:", result);
+
+        // Assuming the backend returns the filename of the uploaded image
+        const filename = result["result"]["filename"];
+        setImageName(filename);
       } catch (error) {
         console.error("Error sending photo:", error);
       }
       exitCamera();
     }
   }
-
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.closeButton} onPress={exitCamera}>
