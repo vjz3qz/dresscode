@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Image, ActivityIndicator, StyleSheet } from "react-native";
 import axios from "axios";
-import { BACKEND_URL } from "@env";
 
 export default function ImageViewer({ imageName }: { imageName: string }) {
   const [imageUrl, setImageUrl] = useState(null);
@@ -14,10 +13,12 @@ export default function ImageViewer({ imageName }: { imageName: string }) {
       }
 
       try {
+        const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
         const response = await axios.get(
           `${BACKEND_URL}/get-image-url/${imageName}`
         );
-        setImageUrl(response.data.url);
+
+        setImageUrl(response.data["result"]["url"]);
       } catch (error) {
         console.error("Error fetching image URL:", error);
       } finally {

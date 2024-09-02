@@ -9,7 +9,6 @@ import {
   Image,
 } from "react-native";
 import axios from "axios";
-import { BACKEND_URL } from "@env";
 
 export default function Camera({
   exitCamera,
@@ -72,7 +71,7 @@ export default function Camera({
           name: "photo.jpg",
           type: "image/jpeg",
         });
-
+        const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
         const apiUrl = `${BACKEND_URL}/upload`;
         console.log("Sending photo to:", apiUrl);
 
