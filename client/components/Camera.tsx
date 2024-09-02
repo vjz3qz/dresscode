@@ -12,7 +12,7 @@ import axios from "axios";
 import * as FileSystem from "expo-file-system";
 import { BACKEND_URL } from "@env";
 
-export default function Camera({ exitCamera }) {
+export default function Camera({ exitCamera }: { exitCamera: () => void }) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [photoUri, setPhotoUri] = useState(null); // State to hold the photo URI
@@ -92,6 +92,7 @@ export default function Camera({ exitCamera }) {
       } catch (error) {
         console.error("Error sending photo:", error);
       }
+      exitCamera();
     }
   }
 
