@@ -7,3 +7,4 @@ secure
 PyJWT
 redis
 python-multipart
+uuid

@@ -1,9 +1,11 @@
 """This module contains the API endpoints for the application."""
 
+from celery import uuid
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, Body, File, Request, UploadFile
 from fastapi.responses import JSONResponse
 import time
+import uuid
 
 from core.celery_worker import celery
 from core.image_segmentation import process_image_s3, upload_file_obj_to_s3
@@ -33,7 +35,9 @@ async def upload(file: UploadFile = File(...)):
         JSONResponse: Returns the task ID of the Celery task.
     """
     file_content = await file.read()
-    file_name = file.filename  
+    # file_name = file.filename  
+    # randomly generate a file name
+    file_name = str(uuid.uuid4()) + ".jpg"
     file_content_type = file.content_type
     task = celery.send_task("tasks.upload", args=[file_content, file_name, file_content_type])
     return return_task(task)
