@@ -8,3 +8,4 @@ PyJWT
 redis
 python-multipart
 uuid
+supabase

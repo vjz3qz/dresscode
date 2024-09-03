@@ -3,8 +3,8 @@
 import os
 import threading
 from celery import Celery
-import time
 from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3, get_image_url_s3
+from data.db_operations import add_item
 
 CHECK_EMAIL_LOCK = threading.Lock()
 
@@ -32,6 +32,7 @@ def upload_task(file_content, file_name, file_content_type):
     """
     upload_file_obj_to_s3(file_content, file_name, file_content_type)
     process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
+    add_item(file_name, "clothing", "processed_" + file_name)
     return {"filename": "processed_" + file_name, "status": "file uploaded successfully"}
     
 @celery.task(name="tasks.process_image")
