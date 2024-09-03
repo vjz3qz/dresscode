@@ -10,13 +10,13 @@ export default function ImageDragger() {
         imageUri="https://via.placeholder.com/150"
         initialX={50}
         initialY={100}
-        size={150}
+        initialSize={150}
       />
       <DraggableImage
         imageUri="https://via.placeholder.com/100"
         initialX={200}
         initialY={300}
-        size={100}
+        initialSize={100}
       />
     </GestureHandlerRootView>
   );

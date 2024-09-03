@@ -13,17 +13,28 @@ const DraggableImage = ({
   imageUri,
   initialX = width / 2 - 75,
   initialY = height / 2 - 75,
-  size = 150,
+  initialSize = 150,
 }: {
   imageUri: string;
   initialX?: number;
   initialY?: number;
-  size?: number;
+  initialSize?: number;
 }) => {
   const translateX = useSharedValue(initialX);
   const translateY = useSharedValue(initialY);
   const startX = useSharedValue(0);
   const startY = useSharedValue(0);
+
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((event) => {
+      scale.value = savedScale.value * event.scale;
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+    });
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -39,18 +50,21 @@ const DraggableImage = ({
       translateY.value = withSpring(translateY.value);
     });
 
+  const combinedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
+        { scale: scale.value },
       ],
     };
   });
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View style={[styles.box(size), animatedStyle]}>
+    <GestureDetector gesture={combinedGesture}>
+      <Animated.View style={[styles.box(initialSize), animatedStyle]}>
         <Image source={{ uri: imageUri }} style={styles.image} />
       </Animated.View>
     </GestureDetector>
@@ -58,9 +72,9 @@ const DraggableImage = ({
 };
 
 const styles = StyleSheet.create({
-  box: (size: string) => ({
-    width: size,
-    height: size,
+  box: (initialSize) => ({
+    width: initialSize,
+    height: initialSize,
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
