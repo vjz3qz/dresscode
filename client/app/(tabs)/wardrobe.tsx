@@ -91,7 +91,7 @@ export default function WardrobeScreen() {
     };
 
     fetchItems();
-  }, [value]);
+  }, [value, imageName, cameraOpen]);
 
   if (selectedImageIndex !== null) {
     return (
