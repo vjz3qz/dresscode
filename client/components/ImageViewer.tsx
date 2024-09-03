@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  View,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import axios from "axios";
 
-export default function ImageViewer({ imageName }: { imageName: string }) {
+export default function ImageViewer({
+  imageName,
+  setImageName,
+}: {
+  imageName: string;
+  setImageName: (imageName: string) => void;
+}) {
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +47,18 @@ export default function ImageViewer({ imageName }: { imageName: string }) {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        imageUrl && <Image source={{ uri: imageUrl }} style={styles.image} />
+        imageUrl && (
+          <>
+            {/* X button to close the gallery */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setImageName("")}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            <Image source={{ uri: imageUrl }} style={styles.image} />
+          </>
+        )
       )}
     </View>
   );
@@ -50,5 +74,18 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     resizeMode: "contain",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
+    padding: 5,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

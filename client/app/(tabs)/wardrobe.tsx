@@ -19,18 +19,18 @@ import { Image } from "expo-image";
 
 const { height } = Dimensions.get("window");
 
-const images = [
-  "https://picsum.photos/id/1015/600/400",
-  "https://picsum.photos/id/1025/600/400",
-  "https://picsum.photos/id/1035/600/400",
-  "https://picsum.photos/id/1045/600/400",
-  "https://picsum.photos/id/1055/600/400",
-  "https://picsum.photos/id/1065/600/400",
-  "https://picsum.photos/id/1075/600/400",
-  "https://picsum.photos/id/1076/600/400",
-  "https://picsum.photos/id/1077/600/400",
-  "https://picsum.photos/id/1078/600/400",
-];
+// const images = [
+//   "https://picsum.photos/id/1015/600/400",
+//   "https://picsum.photos/id/1025/600/400",
+//   "https://picsum.photos/id/1035/600/400",
+//   "https://picsum.photos/id/1045/600/400",
+//   "https://picsum.photos/id/1055/600/400",
+//   "https://picsum.photos/id/1065/600/400",
+//   "https://picsum.photos/id/1075/600/400",
+//   "https://picsum.photos/id/1076/600/400",
+//   "https://picsum.photos/id/1077/600/400",
+//   "https://picsum.photos/id/1078/600/400",
+// ];
 
 const tabs = [
   { name: "Items", tableName: "items" },
@@ -103,7 +103,7 @@ export default function WardrobeScreen() {
         >
           <Text style={styles.closeButtonText}>X</Text>
         </TouchableOpacity>
-        <Gallery initialIndex={selectedImageIndex} data={images} />
+        <Gallery initialIndex={selectedImageIndex} data={data} />
       </View>
     );
   }
@@ -114,7 +114,7 @@ export default function WardrobeScreen() {
       setImageName={setImageName}
     />
   ) : imageName ? (
-    <ImageViewer imageName={imageName} />
+    <ImageViewer imageName={imageName} setImageName={setImageName} />
   ) : (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={[styles.container]}>
@@ -144,7 +144,7 @@ export default function WardrobeScreen() {
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.gridContainer}>
-          {images.map((uri, index) => (
+          {data.map((uri, index) => (
             <TouchableWithoutFeedback
               key={uri}
               onPress={() => setSelectedImageIndex(index)}
