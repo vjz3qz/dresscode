@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   image: {
-    width: "50%",
-    height: (height / 8) * 2,
+    width: "33.33333333333333333333333%",
+    height: height / 7,
   },
   closeButton: {
     position: "absolute",
