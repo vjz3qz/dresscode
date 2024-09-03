@@ -77,15 +77,16 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    top: 40,
+    left: 20,
+    zIndex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10,
     borderRadius: 20,
-    padding: 5,
   },
   closeButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });
