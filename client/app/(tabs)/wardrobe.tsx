@@ -16,6 +16,7 @@ import ImageViewer from "@/components/ImageViewer";
 import { supabase } from "@/utils/Supabase";
 import { Image } from "expo-image";
 import { fetchAllItemImageUrls, fetchImageUrl } from "@/api/FetchImageUrl";
+import { router } from "expo-router";
 
 const { height } = Dimensions.get("window");
 
@@ -51,7 +52,7 @@ export default function WardrobeScreen() {
     if (tabs[value]["tableName"] === "items") {
       setCameraOpen(true);
     } else if (tabs[value]["tableName"] === "outfits") {
-      console.log("Add outfit");
+      router.push("/wardrobe/new/outfit");
     } else if (tabs[value]["tableName"] === "looks") {
       console.log("Add look");
     }
@@ -125,14 +126,18 @@ export default function WardrobeScreen() {
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.gridContainer}>
-          {data.map((uri, index) => (
-            <TouchableWithoutFeedback
-              key={uri}
-              onPress={() => setSelectedImageIndex(index)}
-            >
-              <Image source={uri} style={styles.image} />
-            </TouchableWithoutFeedback>
-          ))}
+          {data.length === 0 ? (
+            <Text>No items found</Text>
+          ) : (
+            data.map((uri, index) => (
+              <TouchableWithoutFeedback
+                key={uri}
+                onPress={() => setSelectedImageIndex(index)}
+              >
+                <Image source={uri} style={styles.image} />
+              </TouchableWithoutFeedback>
+            ))
+          )}
         </View>
       </ScrollView>
       <UploadButton onPress={onPlusButtonClick} />

@@ -1,15 +1,24 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
 import { Button, View, Text, TouchableOpacity } from "react-native";
 import ComingSoonScreen from "@/components/ComingSoon";
 import ImageDragger from "@/components/ImageDragger";
 import { StyleSheet } from "react-native";
+import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 
-export default function TestScreen() {
+export default function NewOutfitScreen() {
+  const [items, setItems] = useState<string[]>([]);
+  useEffect(() => {
+    async function fetchAllItems() {
+      const fetchedItems = await fetchAllItemImageUrls("items");
+      setItems(fetchedItems);
+    }
+    fetchAllItems();
+  }, []);
+
   const sheetRef = useRef<BottomSheetMethods>(null);
   return (
     <View style={{ flex: 1 }}>
-      {/* <ImageDragger /> */}
       <TouchableOpacity
         style={styles.openButton}
         onPress={() => {
@@ -19,7 +28,7 @@ export default function TestScreen() {
       >
         <Text style={styles.closeButtonText}>Open</Text>
       </TouchableOpacity>
-      <ImageDragger />
+      <ImageDragger images={items} />
       <BottomSheet ref={sheetRef}>
         <Text>
           The smart 😎, tiny 📦, and flexible 🎗 bottom sheet your app craves 🚀
