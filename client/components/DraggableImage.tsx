@@ -72,7 +72,7 @@ const DraggableImage = ({
 };
 
 const styles = StyleSheet.create({
-  box: (initialSize) => ({
+  box: (initialSize: number) => ({
     width: initialSize,
     height: initialSize,
     justifyContent: "center",

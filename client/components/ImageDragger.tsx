@@ -3,21 +3,18 @@ import { View, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage from "@/components/DraggableImage"; // Import your component
 
-export default function ImageDragger() {
+export default function ImageDragger({ images }: { images: string[] }) {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <DraggableImage
-        imageUri="https://via.placeholder.com/150"
-        initialX={50}
-        initialY={100}
-        initialSize={150}
-      />
-      <DraggableImage
-        imageUri="https://via.placeholder.com/100"
-        initialX={200}
-        initialY={300}
-        initialSize={100}
-      />
+      {images.map((image, index) => (
+        <DraggableImage
+          key={index}
+          imageUri={image}
+          initialX={Math.random() * 200}
+          initialY={Math.random() * 200}
+          initialSize={100}
+        />
+      ))}
     </GestureHandlerRootView>
   );
 }
