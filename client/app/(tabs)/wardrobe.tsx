@@ -14,8 +14,8 @@ import Gallery from "react-native-awesome-gallery";
 import Camera from "@/components/Camera";
 import ImageViewer from "@/components/ImageViewer";
 import { supabase } from "@/utils/Supabase";
-import axios from "axios";
 import { Image } from "expo-image";
+import { fetchAllItemImageUrls, fetchImageUrl } from "@/api/FetchImageUrl";
 
 const { height } = Dimensions.get("window");
 
@@ -47,47 +47,28 @@ export default function WardrobeScreen() {
     null
   );
 
-  const fetchImageUrl = async (imageName: string) => {
-    if (!imageName) {
-      return;
+  function onPlusButtonClick() {
+    if (tabs[value]["tableName"] === "items") {
+      setCameraOpen(true);
+    } else if (tabs[value]["tableName"] === "outfits") {
+      console.log("Add outfit");
+    } else if (tabs[value]["tableName"] === "looks") {
+      console.log("Add look");
     }
-
-    try {
-      const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-      const response = await axios.get(
-        `${BACKEND_URL}/get-image-url/${imageName}`
-      );
-
-      return response.data["result"]["url"];
-    } catch (error) {
-      console.error("Error fetching image URL:", error);
-    }
-  };
+  }
 
   useEffect(() => {
     const fetchItems = async () => {
-      let { data, error } = await supabase
-        .from(tabs[value]["tableName"])
-        .select("*");
-
-      if (error) {
+      let items: string[] = [];
+      try {
+        items = await fetchAllItemImageUrls(tabs[value]["tableName"]);
+      } catch (error: any) {
+        // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
         setData([]);
         return;
       }
-      if (!data || data.length === 0) {
-        return;
-      }
-      let items: string[] = [];
-      for (let i = 0; i < data.length; i++) {
-        if (!data[i]["s3_key"]) {
-          continue;
-        }
-        const imageUrl = await fetchImageUrl(data[i]["s3_key"]);
-        items.push(imageUrl);
-      }
       setData(items);
-      console.log("items", items);
     };
 
     fetchItems();
@@ -154,7 +135,7 @@ export default function WardrobeScreen() {
           ))}
         </View>
       </ScrollView>
-      <UploadButton onPress={() => setCameraOpen(true)} />
+      <UploadButton onPress={onPlusButtonClick} />
     </SafeAreaView>
   );
 }
