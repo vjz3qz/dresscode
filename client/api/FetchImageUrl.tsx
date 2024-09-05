@@ -15,7 +15,7 @@ export async function fetchImageUrl(imageName: string) {
     return response.data["result"]["url"];
   } catch (error) {
     // throw new Error(`Error fetching image URL: ${error}`);
-    console.error("Error fetching image URL:", error);
+    // console.error("Error fetching image URL:", error);
     return "";
   }
 }
@@ -25,12 +25,12 @@ export async function fetchAllItemImageUrls(tableName: string) {
 
   if (error) {
     // throw new Error(`Error fetching items: ${error.message}`);
-    console.error("Error fetching items:", error.message);
+    // console.error("Error fetching items:", error.message);
     return [];
   }
   if (!data || data.length === 0) {
     // throw new Error("No data found");
-    console.error("No data found");
+    // console.error("No data found");
     return [];
   }
   let items: string[] = [];
