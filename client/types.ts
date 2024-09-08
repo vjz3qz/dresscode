@@ -43,3 +43,49 @@ export type DataT = {
   price: string;
   image: any;
 };
+
+export type Item = {
+  id: number;
+  created_at: string;
+  name: string;
+  type: string;
+  s3_key: string;
+  user_id: number;
+  image_url?: string;
+};
+
+export type User = {
+  id: number;
+  created_at: string;
+  name: string;
+};
+
+export type Outfit = {
+  id: number;
+  created_at: string;
+  name: string;
+  user_id: number;
+  metadata: string;
+};
+
+export type OutfitItem = {
+  id: number;
+  outfit_id: number;
+  item_id: number;
+  created_at: string;
+};
+
+export type Look = {
+  id: number;
+  created_at: string;
+  name: string;
+  description: string;
+  user_id: number;
+};
+
+export type LookOutfit = {
+  id: number;
+  look_id: number;
+  outfit_id: number;
+  created_at: string;
+};
