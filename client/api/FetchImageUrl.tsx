@@ -1,3 +1,4 @@
+import { Item } from "@/types";
 import { supabase } from "@/utils/Supabase";
 import axios from "axios";
 
@@ -33,13 +34,14 @@ export async function fetchAllItemImageUrls(tableName: string) {
     // console.error("No data found");
     return [];
   }
-  let items: string[] = [];
+  let items: Item[] = [];
   for (let i = 0; i < data.length; i++) {
     if (!data[i]["s3_key"]) {
       continue;
     }
     const imageUrl = await fetchImageUrl(data[i]["s3_key"]);
-    items.push(imageUrl);
+    data[i]["image_url"] = imageUrl;
+    items.push(data[i]);
   }
   return items;
 }

@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
 import { Button, View, Text, TouchableOpacity } from "react-native";
-import ComingSoonScreen from "@/components/ComingSoon";
 import ImageDragger from "@/components/ImageDragger";
 import { StyleSheet } from "react-native";
 import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
+import { Item } from "@/types";
 
 export default function NewOutfitScreen() {
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   useEffect(() => {
     async function fetchAllItems() {
       const fetchedItems = await fetchAllItemImageUrls("items");
@@ -28,6 +28,15 @@ export default function NewOutfitScreen() {
       >
         <Text style={styles.closeButtonText}>Open</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => {
+          console.log("Close bottom sheet");
+        }}
+      >
+        <Text style={styles.closeButtonText}>Save</Text>
+      </TouchableOpacity>
+
       <ImageDragger images={items} />
       <BottomSheet ref={sheetRef}>
         <Text>
@@ -36,7 +45,6 @@ export default function NewOutfitScreen() {
       </BottomSheet>
     </View>
   );
-  // return <ComingSoonScreen />;
 }
 
 const styles = StyleSheet.create({
@@ -44,6 +52,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 40,
     left: 20,
+    zIndex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10,
+    borderRadius: 20,
+  },
+  // top right corner
+  closeButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
     zIndex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     padding: 10,
