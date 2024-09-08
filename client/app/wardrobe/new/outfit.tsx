@@ -1,13 +1,37 @@
 import React, { useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
 import { Button, View, Text, TouchableOpacity } from "react-native";
-import ImageDragger from "@/components/ImageDragger";
 import { StyleSheet } from "react-native";
 import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 import { Item } from "@/types";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import DraggableImage from "@/components/DraggableImage";
 
 export default function NewOutfitScreen() {
   const [items, setItems] = useState<Item[]>([]);
+  const [imagePositions, setImagePositions] = React.useState<
+    {
+      x: number;
+      y: number;
+      size: number;
+      id: string;
+    }[]
+  >([]);
+  function save() {
+    console.log("Save outfit");
+    console.log(imagePositions);
+  }
+
+  useEffect(() => {
+    const newImagePositions = items.map((image) => ({
+      x: Math.random() * 200,
+      y: Math.random() * 200,
+      size: 100,
+      id: image["id"].toString(), // Convert the id to a string
+    }));
+
+    setImagePositions(newImagePositions);
+  }, [items]); // Recalculate whenever `items` changes
   useEffect(() => {
     async function fetchAllItems() {
       const fetchedItems = await fetchAllItemImageUrls("items");
@@ -28,16 +52,28 @@ export default function NewOutfitScreen() {
       >
         <Text style={styles.closeButtonText}>Open</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => {
-          console.log("Close bottom sheet");
-        }}
-      >
+      <TouchableOpacity style={styles.closeButton} onPress={save}>
         <Text style={styles.closeButtonText}>Save</Text>
       </TouchableOpacity>
 
-      <ImageDragger images={items} />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {items.map((image, index) => {
+          const position = imagePositions[index];
+          // Add defensive check
+          if (!position) {
+            return null; // Or handle error case
+          }
+          return (
+            <DraggableImage
+              key={index}
+              imageUri={image["image_url"] || ""}
+              initialX={position.x}
+              initialY={position.y}
+              initialSize={position.size}
+            />
+          );
+        })}
+      </GestureHandlerRootView>
       <BottomSheet ref={sheetRef}>
         <Text>
           The smart 😎, tiny 📦, and flexible 🎗 bottom sheet your app craves 🚀
