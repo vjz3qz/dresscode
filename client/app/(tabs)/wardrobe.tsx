@@ -21,19 +21,6 @@ import { Item } from "@/types";
 
 const { height } = Dimensions.get("window");
 
-// const images = [
-//   "https://picsum.photos/id/1015/600/400",
-//   "https://picsum.photos/id/1025/600/400",
-//   "https://picsum.photos/id/1035/600/400",
-//   "https://picsum.photos/id/1045/600/400",
-//   "https://picsum.photos/id/1055/600/400",
-//   "https://picsum.photos/id/1065/600/400",
-//   "https://picsum.photos/id/1075/600/400",
-//   "https://picsum.photos/id/1076/600/400",
-//   "https://picsum.photos/id/1077/600/400",
-//   "https://picsum.photos/id/1078/600/400",
-// ];
-
 const tabs = [
   { name: "Items", tableName: "items" },
   { name: "Outfits", tableName: "outfits" },
