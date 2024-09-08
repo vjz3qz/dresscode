@@ -17,6 +17,7 @@ import { supabase } from "@/utils/Supabase";
 import { Image } from "expo-image";
 import { fetchAllItemImageUrls, fetchImageUrl } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
+import { Item } from "@/types";
 
 const { height } = Dimensions.get("window");
 
@@ -43,7 +44,7 @@ export default function WardrobeScreen() {
   const [cameraOpen, setCameraOpen] = useState<boolean>(false);
   const [imageName, setImageName] = useState<string | null>(null);
   const [value, setValue] = useState(0);
-  const [data, setData] = useState<string[]>([]);
+  const [data, setData] = useState<Item[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
@@ -60,7 +61,7 @@ export default function WardrobeScreen() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      let items: string[] = [];
+      let items: Item[] = [];
       try {
         items = await fetchAllItemImageUrls(tabs[value]["tableName"]);
       } catch (error: any) {
@@ -125,20 +126,18 @@ export default function WardrobeScreen() {
         })}
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.gridContainer}>
-          {data.length === 0 ? (
-            <Text>No items found</Text>
-          ) : (
-            data.map((uri, index) => (
-              <TouchableWithoutFeedback
-                key={uri}
-                onPress={() => setSelectedImageIndex(index)}
-              >
-                <Image source={uri} style={styles.image} />
-              </TouchableWithoutFeedback>
-            ))
-          )}
-        </View>
+        {data.length === 0 ? (
+          <Text>No items found</Text>
+        ) : (
+          data.map((item, index) => (
+            <TouchableWithoutFeedback
+              key={item.id} // Use item.id as a unique key
+              onPress={() => setSelectedImageIndex(index)}
+            >
+              <Image source={{ uri: item.image_url }} style={styles.image} />
+            </TouchableWithoutFeedback>
+          ))
+        )}
       </ScrollView>
       <UploadButton onPress={onPlusButtonClick} />
     </SafeAreaView>
@@ -171,15 +170,19 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-  },
-  gridContainer: {
-    flex: 1,
     flexDirection: "row",
     flexWrap: "wrap",
   },
   image: {
     width: "33.33333333333333333333333%",
     height: height / 7,
+    borderWidth: 0.5,
+    // borderRightWidth: 0,
+    // borderBottomWidth: 1,
+    // borderTopWidth: 1,
+    // borderLeftWidth: 0,
+
+    borderColor: "white",
   },
   closeButton: {
     position: "absolute",
