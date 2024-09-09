@@ -10,48 +10,32 @@ import Feed from "@/components/Feed";
 import { router } from "expo-router";
 
 export default function NewOutfitScreen() {
-  const [items, setItems] = useState<Item[]>([]);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
-  const [imagePositions, setImagePositions] = React.useState<
-    {
-      x: number;
-      y: number;
-      size: number;
-      id: string;
-    }[]
-  >([]);
+
   function save() {
     console.log("Save outfit");
-    console.log(imagePositions);
+    console.log(selectedItems);
+    // saveOutfit(selectedItems);
     router.dismiss();
   }
 
-  useEffect(() => {
-    const newImagePositions = selectedItems.map((image) => {
-      const existingPosition = imagePositions.find(
-        (position) => position.id === image["id"].toString()
-      );
-      if (existingPosition) {
-        return existingPosition;
-      }
-      return {
-        x: Math.random() * 200,
-        y: Math.random() * 200,
-        size: 100,
-        id: image["id"].toString(),
-      };
-    });
+  const updateImagePosition = (id: string, x: number, y: number) => {
+    // find the image index by id and update the x and y values
+    setSelectedItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id.toString() === id ? { ...item, x, y } : item
+      )
+    );
+  };
 
-    setImagePositions(newImagePositions);
-  }, [selectedItems]); // Recalculate whenever `items` changes
-
-  useEffect(() => {
-    async function fetchAllItems() {
-      const fetchedItems = await fetchAllItemImageUrls("items");
-      setItems(fetchedItems);
-    }
-    fetchAllItems();
-  }, []);
+  const updateImageSize = (id: string, size: number) => {
+    // find the image index by id and update the size value
+    setSelectedItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id.toString() === id ? { ...item, size } : item
+      )
+    );
+  };
 
   const sheetRef = useRef<BottomSheetMethods>(null);
   return (
@@ -70,26 +54,31 @@ export default function NewOutfitScreen() {
       </TouchableOpacity>
 
       <GestureHandlerRootView style={{ flex: 1 }}>
-        {items.map((image, index) => {
-          const position = imagePositions[index];
-          // Add defensive check
-          if (!position) {
-            return null; // Or handle error case
-          }
+        {selectedItems.map((image, index) => {
           return (
             <DraggableImage
-              key={index}
+              key={image.id}
               imageUri={image["image_url"] || ""}
-              initialX={position.x}
-              initialY={position.y}
-              initialSize={position.size}
+              initialX={image.x}
+              initialY={image.y}
+              initialSize={image.size}
+              // onPositionChange={(x, y) =>
+              //   updateImagePosition(image.id.toString(), x, y)
+              // }
+              // onSizeChange={(size) =>
+              //   updateImageSize(image.id.toString(), size)
+              // }
             />
           );
         })}
       </GestureHandlerRootView>
+
       <BottomSheet ref={sheetRef}>
         <Feed
           onItemClick={(item: Item, index: number) => {
+            item["x"] = Math.random() * 200;
+            item["y"] = Math.random() * 200;
+            item["size"] = 100;
             setSelectedItems([...selectedItems, item]);
             sheetRef.current?.close();
           }}
@@ -110,7 +99,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  // top right corner
   saveButton: {
     position: "absolute",
     top: 50,
