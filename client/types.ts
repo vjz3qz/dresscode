@@ -52,6 +52,9 @@ export type Item = {
   s3_key: string;
   user_id: number;
   image_url?: string;
+  x?: number;
+  y?: number;
+  size?: number;
 };
 
 export type User = {

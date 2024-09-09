@@ -10,6 +10,7 @@ import Feed from "@/components/Feed";
 
 export default function NewOutfitScreen() {
   const [items, setItems] = useState<Item[]>([]);
+  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [imagePositions, setImagePositions] = React.useState<
     {
       x: number;
@@ -24,15 +25,24 @@ export default function NewOutfitScreen() {
   }
 
   useEffect(() => {
-    const newImagePositions = items.map((image) => ({
-      x: Math.random() * 200,
-      y: Math.random() * 200,
-      size: 100,
-      id: image["id"].toString(), // Convert the id to a string
-    }));
+    const newImagePositions = selectedItems.map((image) => {
+      const existingPosition = imagePositions.find(
+        (position) => position.id === image["id"].toString()
+      );
+      if (existingPosition) {
+        return existingPosition;
+      }
+      return {
+        x: Math.random() * 200,
+        y: Math.random() * 200,
+        size: 100,
+        id: image["id"].toString(),
+      };
+    });
 
     setImagePositions(newImagePositions);
-  }, [items]); // Recalculate whenever `items` changes
+  }, [selectedItems]); // Recalculate whenever `items` changes
+
   useEffect(() => {
     async function fetchAllItems() {
       const fetchedItems = await fetchAllItemImageUrls("items");
@@ -78,7 +88,8 @@ export default function NewOutfitScreen() {
       <BottomSheet ref={sheetRef}>
         <Feed
           onItemClick={(item) => {
-            console.log("Add item", item);
+            setSelectedItems([...selectedItems, item]);
+            sheetRef.current?.close();
           }}
           tableName={"items"}
         />
