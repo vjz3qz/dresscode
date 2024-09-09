@@ -7,6 +7,7 @@ import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage from "@/components/DraggableImage";
 import Feed from "@/components/Feed";
+import { router } from "expo-router";
 
 export default function NewOutfitScreen() {
   const [items, setItems] = useState<Item[]>([]);
@@ -22,6 +23,7 @@ export default function NewOutfitScreen() {
   function save() {
     console.log("Save outfit");
     console.log(imagePositions);
+    router.dismiss();
   }
 
   useEffect(() => {
