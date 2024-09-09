@@ -67,11 +67,16 @@ export default function WardrobeScreen() {
         {/* X button to close the gallery */}
         <TouchableOpacity
           style={styles.closeButton}
-          onPress={() => setSelectedImageIndex(null)}
+          onPress={() => {
+            setSelectedImageIndex(null);
+          }}
         >
           <Text style={styles.closeButtonText}>X</Text>
         </TouchableOpacity>
-        <Gallery initialIndex={selectedImageIndex} data={data} />
+        <Gallery
+          initialIndex={selectedImageIndex}
+          data={data.map((object) => object.image_url)}
+        />
       </View>
     );
   }
