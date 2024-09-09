@@ -44,16 +44,16 @@ export default function NewOutfitScreen() {
   return (
     <View style={{ flex: 1 }}>
       <TouchableOpacity
-        style={styles.openButton}
+        style={styles.addButton}
         onPress={() => {
           sheetRef.current?.open();
           console.log("Open bottom sheet");
         }}
       >
-        <Text style={styles.closeButtonText}>Open</Text>
+        <Text style={styles.buttonText}>Add Item</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.closeButton} onPress={save}>
-        <Text style={styles.closeButtonText}>Save</Text>
+      <TouchableOpacity style={styles.saveButton} onPress={save}>
+        <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
 
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -84,9 +84,9 @@ export default function NewOutfitScreen() {
 }
 
 const styles = StyleSheet.create({
-  openButton: {
+  addButton: {
     position: "absolute",
-    top: 40,
+    top: 50,
     left: 20,
     zIndex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -94,16 +94,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   // top right corner
-  closeButton: {
+  saveButton: {
     position: "absolute",
-    top: 40,
+    top: 50,
     right: 20,
     zIndex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     padding: 10,
     borderRadius: 20,
   },
-  closeButtonText: {
+  buttonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
