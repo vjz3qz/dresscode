@@ -8,14 +8,11 @@ import {
   SafeAreaView,
   Dimensions,
   TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import Gallery from "react-native-awesome-gallery";
 import Camera from "@/components/Camera";
 import ImageViewer from "@/components/ImageViewer";
-import { supabase } from "@/utils/Supabase";
-import { Image } from "expo-image";
-import { fetchAllItemImageUrls, fetchImageUrl } from "@/api/FetchImageUrl";
+import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import { Item } from "@/types";
 import Feed from "@/components/Feed";

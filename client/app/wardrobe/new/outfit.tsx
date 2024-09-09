@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
-import { Button, View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native";
 import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 import { Item } from "@/types";
