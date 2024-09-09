@@ -1,43 +1,34 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
 import { View, Text, TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native";
-import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import DraggableImage from "@/components/DraggableImage";
+import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
 import Feed from "@/components/Feed";
 import { router } from "expo-router";
 
 export default function NewOutfitScreen() {
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const imageRefs = useRef<(DraggableImageRef | null)[]>([]); // Array of refs for DraggableImage components
 
   function save() {
-    console.log("Save outfit");
-    console.log(selectedItems);
-    // saveOutfit(selectedItems);
+    const updatedItems = selectedItems.map((item, index) => {
+      const ref = imageRefs.current[index];
+      if (ref) {
+        const { x, y, size } = ref.getPositionAndSize();
+        return { ...item, x, y, size };
+      }
+      return item;
+    });
+
+    console.log("Save outfit", updatedItems);
+    // saveOutfit(updatedItems); // Call your API or data persistence method here
     router.dismiss();
   }
 
-  const updateImagePosition = (id: string, x: number, y: number) => {
-    // find the image index by id and update the x and y values
-    setSelectedItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id.toString() === id ? { ...item, x, y } : item
-      )
-    );
-  };
-
-  const updateImageSize = (id: string, size: number) => {
-    // find the image index by id and update the size value
-    setSelectedItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id.toString() === id ? { ...item, size } : item
-      )
-    );
-  };
-
   const sheetRef = useRef<BottomSheetMethods>(null);
+
   return (
     <View style={{ flex: 1 }}>
       <TouchableOpacity
@@ -54,31 +45,25 @@ export default function NewOutfitScreen() {
       </TouchableOpacity>
 
       <GestureHandlerRootView style={{ flex: 1 }}>
-        {selectedItems.map((image, index) => {
-          return (
-            <DraggableImage
-              key={image.id}
-              imageUri={image["image_url"] || ""}
-              initialX={image.x}
-              initialY={image.y}
-              initialSize={image.size}
-              // onPositionChange={(x, y) =>
-              //   updateImagePosition(image.id.toString(), x, y)
-              // }
-              // onSizeChange={(size) =>
-              //   updateImageSize(image.id.toString(), size)
-              // }
-            />
-          );
-        })}
+        {selectedItems.map((item, index) => (
+          <DraggableImage
+            key={item.id}
+            ref={(ref) => (imageRefs.current[index] = ref)} // Store refs
+            imageUri={item.image_url || ""}
+            initialX={item.x}
+            initialY={item.y}
+            initialSize={item.size}
+          />
+        ))}
       </GestureHandlerRootView>
 
       <BottomSheet ref={sheetRef}>
         <Feed
-          onItemClick={(item: Item, index: number) => {
-            item["x"] = Math.random() * 200;
-            item["y"] = Math.random() * 200;
-            item["size"] = 100;
+          onItemClick={(item: Item) => {
+            // Assign initial random positions and size for the newly selected item
+            item.x = Math.random() * 200;
+            item.y = Math.random() * 200;
+            item.size = 100;
             setSelectedItems([...selectedItems, item]);
             sheetRef.current?.close();
           }}
