@@ -17,7 +17,7 @@ export default function Feed({
   onItemClick,
   tableName,
 }: {
-  onItemClick: (item: Item) => void;
+  onItemClick: (item: Item, index: number) => void;
   tableName: string;
 }) {
   const [data, setData] = useState<Item[]>([]);
@@ -53,7 +53,7 @@ export default function Feed({
         data.map((item, index) => (
           <TouchableWithoutFeedback
             key={item.id}
-            onPress={() => onItemClick(data[index])}
+            onPress={() => onItemClick(data[index], index)}
           >
             <Image source={{ uri: item.image_url }} style={styles.image} />
           </TouchableWithoutFeedback>

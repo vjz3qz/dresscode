@@ -87,7 +87,7 @@ export default function NewOutfitScreen() {
       </GestureHandlerRootView>
       <BottomSheet ref={sheetRef}>
         <Feed
-          onItemClick={(item) => {
+          onItemClick={(item: Item, index: number) => {
             setSelectedItems([...selectedItems, item]);
             sheetRef.current?.close();
           }}

@@ -111,7 +111,9 @@ export default function WardrobeScreen() {
         })}
       </View>
       <Feed
-        onItemClick={(item: Item) => console.log("Add item", item)}
+        onItemClick={(item: Item, index: number) => {
+          setSelectedImageIndex(index);
+        }}
         tableName={tabs[value]["tableName"]}
       />
       <UploadButton onPress={onPlusButtonClick} />
