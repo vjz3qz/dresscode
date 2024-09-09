@@ -114,7 +114,14 @@ export default function WardrobeScreen() {
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 ? (
-          <Text>No items found</Text>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text style={{ fontSize: 20, color: "#6b7280" }}>
+              No {tabs[value]["tableName"]} found. Add some{" "}
+              {tabs[value]["tableName"]}!
+            </Text>
+          </View>
         ) : (
           data.map((item, index) => (
             <TouchableWithoutFeedback
