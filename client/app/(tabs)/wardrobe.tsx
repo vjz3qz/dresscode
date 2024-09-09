@@ -18,6 +18,7 @@ import { Image } from "expo-image";
 import { fetchAllItemImageUrls, fetchImageUrl } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import { Item } from "@/types";
+import Feed from "@/components/Feed";
 
 const { height } = Dimensions.get("window");
 
@@ -112,27 +113,10 @@ export default function WardrobeScreen() {
           );
         })}
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {data.length === 0 ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <Text style={{ fontSize: 20, color: "#6b7280" }}>
-              No {tabs[value]["tableName"]} found. Add some{" "}
-              {tabs[value]["tableName"]}!
-            </Text>
-          </View>
-        ) : (
-          data.map((item, index) => (
-            <TouchableWithoutFeedback
-              key={item.id} // Use item.id as a unique key
-              onPress={() => setSelectedImageIndex(index)}
-            >
-              <Image source={{ uri: item.image_url }} style={styles.image} />
-            </TouchableWithoutFeedback>
-          ))
-        )}
-      </ScrollView>
+      <Feed
+        onItemClick={(item: Item) => console.log("Add item", item)}
+        tableName={tabs[value]["tableName"]}
+      />
       <UploadButton onPress={onPlusButtonClick} />
     </SafeAreaView>
   );

@@ -6,6 +6,7 @@ import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage from "@/components/DraggableImage";
+import Feed from "@/components/Feed";
 
 export default function NewOutfitScreen() {
   const [items, setItems] = useState<Item[]>([]);
@@ -75,9 +76,12 @@ export default function NewOutfitScreen() {
         })}
       </GestureHandlerRootView>
       <BottomSheet ref={sheetRef}>
-        <Text>
-          The smart 😎, tiny 📦, and flexible 🎗 bottom sheet your app craves 🚀
-        </Text>
+        <Feed
+          onItemClick={(item) => {
+            console.log("Add item", item);
+          }}
+          tableName={"items"}
+        />
       </BottomSheet>
     </View>
   );
