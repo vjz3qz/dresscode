@@ -8,7 +8,7 @@ import {
   View,
   Image,
 } from "react-native";
-import { uploadImageUri } from "@/api/UploadImage";
+import { saveItem } from "@/api/SaveItem";
 
 export default function Camera({
   exitCamera,
@@ -64,8 +64,26 @@ export default function Camera({
   async function uploadPicture() {
     if (photoUri) {
       try {
-        const filename = await uploadImageUri(photoUri);
-        setImageName(filename);
+        // create an item type
+        const item = {
+          name: "New Item",
+          type: "clothing",
+        };
+
+        try {
+          const createdItems = await saveItem(item, photoUri); // The result is an array
+
+          if (createdItems && createdItems.length > 0) {
+            const createdItem = createdItems[0]; // Access the first item in the array
+            if ("name" in createdItem) {
+              setImageName(createdItem.name || ""); // Use the name field from the saved item
+            }
+          } else {
+            console.log("No items were created.");
+          }
+        } catch (error) {
+          console.error("Error saving the item:", error);
+        }
       } catch (error) {
         console.error("Error sending photo:", error);
       }

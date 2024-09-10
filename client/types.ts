@@ -49,8 +49,8 @@ export type Item = {
   created_at?: string;
   name: string;
   type: string;
-  s3_key: string;
-  user_id: number;
+  s3_key?: string;
+  user_id?: number;
   image_url?: string;
   x?: number;
   y?: number;
