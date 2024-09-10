@@ -34,30 +34,6 @@ def upload_task(file_content, file_name, file_content_type):
     process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
     add_item(file_name, "clothing", "processed_" + file_name)
     return {"filename": "processed_" + file_name, "status": "file uploaded successfully"}
-    
-@celery.task(name="tasks.process_image")
-def process_image_task(image_url):
-    """
-    Process an image by removing the background.
-    Args:
-        image_url (str): The URL of the image to process.
-    Returns:
-        str: The URL of the processed image.
-    """
-    # process the image
-    output_image_url = process_image_s3(image_url)
-    return output_image_url
-
-@celery.task(name="tasks.upload_image_to_s3")
-def upload_image_to_s3_task(bucket_name, key, image_path):
-    """
-    Upload an image to an S3 bucket.
-    Args:
-        bucket_name (str): The name of the S3 bucket.
-        key (str): The key of the object in the S3 bucket.
-        image_path (str): The path to the image file.
-    """
-    upload_image_to_s3(bucket_name, key, image_path)
 
 @celery.task(name="tasks.get_image_url")
 def get_image_url_task(filename):

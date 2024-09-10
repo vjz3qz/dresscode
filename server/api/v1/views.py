@@ -42,42 +42,6 @@ async def upload(file: UploadFile = File(...)):
     task = celery.send_task("tasks.upload", args=[file_content, file_name, file_content_type])
     return return_task(task)
 
-@router.post("/process-image")
-async def process_image(
-    image_url: str = Body(...),
-    token: str = Depends(validate_token),
-):
-    """
-    Process an image by removing the background.
-    Args:
-        image_url (str): The URL of the image to process.
-        token (str): The JWT token.
-    Returns:
-        JSONResponse: Returns the task ID of the Celery task.
-    """
-    task = celery.send_task("tasks.process_image", args=[image_url])
-    return return_task(task)
-
-@router.post("/upload-image-to-s3")
-async def upload_image_to_s3(
-    bucket_name: str = Body(...),
-    key: str = Body(...),
-    image_path: str = Body(...),
-    token: str = Depends(validate_token),
-):
-    """
-    Upload an image to an S3 bucket.
-    Args:
-        bucket_name (str): The name of the S3 bucket.
-        key (str): The key of the object in the S3 bucket.
-        image_path (str): The path to the image file.
-        token (str): The JWT token.
-    Returns:
-        JSONResponse: Returns the task ID of the Celery task.
-    """
-    task = celery.send_task("tasks.upload_image_to_s3", args=[bucket_name, key, image_path])
-    return return_task(task)
-
 
 
 @router.get("/get-image-url/{filename}")
