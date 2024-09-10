@@ -28,18 +28,18 @@ const tabs = [
 export default function WardrobeScreen() {
   const [cameraOpen, setCameraOpen] = useState<boolean>(false);
   const [imageName, setImageName] = useState<string | null>(null);
-  const [value, setValue] = useState(0);
+  const [tabIndex, setTabIndex] = useState(0);
   const [data, setData] = useState<Item[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
 
   function onPlusButtonClick() {
-    if (tabs[value]["tableName"] === "items") {
+    if (tabs[tabIndex]["tableName"] === "items") {
       setCameraOpen(true);
-    } else if (tabs[value]["tableName"] === "outfits") {
+    } else if (tabs[tabIndex]["tableName"] === "outfits") {
       router.push("/wardrobe/new/outfit");
-    } else if (tabs[value]["tableName"] === "looks") {
+    } else if (tabs[tabIndex]["tableName"] === "looks") {
       console.log("Add look");
     }
   }
@@ -48,7 +48,7 @@ export default function WardrobeScreen() {
     const fetchItems = async () => {
       let items: Item[] = [];
       try {
-        items = await fetchAllItemImageUrls(tabs[value]["tableName"]);
+        items = await fetchAllItemImageUrls(tabs[tabIndex]["tableName"]);
       } catch (error: any) {
         // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
@@ -59,7 +59,7 @@ export default function WardrobeScreen() {
     };
 
     fetchItems();
-  }, [value, imageName, cameraOpen]);
+  }, [tabIndex, imageName, cameraOpen]);
 
   if (selectedImageIndex !== null) {
     return (
@@ -92,13 +92,13 @@ export default function WardrobeScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={[styles.container]}>
         {tabs.map((item, index) => {
-          const isActive = index === value;
+          const isActive = index === tabIndex;
 
           return (
             <TouchableWithoutFeedback
               key={item.name}
               onPress={() => {
-                setValue(index);
+                setTabIndex(index);
               }}
             >
               <View
@@ -119,7 +119,7 @@ export default function WardrobeScreen() {
         onItemClick={(item: Item, index: number) => {
           setSelectedImageIndex(index);
         }}
-        tableName={tabs[value]["tableName"]}
+        tableName={tabs[tabIndex]["tableName"]}
       />
       <UploadButton onPress={onPlusButtonClick} />
     </SafeAreaView>
