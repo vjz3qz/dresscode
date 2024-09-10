@@ -8,7 +8,7 @@ import {
   View,
   Image,
 } from "react-native";
-import axios from "axios";
+import { uploadImageUri } from "@/api/UploadImage";
 
 export default function Camera({
   exitCamera,
@@ -64,29 +64,7 @@ export default function Camera({
   async function uploadPicture() {
     if (photoUri) {
       try {
-        // Create a FormData object
-        const formData = new FormData();
-        formData.append("file", {
-          uri: photoUri,
-          name: "photo.jpg",
-          type: "image/jpeg",
-        });
-        const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-        const apiUrl = `${BACKEND_URL}/upload`;
-        console.log("Sending photo to:", apiUrl);
-
-        // Send the request to the backend to upload the image
-        const response = await axios.post(apiUrl, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        const result = response.data;
-        console.log("Response from backend:", result);
-
-        // Assuming the backend returns the filename of the uploaded image
-        const filename = result["result"]["filename"];
+        const filename = await uploadImageUri(photoUri);
         setImageName(filename);
       } catch (error) {
         console.error("Error sending photo:", error);

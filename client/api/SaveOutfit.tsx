@@ -1,14 +1,21 @@
 import { Outfit } from "@/types";
 import { supabase } from "@/utils/Supabase";
+import { uploadImageUri } from "@/api/UploadImage";
 
 export async function saveOutfit(outfit: Outfit, screenshotUri: string) {
-  // save screen shot to s3, then add s3 key to outfit
-  // const { data, error } = await supabase.storage
-  //   .from("outfits")
-  //   .upload(`outfits/${outfit.name}.png`, screenshotUri);
-  const { error } = await supabase.from("outfits").insert([outfit]);
+  try {
+    const s3Key = await uploadImageUri(screenshotUri);
 
-  if (error) {
-    throw new Error(`Error saving outfit: ${error.message}`);
+    // Add the S3 key to the outfit metadata and save the outfit to Supabase
+    outfit.s3_key = s3Key;
+    const { error } = await supabase.from("outfits").insert([outfit]);
+
+    if (error) {
+      throw new Error(`Error saving outfit: ${error.message}`);
+    }
+
+    console.log("Outfit and screenshot saved successfully!");
+  } catch (error) {
+    console.error("Error saving outfit:", error);
   }
 }
