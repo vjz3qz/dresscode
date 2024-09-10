@@ -8,13 +8,14 @@ export async function saveItem(item: Item, screenshotUri: string) {
 
     // Add the S3 key to the outfit metadata and save the outfit to Supabase
     item.s3_key = s3Key;
-    const { error } = await supabase.from("items").insert([item]);
+    const { data, error } = await supabase.from("items").insert(item).select();
 
     if (error) {
       throw new Error(`Error saving item: ${error.message}`);
     }
 
     console.log("Item and screenshot saved successfully!");
+    return data;
   } catch (error) {
     console.error("Error saving item:", error);
   }
