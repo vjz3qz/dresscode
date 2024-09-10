@@ -7,12 +7,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
 import Feed from "@/components/Feed";
 import { router } from "expo-router";
+import { saveOutfit } from "@/api/SaveOutfit";
 
 export default function NewOutfitScreen() {
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const imageRefs = useRef<(DraggableImageRef | null)[]>([]); // Array of refs for DraggableImage components
 
-  function save() {
+  async function save() {
     const updatedItems = selectedItems.map((item, index) => {
       const ref = imageRefs.current[index];
       if (ref) {
@@ -23,7 +24,10 @@ export default function NewOutfitScreen() {
     });
 
     console.log("Save outfit", updatedItems);
-    // saveOutfit(updatedItems); // Call your API or data persistence method here
+    await saveOutfit({
+      name: "New Outfit",
+      metadata: updatedItems,
+    }); // Call your API or data persistence method here
     router.dismiss();
   }
 

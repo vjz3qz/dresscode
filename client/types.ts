@@ -45,8 +45,8 @@ export type DataT = {
 };
 
 export type Item = {
-  id: number;
-  created_at: string;
+  id?: number;
+  created_at?: string;
   name: string;
   type: string;
   s3_key: string;
@@ -64,11 +64,11 @@ export type User = {
 };
 
 export type Outfit = {
-  id: number;
-  created_at: string;
+  id?: number;
+  created_at?: string;
   name: string;
-  user_id: number;
-  metadata: string;
+  user_id?: number;
+  metadata: Item[];
 };
 
 export type OutfitItem = {
