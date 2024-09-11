@@ -8,8 +8,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Image } from "expo-image";
-import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
-import { Item } from "@/types";
+import { fetchAllImageUrls } from "@/api/FetchImageUrl";
+import { Outfit, TableTypes } from "@/types";
 
 const { height } = Dimensions.get("window");
 
@@ -17,17 +17,17 @@ export default function SelectFeed({
   tableName,
   onSelect,
 }: {
-  tableName: string;
-  onSelect: (selectedItems: Item[]) => void;
+  tableName: keyof TableTypes;
+  onSelect: (selectedOutfits: Outfit[]) => void;
 }) {
-  const [data, setData] = useState<Item[]>([]);
-  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [data, setData] = useState<Outfit[]>([]);
+  const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
 
   useEffect(() => {
-    const fetchItems = async () => {
-      let items: Item[] = [];
+    const fetchOutfits = async () => {
+      let items: Outfit[] = [];
       try {
-        items = await fetchAllItemImageUrls(tableName);
+        items = (await fetchAllImageUrls(tableName)) as Outfit[];
       } catch (error: any) {
         console.error("Error fetching items:", error.message);
         setData([]);
@@ -36,19 +36,19 @@ export default function SelectFeed({
       setData(items);
     };
 
-    fetchItems();
+    fetchOutfits();
   }, [tableName]);
 
-  const toggleSelection = (item: Item) => {
-    const isSelected = selectedItems.some(
+  const toggleSelection = (item: Outfit) => {
+    const isSelected = selectedOutfits.some(
       (selected) => selected.id === item.id
     );
-    const newSelectedItems = isSelected
-      ? selectedItems.filter((selected) => selected.id !== item.id)
-      : [...selectedItems, item];
+    const newSelectedOutfits = isSelected
+      ? selectedOutfits.filter((selected) => selected.id !== item.id)
+      : [...selectedOutfits, item];
 
-    setSelectedItems(newSelectedItems);
-    onSelect(newSelectedItems);
+    setSelectedOutfits(newSelectedOutfits);
+    onSelect(newSelectedOutfits);
   };
 
   return (
@@ -63,7 +63,7 @@ export default function SelectFeed({
         </View>
       ) : (
         data.map((item) => {
-          const isSelected = selectedItems.some(
+          const isSelected = selectedOutfits.some(
             (selected) => selected.id === item.id
           );
           return (
