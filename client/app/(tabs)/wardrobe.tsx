@@ -15,7 +15,7 @@ import ImageViewer from "@/components/ImageViewer";
 import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import { Item } from "@/types";
-import Feed from "@/components/Feed";
+import Feed from "@/components/Feeds/Feed";
 
 const { height } = Dimensions.get("window");
 

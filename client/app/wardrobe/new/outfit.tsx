@@ -7,7 +7,7 @@ import { StyleSheet } from "react-native";
 import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
-import Feed from "@/components/Feed";
+import Feed from "@/components/Feeds/Feed";
 import { router } from "expo-router";
 import { saveOutfit } from "@/api/SaveOutfit";
 
