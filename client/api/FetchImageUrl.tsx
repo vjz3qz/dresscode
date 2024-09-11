@@ -1,4 +1,4 @@
-import { Item, Outfit, Look } from "@/types";
+import { TableTypes } from "@/types";
 import { supabase } from "@/utils/Supabase";
 import axios from "axios";
 
@@ -20,12 +20,6 @@ export async function fetchImageUrl(imageName: string) {
     return "";
   }
 }
-
-type TableTypes = {
-  items: Item;
-  looks: Look;
-  outfits: Outfit;
-};
 
 export async function fetchAllImageUrls<T extends keyof TableTypes>(
   tableName: T
