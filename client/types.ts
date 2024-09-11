@@ -81,11 +81,12 @@ export type OutfitItem = {
 };
 
 export type Look = {
-  id: number;
-  created_at: string;
+  id?: number;
+  created_at?: string;
   name: string;
   description: string;
-  user_id: number;
+  outfits: Outfit[];
+  user_id?: number;
 };
 
 export type LookOutfit = {
