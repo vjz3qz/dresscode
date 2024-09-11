@@ -1,4 +1,4 @@
-import { Item } from "@/types";
+import { Item, Outfit, Look } from "@/types";
 import { supabase } from "@/utils/Supabase";
 import axios from "axios";
 
@@ -21,7 +21,15 @@ export async function fetchImageUrl(imageName: string) {
   }
 }
 
-export async function fetchAllItemImageUrls(tableName: string) {
+type TableTypes = {
+  items: Item;
+  looks: Look;
+  outfits: Outfit;
+};
+
+export async function fetchAllImageUrls<T extends keyof TableTypes>(
+  tableName: T
+) {
   let { data, error } = await supabase.from(tableName).select("*");
 
   if (error) {
@@ -34,14 +42,16 @@ export async function fetchAllItemImageUrls(tableName: string) {
     // console.error("No data found");
     return [];
   }
-  let items: Item[] = [];
+
+  let objects: TableTypes[T][] = [];
   for (let i = 0; i < data.length; i++) {
     if (!data[i]["s3_key"]) {
       continue;
     }
     const imageUrl = await fetchImageUrl(data[i]["s3_key"]);
     data[i]["image_url"] = imageUrl;
-    items.push(data[i]);
+    objects.push(data[i] as TableTypes[T]); // Type assertion here
   }
-  return items;
+
+  return objects;
 }
