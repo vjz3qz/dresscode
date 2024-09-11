@@ -95,3 +95,9 @@ export type LookOutfit = {
   outfit_id: number;
   created_at: string;
 };
+
+export type TableTypes = {
+  items: Item;
+  looks: Look;
+  outfits: Outfit;
+};
