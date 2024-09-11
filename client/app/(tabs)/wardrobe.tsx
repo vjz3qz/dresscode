@@ -12,7 +12,7 @@ import {
 import Gallery from "react-native-awesome-gallery";
 import Camera from "@/components/Camera";
 import ImageViewer from "@/components/ImageViewer";
-import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
+import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import { Item } from "@/types";
 import Feed from "@/components/Feeds/Feed";
@@ -40,7 +40,7 @@ export default function WardrobeScreen() {
     } else if (tabs[tabIndex]["tableName"] === "outfits") {
       router.push("/wardrobe/new/outfit");
     } else if (tabs[tabIndex]["tableName"] === "looks") {
-      console.log("Add look");
+      router.push("/wardrobe/new/look");
     }
   }
 
@@ -48,7 +48,7 @@ export default function WardrobeScreen() {
     const fetchItems = async () => {
       let items: Item[] = [];
       try {
-        items = await fetchAllItemImageUrls(tabs[tabIndex]["tableName"]);
+        items = await fetchAllImageUrls(tabs[tabIndex]["tableName"]);
       } catch (error: any) {
         // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
