@@ -8,35 +8,35 @@ import {
   ScrollView,
 } from "react-native";
 import { Image } from "expo-image";
-import { fetchAllItemImageUrls } from "@/api/FetchImageUrl";
-import { Item } from "@/types";
+import { fetchAllImageUrls } from "@/api/FetchImageUrl";
+import { TableTypes } from "@/types";
 
 const { height } = Dimensions.get("window");
 
 export default function Feed({
-  onItemClick,
+  onObjectClick,
   tableName,
 }: {
-  onItemClick: (item: Item, index: number) => void;
-  tableName: string;
+  onObjectClick: (object: any, index: number) => void;
+  tableName: keyof TableTypes;
 }) {
-  const [data, setData] = useState<Item[]>([]);
+  const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchItems = async () => {
-      let items: Item[] = [];
+    const fetchObjects = async () => {
+      let objects: any[] = [];
       try {
-        items = await fetchAllItemImageUrls(tableName);
+        objects = await fetchAllImageUrls(tableName);
       } catch (error: any) {
         // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
         setData([]);
         return;
       }
-      setData(items);
+      setData(objects);
     };
 
-    fetchItems();
+    fetchObjects();
   }, [tableName]);
 
   return (
@@ -53,7 +53,7 @@ export default function Feed({
         data.map((item, index) => (
           <TouchableWithoutFeedback
             key={item.id}
-            onPress={() => onItemClick(data[index], index)}
+            onPress={() => onObjectClick(data[index], index)}
           >
             <Image source={{ uri: item.image_url }} style={styles.image} />
           </TouchableWithoutFeedback>
