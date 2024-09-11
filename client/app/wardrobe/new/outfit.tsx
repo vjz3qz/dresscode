@@ -90,7 +90,7 @@ export default function NewOutfitScreen() {
 
       <BottomSheet ref={sheetRef}>
         <Feed
-          onItemClick={(item: Item) => {
+          onObjectClick={(item: Item) => {
             item.x = Math.random() * 200;
             item.y = Math.random() * 200;
             item.size = 100;
