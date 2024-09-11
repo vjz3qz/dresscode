@@ -57,12 +57,6 @@ export type Item = {
   size?: number;
 };
 
-export type User = {
-  id: number;
-  created_at: string;
-  name: string;
-};
-
 export type Outfit = {
   id?: number;
   created_at?: string;
