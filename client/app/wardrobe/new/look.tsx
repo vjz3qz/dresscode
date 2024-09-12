@@ -16,9 +16,8 @@ export default function NewLookScreen() {
     const newLook: Look = {
       name: "New Look",
       description: "A new look",
-      outfits: selectedOutfits,
     };
-    await saveLook(newLook);
+    await saveLook(newLook, selectedOutfits);
     router.dismiss();
   }
 
