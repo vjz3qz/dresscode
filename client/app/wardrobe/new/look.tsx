@@ -18,7 +18,9 @@ export default function NewLookScreen() {
       <TouchableOpacity style={styles.saveButton} onPress={save}>
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
-      <SelectFeed tableName="outfits" onSelect={onSelect} />
+      <View style={styles.feedContainer}>
+        <SelectFeed tableName="outfits" onSelect={onSelect} />
+      </View>
     </View>
   );
 }
@@ -46,5 +48,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  feedContainer: {
+    flex: 1,
+    paddingTop: 100, // Add padding above the SelectFeed
   },
 });
