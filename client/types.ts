@@ -79,15 +79,14 @@ export type Look = {
   created_at?: string;
   name: string;
   description: string;
-  outfits: Outfit[];
   user_id?: number;
 };
 
 export type LookOutfit = {
-  id: number;
+  id?: number;
   look_id: number;
   outfit_id: number;
-  created_at: string;
+  created_at?: string;
 };
 
 export type TableTypes = {
