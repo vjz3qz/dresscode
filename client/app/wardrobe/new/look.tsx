@@ -1,8 +1,9 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import { Outfit } from "@/types";
+import { Look, Outfit } from "@/types";
 import SelectFeed from "@/components/Feeds/SelectFeed";
 import { router } from "expo-router";
+import { saveLook } from "@/api/SaveLook";
 
 export default function NewLookScreen() {
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
@@ -10,8 +11,14 @@ export default function NewLookScreen() {
   function onSelect(selectedOutfits: Outfit[]) {
     setSelectedOutfits(selectedOutfits);
   }
-  function save() {
+  async function save() {
     console.log("Saving look with outfits:", selectedOutfits);
+    const newLook: Look = {
+      name: "New Look",
+      description: "A new look",
+      outfits: selectedOutfits,
+    };
+    await saveLook(newLook);
     router.dismiss();
   }
 
