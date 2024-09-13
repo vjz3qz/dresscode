@@ -30,7 +30,6 @@ export default function LookFeed({
               outfit.image_url = url;
             });
           });
-          console.log("LookFeed: outfits", outfits);
         }
 
         setLooks(fetchedLooks);
@@ -44,29 +43,51 @@ export default function LookFeed({
 
     loadLooks();
   }, [tableName]);
+
   const renderOutfitGrid = (outfits: Outfit[]) => {
     const firstFourOutfits = outfits.slice(0, 4); // Get up to the first 4 outfits
 
     // Split the outfits into two rows, each with two outfits
-    const rows = [];
-    for (let i = 0; i < firstFourOutfits.length; i += 2) {
-      rows.push(firstFourOutfits.slice(i, i + 2));
+    const rows: Outfit[][] = [];
+    for (let i = 0; i < 2; i += 1) {
+      for (let j = 0; j < 2; j += 1) {
+        if (!rows[i]) rows[i] = []; // Initialize the row if it doesn't exist
+        rows[i].push({
+          id: i + j + Math.floor(Math.random() * 1000),
+          image_url: "",
+        } as Outfit); // Placeholder outfit
+      }
+    }
+    let k = 0;
+    for (let i = 0; i < 2; i += 1) {
+      for (let j = 0; j < 2; j += 1) {
+        if (k >= firstFourOutfits.length) break; // Break if there are no more outfits
+        rows[i][j] = firstFourOutfits[k]; // Replace the placeholder outfit with the actual outfit
+        k += 1; // Move to the next outfit
+      }
     }
 
     return (
       <View style={styles.gridContainer}>
         {rows.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.row}>
-            {row.map((outfit) => (
-              <View key={outfit.id} style={styles.cell}>
-                <Image
-                  source={{
-                    uri: outfit.image_url,
-                  }}
-                  style={styles.gridImage}
+            {row.map((outfit) =>
+              outfit.image_url ? (
+                <View key={outfit.id} style={styles.cell}>
+                  <Image
+                    source={{
+                      uri: outfit.image_url,
+                    }}
+                    style={styles.gridImage}
+                  />
+                </View>
+              ) : (
+                <View
+                  key={outfit.id}
+                  style={[styles.cell, styles.placeholderCell]}
                 />
-              </View>
-            ))}
+              )
+            )}
           </View>
         ))}
       </View>
@@ -113,6 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   textContainer: {
+    marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -143,6 +165,13 @@ const styles = StyleSheet.create({
     width: 107, // Set appropriate width for the image
     height: 107, // Set appropriate height for the image
 
+    borderWidth: 0.5,
+    borderColor: "white",
+  },
+  placeholderCell: {
+    width: 107, // Placeholder cell has the same size as gridImage
+    height: 107,
+    backgroundColor: "#e0e0e0", // Light grey background for the placeholder
     borderWidth: 0.5,
     borderColor: "white",
   },
