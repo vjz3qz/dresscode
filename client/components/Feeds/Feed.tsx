@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     width: "33.33333333333333333333333%",
     height: height / 7,
     borderWidth: 0.5,
-
     borderColor: "white",
   },
 });
