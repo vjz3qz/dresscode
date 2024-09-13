@@ -80,6 +80,7 @@ export type Look = {
   name: string;
   description: string;
   user_id?: number;
+  outfits?: Outfit[];
 };
 
 export type LookOutfit = {

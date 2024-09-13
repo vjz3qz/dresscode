@@ -14,8 +14,9 @@ import Camera from "@/components/Camera";
 import ImageViewer from "@/components/ImageViewer";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
-import { Item } from "@/types";
+import { Item, TableTypes } from "@/types";
 import Feed from "@/components/Feeds/Feed";
+import LookFeed from "@/components/Feeds/LookFeed";
 
 const { height } = Dimensions.get("window");
 
@@ -29,7 +30,7 @@ export default function WardrobeScreen() {
   const [cameraOpen, setCameraOpen] = useState<boolean>(false);
   const [imageName, setImageName] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
-  const [data, setData] = useState<Item[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
@@ -46,9 +47,11 @@ export default function WardrobeScreen() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      let items: Item[] = [];
+      let items: any[] = [];
       try {
-        items = await fetchAllImageUrls(tabs[tabIndex]["tableName"]);
+        items = await fetchAllImageUrls(
+          tabs[tabIndex]["tableName"] as keyof TableTypes
+        );
       } catch (error: any) {
         // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
@@ -115,12 +118,21 @@ export default function WardrobeScreen() {
           );
         })}
       </View>
-      <Feed
-        onItemClick={(item: Item, index: number) => {
-          setSelectedImageIndex(index);
-        }}
-        tableName={tabs[tabIndex]["tableName"]}
-      />
+      {tabs[tabIndex]["tableName"] === "looks" ? (
+        <LookFeed
+          onLookClick={(look: any, index: number) => {
+            console.log("Look clicked:", look, index);
+          }}
+          tableName={tabs[tabIndex]["tableName"] as keyof TableTypes}
+        />
+      ) : (
+        <Feed
+          onObjectClick={(item: Item, index: number) => {
+            setSelectedImageIndex(index);
+          }}
+          tableName={tabs[tabIndex]["tableName"] as keyof TableTypes}
+        />
+      )}
       <UploadButton onPress={onPlusButtonClick} />
     </SafeAreaView>
   );
