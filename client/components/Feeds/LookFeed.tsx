@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Dimensions, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Dimensions,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { Image } from "expo-image";
-import { fetchAllImageUrls, fetchImageUrl } from "@/api/FetchImageUrl";
+import { fetchImageUrl } from "@/api/FetchImageUrl";
 import { Look, Outfit, TableTypes } from "@/types";
 import { fetchLooks, fetchOutfitsByLook } from "@/api/FetchLooks";
 
@@ -24,7 +31,7 @@ export default function LookFeed({
         for (const look of fetchedLooks) {
           const outfits = await fetchOutfitsByLook((look.id || "").toString());
           look.outfits = outfits as Outfit[];
-          // add image_url to each outfit
+          // Add image_url to each outfit
           look.outfits.forEach((outfit) => {
             fetchImageUrl(outfit.s3_key || "").then((url) => {
               outfit.image_url = url;
@@ -33,7 +40,6 @@ export default function LookFeed({
         }
 
         setLooks(fetchedLooks);
-        // fetchedLooks = (await fetchAllImageUrls(tableName)) as Look[];
       } catch (error: any) {
         console.error("Error fetching looks:", error.message);
         setLooks([]);
@@ -106,13 +112,17 @@ export default function LookFeed({
         </View>
       ) : (
         looks.map((look, index) => (
-          <View key={look.id} style={styles.lookContainer}>
+          <TouchableOpacity
+            key={look.id}
+            style={styles.lookContainer}
+            onPress={() => onLookClick(look, index)}
+          >
             {renderOutfitGrid(look.outfits || [])}
             <View style={styles.textContainer}>
               <Text style={styles.lookTitle}>{look.name}</Text>
               <Text style={styles.lookDescription}>{look.description}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))
       )}
     </ScrollView>
@@ -149,29 +159,26 @@ const styles = StyleSheet.create({
     color: "#6b7280",
   },
   gridContainer: {
-    flexDirection: "column", // Ensures the grid has rows
+    flexDirection: "column",
   },
   row: {
-    flexDirection: "row", // Each row has items aligned horizontally
-    justifyContent: "center", // Spacing between the items
-    // marginBottom: 10, // Add some space between rows
+    flexDirection: "row",
+    justifyContent: "center",
   },
   cell: {
-    flex: 1, // Makes each cell take equal space
-    // marginRight: 10, // Add space between cells
-    alignItems: "center", // Center the image horizontally in the cell
+    flex: 1,
+    alignItems: "center",
   },
   gridImage: {
-    width: 107, // Set appropriate width for the image
-    height: 107, // Set appropriate height for the image
-
+    width: 107,
+    height: 107,
     borderWidth: 0.5,
     borderColor: "white",
   },
   placeholderCell: {
-    width: 107, // Placeholder cell has the same size as gridImage
+    width: 107,
     height: 107,
-    backgroundColor: "#e0e0e0", // Light grey background for the placeholder
+    backgroundColor: "#e0e0e0",
     borderWidth: 0.5,
     borderColor: "white",
   },
