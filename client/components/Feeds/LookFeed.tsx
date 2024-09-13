@@ -44,21 +44,31 @@ export default function LookFeed({
 
     loadLooks();
   }, [tableName]);
-
   const renderOutfitGrid = (outfits: Outfit[]) => {
     const firstFourOutfits = outfits.slice(0, 4); // Get up to the first 4 outfits
 
+    // Split the outfits into two rows, each with two outfits
+    const rows = [];
+    for (let i = 0; i < firstFourOutfits.length; i += 2) {
+      rows.push(firstFourOutfits.slice(i, i + 2));
+    }
+
     return (
       <View style={styles.gridContainer}>
-        {firstFourOutfits.map((outfit) => {
-          return (
-            <Image
-              key={outfit.id}
-              source={{ uri: outfit.image_url }}
-              style={styles.gridImage}
-            />
-          );
-        })}
+        {rows.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((outfit) => (
+              <View key={outfit.id} style={styles.cell}>
+                <Image
+                  source={{
+                    uri: outfit.image_url,
+                  }}
+                  style={styles.gridImage}
+                />
+              </View>
+            ))}
+          </View>
+        ))}
       </View>
     );
   };
@@ -77,8 +87,10 @@ export default function LookFeed({
         looks.map((look, index) => (
           <View key={look.id} style={styles.lookContainer}>
             {renderOutfitGrid(look.outfits || [])}
-            <Text style={styles.lookTitle}>{look.name}</Text>
-            <Text style={styles.lookDescription}>{look.description}</Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.lookTitle}>{look.name}</Text>
+              <Text style={styles.lookDescription}>{look.description}</Text>
+            </View>
           </View>
         ))
       )}
@@ -90,9 +102,19 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 20,
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   lookContainer: {
-    marginBottom: 20,
+    width: "50%",
+    height: height / 4.35,
+    borderWidth: 0.5,
+    borderColor: "white",
+    marginBottom: 60,
+  },
+  textContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   lookTitle: {
     fontSize: 18,
@@ -105,12 +127,22 @@ const styles = StyleSheet.create({
     color: "#6b7280",
   },
   gridContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: "column", // Ensures the grid has rows
+  },
+  row: {
+    flexDirection: "row", // Each row has items aligned horizontally
+    justifyContent: "center", // Spacing between the items
+    // marginBottom: 10, // Add some space between rows
+  },
+  cell: {
+    flex: 1, // Makes each cell take equal space
+    // marginRight: 10, // Add space between cells
+    alignItems: "center", // Center the image horizontally in the cell
   },
   gridImage: {
-    width: "23%", // roughly 4 items in a row
-    height: height / 10,
+    width: 107, // Set appropriate width for the image
+    height: 107, // Set appropriate height for the image
+
     borderWidth: 0.5,
     borderColor: "white",
   },
