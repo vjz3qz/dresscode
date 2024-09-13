@@ -14,3 +14,4 @@ celery -A core.celery_worker worker --loglevel=info --pool=threads
 <!-- celery -A core.celery_worker beat --loglevel=info -->
 
 in client dir:
+npx expo start
