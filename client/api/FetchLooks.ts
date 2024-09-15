@@ -14,6 +14,21 @@ export async function fetchLooks(): Promise<Look[]> {
   return data as Look[];
 }
 
+export async function fetchLookById(LookId: string): Promise<Look> {
+  const { data, error } = await supabase
+    .from("looks")
+    .select("*")
+    .eq("id", LookId);
+
+  if (error) {
+    console.error("Error fetching look by ID:", error);
+    return {} as Look;
+  }
+
+  return data[0] as Look;
+}
+
+// Function to fetch outfits by look ID
 export async function fetchOutfitsByLook(LookId: string): Promise<Outfit[]> {
   const { data, error } = await supabase
     .from("looks_outfits")
