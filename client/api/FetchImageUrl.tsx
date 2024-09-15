@@ -37,14 +37,20 @@ export async function fetchAllImageUrls<T extends keyof TableTypes>(
     return [];
   }
 
-  let objects: TableTypes[T][] = [];
+  let objects: TableTypes[T][] = addImageUrls(data as any) as any; // Type assertion here
+
+  return objects;
+}
+
+export async function addImageUrls(data: any[]) {
+  let objects: any[] = [];
   for (let i = 0; i < data.length; i++) {
     if (!data[i]["s3_key"]) {
       continue;
     }
     const imageUrl = await fetchImageUrl(data[i]["s3_key"]);
     data[i]["image_url"] = imageUrl;
-    objects.push(data[i] as TableTypes[T]); // Type assertion here
+    objects.push(data[i] as any); // Type assertion here
   }
 
   return objects;
