@@ -47,6 +47,10 @@ function RootLayoutContent() {
             name="wardrobe/new/look"
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="wardrobe/view/look-outfits/[lookId]"
+            options={{ headerShown: false }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
       ) : (
