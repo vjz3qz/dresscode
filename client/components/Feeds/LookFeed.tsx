@@ -10,7 +10,7 @@ import {
 import { Image } from "expo-image";
 import { fetchImageUrl } from "@/api/FetchImageUrl";
 import { Look, Outfit, TableTypes } from "@/types";
-import { fetchLooks, fetchOutfitsByLook } from "@/api/FetchLooks";
+import { fetchLooks, loadLooksWithOutfits } from "@/api/FetchLooks";
 
 const { height } = Dimensions.get("window");
 
@@ -27,23 +27,11 @@ export default function LookFeed({
     const loadLooks = async () => {
       try {
         const fetchedLooks = await fetchLooks();
+        const fetchedLooksWithOutfits = await loadLooksWithOutfits(
+          fetchedLooks
+        );
 
-        for (const look of fetchedLooks) {
-          const outfits = await fetchOutfitsByLook((look.id || "").toString());
-          look.outfits = outfits as Outfit[];
-
-          // Use Promise.all to fetch all image URLs for this look's outfits
-          await Promise.all(
-            look.outfits.map(async (outfit) => {
-              if (outfit.s3_key) {
-                const url = await fetchImageUrl(outfit.s3_key);
-                outfit.image_url = url;
-              }
-            })
-          );
-        }
-
-        setLooks(fetchedLooks);
+        setLooks(fetchedLooksWithOutfits);
       } catch (error: any) {
         console.error("Error fetching looks:", error.message);
         setLooks([]);
