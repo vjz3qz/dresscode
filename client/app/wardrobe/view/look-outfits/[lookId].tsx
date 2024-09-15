@@ -1,20 +1,16 @@
-import UploadButton from "@/ui/UploadButton";
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
   Text,
-  TouchableWithoutFeedback,
   SafeAreaView,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
 import Gallery from "react-native-awesome-gallery";
-import Camera from "@/components/Camera";
-import ImageViewer from "@/components/ImageViewer";
-import { fetchAllImageUrls } from "@/api/FetchImageUrl";
-import { router, useLocalSearchParams } from "expo-router";
-import { Item, Look, Outfit, TableTypes } from "@/types";
+import { addImageUrls } from "@/api/FetchImageUrl";
+import { useLocalSearchParams } from "expo-router";
+import { Item, Look, Outfit } from "@/types";
 import Feed from "@/components/Feeds/Feed";
 import {
   fetchLookById,
@@ -53,8 +49,10 @@ export default function LookOutfits() {
         const fetchedOutfits = await fetchOutfitsByLook(
           Array.isArray(lookId) ? lookId[0] : lookId
         );
+        // add the image_url to the outfits
+        const fetchedOutfitsWithImages = await addImageUrls(fetchedOutfits);
 
-        setOutfits(fetchedOutfits);
+        setOutfits(fetchedOutfitsWithImages);
       } catch (error: any) {
         console.error("Error fetching looks:", error.message);
         setOutfits([]);
@@ -132,10 +130,6 @@ const styles = StyleSheet.create({
     width: "33.33333333333333333333333%",
     height: height / 7,
     borderWidth: 0.5,
-    // borderRightWidth: 0,
-    // borderBottomWidth: 1,
-    // borderTopWidth: 1,
-    // borderLeftWidth: 0,
 
     borderColor: "white",
   },
