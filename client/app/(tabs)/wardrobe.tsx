@@ -121,7 +121,8 @@ export default function WardrobeScreen() {
       {tabs[tabIndex]["tableName"] === "looks" ? (
         <LookFeed
           onLookClick={(look: any, index: number) => {
-            console.log("Look clicked:", look, index);
+            // console.log("Look clicked:", look, index);
+            router.push(`/wardrobe/view/look-outfits/${look.id}`);
           }}
           tableName={tabs[tabIndex]["tableName"] as keyof TableTypes}
         />
