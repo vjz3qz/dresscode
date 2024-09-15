@@ -31,12 +31,16 @@ export default function LookFeed({
         for (const look of fetchedLooks) {
           const outfits = await fetchOutfitsByLook((look.id || "").toString());
           look.outfits = outfits as Outfit[];
-          // Add image_url to each outfit
-          look.outfits.forEach((outfit) => {
-            fetchImageUrl(outfit.s3_key || "").then((url) => {
-              outfit.image_url = url;
-            });
-          });
+
+          // Use Promise.all to fetch all image URLs for this look's outfits
+          await Promise.all(
+            look.outfits.map(async (outfit) => {
+              if (outfit.s3_key) {
+                const url = await fetchImageUrl(outfit.s3_key);
+                outfit.image_url = url;
+              }
+            })
+          );
         }
 
         setLooks(fetchedLooks);
