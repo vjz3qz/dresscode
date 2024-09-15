@@ -16,9 +16,11 @@ const { height } = Dimensions.get("window");
 export default function Feed({
   onObjectClick,
   tableName,
+  rawData,
 }: {
   onObjectClick: (object: any, index: number) => void;
   tableName: keyof TableTypes;
+  rawData?: any[];
 }) {
   const [data, setData] = useState<any[]>([]);
 
@@ -26,7 +28,11 @@ export default function Feed({
     const fetchObjects = async () => {
       let objects: any[] = [];
       try {
-        objects = await fetchAllImageUrls(tableName);
+        if (tableName) {
+          objects = await fetchAllImageUrls(tableName);
+        } else {
+          console.error("tableName is undefined");
+        }
       } catch (error: any) {
         // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
@@ -36,7 +42,11 @@ export default function Feed({
       setData(objects);
     };
 
-    fetchObjects();
+    if (rawData) {
+      setData(rawData);
+    } else {
+      fetchObjects();
+    }
   }, [tableName]);
 
   return (
