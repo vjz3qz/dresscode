@@ -47,7 +47,7 @@ export default function Feed({
     } else {
       fetchObjects();
     }
-  }, [tableName]);
+  }, [tableName, rawData]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
