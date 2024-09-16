@@ -1,10 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Camera from "@/components/Camera";
-import ImageViewer from "@/components/ImageViewer";
+import { fetchImageUrl } from "@/api/FetchImageUrl";
+import { router } from "expo-router";
+import ImageGallery from "@/components/ImageGallery";
 
 export default function WardrobeScreen() {
   const [cameraOpen, setCameraOpen] = useState<boolean>(true);
   const [imageName, setImageName] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadImageUrl = async () => {
+      if (!imageName) {
+        return;
+      }
+      try {
+        const fetchedImageUrl = await fetchImageUrl(imageName);
+        setImageUrl(fetchedImageUrl);
+      } catch (error) {
+        console.error("Error fetching image URL:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImageUrl();
+  }, [imageName]);
 
   if (cameraOpen) {
     return (
@@ -15,6 +37,15 @@ export default function WardrobeScreen() {
     );
   }
   if (imageName) {
-    return <ImageViewer imageName={imageName} setImageName={setImageName} />;
+    return (
+      <ImageGallery
+        loading={loading}
+        data={[imageUrl]}
+        selectedImageIndex={0}
+        onClose={() => {
+          router.dismiss();
+        }}
+      />
+    );
   }
 }

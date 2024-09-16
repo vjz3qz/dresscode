@@ -7,14 +7,13 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
   Dimensions,
-  TouchableOpacity,
 } from "react-native";
-import Gallery from "react-native-awesome-gallery";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import { Item, TableTypes } from "@/types";
 import Feed from "@/components/Feeds/Feed";
 import LookFeed from "@/components/Feeds/LookFeed";
+import ImageGallery from "@/components/ImageGallery";
 
 const { height } = Dimensions.get("window");
 
@@ -62,21 +61,14 @@ export default function WardrobeScreen() {
 
   if (selectedImageIndex !== null) {
     return (
-      <View style={{ flex: 1 }}>
-        {/* X button to close the gallery */}
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => {
-            setSelectedImageIndex(null);
-          }}
-        >
-          <Text style={styles.closeButtonText}>X</Text>
-        </TouchableOpacity>
-        <Gallery
-          initialIndex={selectedImageIndex}
-          data={data.map((object) => object.image_url)}
-        />
-      </View>
+      <ImageGallery
+        loading={false}
+        data={data.map((object) => object.image_url)}
+        selectedImageIndex={selectedImageIndex}
+        onClose={() => {
+          setSelectedImageIndex(null);
+        }}
+      />
     );
   }
 
