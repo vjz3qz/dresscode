@@ -1,8 +1,9 @@
 """This module contains the API endpoints for the application."""
 
+from typing import List
 from celery import uuid
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, Body, File, Request, UploadFile
+from fastapi import APIRouter, Depends, Body, File, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
 import time
 import uuid
@@ -55,6 +56,21 @@ async def get_image_url(filename: str):
     """
     task = celery.send_task("tasks.get_image_url", args=[filename])
     return return_task(task)
+
+
+@router.get("/get-image-urls")
+async def get_image_urls(filenames: List[str] = Query(...)):
+    """
+    Get the URLs of images in the S3 bucket.
+    Args:
+        filenames (List[str]): A list of image filenames.
+    Returns:
+        JSONResponse: Returns a dictionary containing filenames and their URLs.
+    """
+    tasks = [celery.send_task("tasks.get_image_url", args=[filename]) for filename in filenames]
+    results = {filename: return_task(task) for filename, task in zip(filenames, tasks)}
+    return JSONResponse(content=results)
+
 
 def return_task(task):
     # Loop until the task is complete
