@@ -8,6 +8,7 @@ import {
   Text,
 } from "react-native";
 import { fetchImageUrl } from "@/api/FetchImageUrl";
+import { router } from "expo-router";
 
 export default function ImageViewer({
   imageName,
@@ -47,7 +48,10 @@ export default function ImageViewer({
             {/* X button to close the gallery */}
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setImageName("")}
+              onPress={() => {
+                setImageName("");
+                router.push("/wardrobe");
+              }}
             >
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>

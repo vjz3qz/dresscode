@@ -10,8 +10,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Gallery from "react-native-awesome-gallery";
-import Camera from "@/components/Camera";
-import ImageViewer from "@/components/ImageViewer";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import { Item, TableTypes } from "@/types";
@@ -27,8 +25,6 @@ const tabs = [
 ];
 
 export default function WardrobeScreen() {
-  const [cameraOpen, setCameraOpen] = useState<boolean>(false);
-  const [imageName, setImageName] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
   const [data, setData] = useState<any[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
@@ -37,7 +33,7 @@ export default function WardrobeScreen() {
 
   function onPlusButtonClick() {
     if (tabs[tabIndex]["tableName"] === "items") {
-      setCameraOpen(true);
+      router.push("/wardrobe/new/item");
     } else if (tabs[tabIndex]["tableName"] === "outfits") {
       router.push("/wardrobe/new/outfit");
     } else if (tabs[tabIndex]["tableName"] === "looks") {
@@ -62,7 +58,7 @@ export default function WardrobeScreen() {
     };
 
     fetchItems();
-  }, [tabIndex, imageName, cameraOpen]);
+  }, [tabIndex]);
 
   if (selectedImageIndex !== null) {
     return (
@@ -84,14 +80,7 @@ export default function WardrobeScreen() {
     );
   }
 
-  return cameraOpen ? (
-    <Camera
-      exitCamera={() => setCameraOpen(false)}
-      setImageName={setImageName}
-    />
-  ) : imageName ? (
-    <ImageViewer imageName={imageName} setImageName={setImageName} />
-  ) : (
+  return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={[styles.container]}>
         {tabs.map((item, index) => {
