@@ -85,93 +85,84 @@ export default function Auth() {
     setLoading(false);
   }
 
-  function EmailAuth() {
-    return (
-      <>
-        <View style={[styles.verticallySpaced, styles.mt20]}>
-          <Input
-            label="Email"
-            leftIcon={{ type: "font-awesome", name: "envelope" }}
-            onChangeText={(text) => setEmail(text)}
-            value={email}
-            placeholder="email@address.com"
-            autoCapitalize={"none"}
-          />
-        </View>
-        <View style={styles.verticallySpaced}>
-          <Input
-            label="Password"
-            leftIcon={{ type: "font-awesome", name: "lock" }}
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={true}
-            placeholder="Password"
-            autoCapitalize={"none"}
-          />
-        </View>
-        <View style={[styles.verticallySpaced, styles.mt20]}>
-          <Button
-            title="Sign in with Email"
-            disabled={loading}
-            onPress={() => signInWithEmail()}
-          />
-        </View>
-        <View style={styles.verticallySpaced}>
-          <Button
-            title="Sign up with Email"
-            disabled={loading}
-            onPress={() => signUpWithEmail()}
-          />
-        </View>
-      </>
-    );
-  }
-
-  function PhoneAuth() {
-    return (
-      <>
-        {/* Phone Sign-In Section */}
-        <View style={[styles.verticallySpaced, styles.mt20]}>
-          <Input
-            label="Phone"
-            leftIcon={{ type: "font-awesome", name: "phone" }}
-            onChangeText={(text) => setPhone(text)}
-            value={phone}
-            placeholder="+1234567890"
-            autoCapitalize={"none"}
-          />
-        </View>
-        <View style={styles.verticallySpaced}>
-          <Button
-            title="Sign up with Phone"
-            disabled={loading}
-            onPress={() => signUpWithPhone()}
-          />
-        </View>
-        <View style={styles.verticallySpaced}>
-          <Input
-            label="OTP"
-            leftIcon={{ type: "font-awesome", name: "key" }}
-            onChangeText={(text) => setOtp(text)}
-            value={otp}
-            placeholder="Enter OTP"
-            autoCapitalize={"none"}
-          />
-        </View>
-        <View style={styles.verticallySpaced}>
-          <Button
-            title="Verify OTP"
-            disabled={loading}
-            onPress={() => verifyOtp()}
-          />
-        </View>
-      </>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      {emailAuth ? <EmailAuth /> : <PhoneAuth />}
+      {emailAuth ? (
+        <>
+          <View style={[styles.verticallySpaced, styles.mt20]}>
+            <Input
+              label="Email"
+              leftIcon={{ type: "font-awesome", name: "envelope" }}
+              onChangeText={(text) => setEmail(text)}
+              value={email}
+              placeholder="email@address.com"
+              autoCapitalize={"none"}
+            />
+          </View>
+          <View style={styles.verticallySpaced}>
+            <Input
+              label="Password"
+              leftIcon={{ type: "font-awesome", name: "lock" }}
+              onChangeText={(text) => setPassword(text)}
+              value={password}
+              secureTextEntry={true}
+              placeholder="Password"
+              autoCapitalize={"none"}
+            />
+          </View>
+          <View style={[styles.verticallySpaced, styles.mt20]}>
+            <Button
+              title="Sign in"
+              disabled={loading}
+              onPress={() => signInWithEmail()}
+            />
+          </View>
+          <View style={styles.verticallySpaced}>
+            <Button
+              title="Sign up"
+              disabled={loading}
+              onPress={() => signUpWithEmail()}
+            />
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={[styles.verticallySpaced, styles.mt20]}>
+            <Input
+              label="Phone"
+              leftIcon={{ type: "font-awesome", name: "phone" }}
+              onChangeText={(text) => setPhone(text)}
+              value={phone}
+              placeholder="+1234567890"
+              autoCapitalize={"none"}
+            />
+          </View>
+          <View style={styles.verticallySpaced}>
+            <Button
+              title="Sign up with Phone"
+              disabled={loading}
+              onPress={() => signUpWithPhone()}
+            />
+          </View>
+          <View style={styles.verticallySpaced}>
+            <Input
+              label="OTP"
+              leftIcon={{ type: "font-awesome", name: "key" }}
+              onChangeText={(text) => setOtp(text)}
+              value={otp}
+              placeholder="Enter OTP"
+              autoCapitalize={"none"}
+            />
+          </View>
+          <View style={styles.verticallySpaced}>
+            <Button
+              title="Verify OTP"
+              disabled={loading}
+              onPress={() => verifyOtp()}
+            />
+          </View>
+        </>
+      )}
       <View style={styles.verticallySpaced}>
         <Button
           title={emailAuth ? "Sign up with Phone" : "Sign up with Email"}
