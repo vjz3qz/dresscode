@@ -15,6 +15,11 @@ AppState.addEventListener("change", (state) => {
   }
 });
 
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) Alert.alert(error.message);
+}
+
 export default function Auth() {
   const [emailAuth, setEmailAuth] = useState(true);
   const [email, setEmail] = useState("");
