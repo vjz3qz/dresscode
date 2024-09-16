@@ -40,6 +40,10 @@ function RootLayoutContent() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
+            name="wardrobe/new/item"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="wardrobe/new/outfit"
             options={{ headerShown: false }}
           />

@@ -31,7 +31,9 @@ export default function WardrobeScreen() {
   if (cameraOpen) {
     return (
       <Camera
-        exitCamera={() => setCameraOpen(false)}
+        exitCamera={() => {
+          router.dismiss();
+        }}
         setImageName={setImageName}
       />
     );
