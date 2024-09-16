@@ -1,4 +1,5 @@
 import { TableTypes } from "@/types";
+import { axiosParamSerializer } from "@/utils/AxiosParamSerializer";
 import { supabase } from "@/utils/Supabase";
 import axios from "axios";
 
@@ -32,6 +33,7 @@ export async function fetchImageUrls(imageNames: string[]) {
       params: {
         filenames: imageNames, // Pass array of filenames as query params
       },
+      paramsSerializer: axiosParamSerializer,
     });
 
     return response.data; // This is expected to be an object with { filename: url }

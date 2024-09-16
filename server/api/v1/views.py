@@ -1,5 +1,6 @@
 """This module contains the API endpoints for the application."""
 
+import json
 from typing import List
 from celery import uuid
 from celery.result import AsyncResult
@@ -68,7 +69,21 @@ async def get_image_urls(filenames: List[str] = Query(...)):
         JSONResponse: Returns a dictionary containing filenames and their URLs.
     """
     tasks = [celery.send_task("tasks.get_image_url", args=[filename]) for filename in filenames]
-    results = {filename: return_task(task) for filename, task in zip(filenames, tasks)}
+    results = {}
+
+    for filename, task in zip(filenames, tasks):
+        task_result = return_task(task)
+
+        # Extract content from JSONResponse
+        content = task_result.body  # Access the internal _body attribute
+        content_data = json.loads(content.decode('utf-8'))  # Decode bytes to string and then load JSON
+
+        # Retrieve the URL if the task was successful
+        if content_data.get('status') == 'complete':
+            results[filename] = content_data.get('result', {}).get('url', '')
+        else:
+            results[filename] = ''  # Handle error case by setting an empty string or error message
+
     return JSONResponse(content=results)
 
 
