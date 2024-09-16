@@ -18,6 +18,8 @@ AppState.addEventListener("change", (state) => {
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function signInWithEmail() {
@@ -44,6 +46,36 @@ export default function Auth() {
     if (error) Alert.alert(error.message);
     if (!session)
       Alert.alert("Please check your inbox for email verification!");
+    setLoading(false);
+  }
+
+  async function signUpWithPhone() {
+    setLoading(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signInWithOtp({
+      phone: phone,
+    });
+
+    if (error) Alert.alert(error.message);
+    if (!session) Alert.alert("Please check your phone for the OTP!");
+    setLoading(false);
+  }
+
+  async function verifyOtp() {
+    setLoading(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.verifyOtp({
+      phone: phone,
+      token: otp,
+      type: "sms",
+    });
+
+    if (error) Alert.alert(error.message);
+    // if (!session) Alert.alert("Phone verified!");
     setLoading(false);
   }
 
