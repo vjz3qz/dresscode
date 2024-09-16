@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import axios from "axios";
+import { fetchImageUrl } from "@/api/FetchImageUrl";
 
 export default function ImageViewer({
   imageName,
@@ -20,18 +20,13 @@ export default function ImageViewer({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchImageUrl = async () => {
+    const loadImageUrl = async () => {
       if (!imageName) {
         return;
       }
-
       try {
-        const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-        const response = await axios.get(
-          `${BACKEND_URL}/get-image-url/${imageName}`
-        );
-
-        setImageUrl(response.data["result"]["url"]);
+        const fetchedImageUrl = await fetchImageUrl(imageName);
+        setImageUrl(fetchedImageUrl);
       } catch (error) {
         console.error("Error fetching image URL:", error);
       } finally {
@@ -39,7 +34,7 @@ export default function ImageViewer({
       }
     };
 
-    fetchImageUrl();
+    loadImageUrl();
   }, [imageName]);
 
   return (
