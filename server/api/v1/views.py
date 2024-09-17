@@ -28,7 +28,7 @@ async def health():
     return JSONResponse({"text": "OK"})
 
 @router.post("/upload")
-async def upload(file: UploadFile = File(...)):
+async def upload(file: UploadFile = File(...), token_payload: dict = Depends(validate_token)):
     """
     Upload a file to S3.
     Args:
@@ -47,7 +47,7 @@ async def upload(file: UploadFile = File(...)):
 
 
 @router.get("/get-image-url/{filename}")
-async def get_image_url(filename: str):
+async def get_image_url(filename: str, token_payload: dict = Depends(validate_token)):
     """
     Get the URL of an image in the S3 bucket.
     Args:
@@ -60,7 +60,7 @@ async def get_image_url(filename: str):
 
 
 @router.get("/get-image-urls")
-async def get_image_urls(filenames: List[str] = Query(...)):
+async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict = Depends(validate_token)):
     """
     Get the URLs of images in the S3 bucket.
     Args:

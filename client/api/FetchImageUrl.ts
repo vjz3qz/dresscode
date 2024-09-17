@@ -1,9 +1,10 @@
 import { TableTypes } from "@/types";
 import { axiosParamSerializer } from "@/utils/AxiosParamSerializer";
 import { supabase } from "@/utils/Supabase";
+import { Session } from "@supabase/supabase-js";
 import axios from "axios";
 
-export async function fetchImageUrl(imageName: string) {
+export async function fetchImageUrl(imageName: string, session: Session) {
   if (!imageName) {
     return;
   }
@@ -11,7 +12,13 @@ export async function fetchImageUrl(imageName: string) {
   try {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
     const response = await axios.get(
-      `${BACKEND_URL}/get-image-url/${imageName}`
+      `${BACKEND_URL}/get-image-url/${imageName}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
     );
 
     return response.data["result"]["url"];
@@ -22,7 +29,7 @@ export async function fetchImageUrl(imageName: string) {
   }
 }
 
-export async function fetchImageUrls(imageNames: string[]) {
+export async function fetchImageUrls(imageNames: string[], session: Session) {
   if (!imageNames || imageNames.length === 0) {
     return {};
   }
@@ -34,6 +41,10 @@ export async function fetchImageUrls(imageNames: string[]) {
         filenames: imageNames, // Pass array of filenames as query params
       },
       paramsSerializer: axiosParamSerializer,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
     });
 
     return response.data; // This is expected to be an object with { filename: url }
@@ -44,7 +55,8 @@ export async function fetchImageUrls(imageNames: string[]) {
 }
 
 export async function fetchAllImageUrls<T extends keyof TableTypes>(
-  tableName: T
+  tableName: T,
+  session: Session
 ) {
   let { data, error } = await supabase.from(tableName).select("*");
 
@@ -57,13 +69,13 @@ export async function fetchAllImageUrls<T extends keyof TableTypes>(
     return [];
   }
 
-  let objects: TableTypes[T][] = await addImageUrls(data as any); // Wait for the URLs to be added
+  let objects: TableTypes[T][] = await addImageUrls(data as any, session); // Wait for the URLs to be added
   return objects;
 }
 
-export async function addImageUrls(data: any[]) {
+export async function addImageUrls(data: any[], session: Session) {
   const imageNames = data.map((item) => item["s3_key"]).filter(Boolean);
-  const imageUrls = await fetchImageUrls(imageNames);
+  const imageUrls = await fetchImageUrls(imageNames, session);
 
   let objects: any[] = [];
   for (let i = 0; i < data.length; i++) {

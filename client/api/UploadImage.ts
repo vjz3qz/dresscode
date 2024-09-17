@@ -1,3 +1,4 @@
+import { Session } from "@supabase/supabase-js";
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
 
@@ -24,13 +25,14 @@ async function convertUriToFormData(uri: string): Promise<FormData> {
   return formData;
 }
 
-export async function uploadImageUri(uri: string) {
+export async function uploadImageUri(uri: string, session: Session) {
   const formData = await convertUriToFormData(uri);
 
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const response = await axios.post(`${BACKEND_URL}/upload`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${session.access_token}`,
     },
   });
 

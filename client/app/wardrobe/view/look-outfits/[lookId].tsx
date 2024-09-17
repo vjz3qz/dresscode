@@ -12,16 +12,13 @@ import { addImageUrls } from "@/api/FetchImageUrl";
 import { useLocalSearchParams } from "expo-router";
 import { Item, Look, Outfit } from "@/types";
 import Feed from "@/components/Feeds/Feed";
-import {
-  fetchLookById,
-  fetchLooks,
-  fetchOutfitsByLook,
-  loadLooksWithOutfits,
-} from "@/api/FetchLooks";
+import { fetchLookById, fetchOutfitsByLook } from "@/api/FetchLooks";
+import { useSession } from "@/contexts/SessionContext";
 
 const { height } = Dimensions.get("window");
 
 export default function LookOutfits() {
+  const { session } = useSession();
   const { lookId } = useLocalSearchParams();
   const [look, setLook] = useState<Look | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
@@ -50,7 +47,13 @@ export default function LookOutfits() {
           Array.isArray(lookId) ? lookId[0] : lookId
         );
         // add the image_url to the outfits
-        const fetchedOutfitsWithImages = await addImageUrls(fetchedOutfits);
+        if (!session) {
+          return;
+        }
+        const fetchedOutfitsWithImages = await addImageUrls(
+          fetchedOutfits,
+          session
+        );
 
         setOutfits(fetchedOutfitsWithImages);
       } catch (error: any) {

@@ -14,6 +14,7 @@ import { Item, TableTypes } from "@/types";
 import Feed from "@/components/Feeds/Feed";
 import LookFeed from "@/components/Feeds/LookFeed";
 import ImageGallery from "@/components/ImageGallery";
+import { useSession } from "@/contexts/SessionContext";
 
 const { height } = Dimensions.get("window");
 
@@ -24,6 +25,7 @@ const tabs = [
 ];
 
 export default function WardrobeScreen() {
+  const { session } = useSession();
   const [tabIndex, setTabIndex] = useState(0);
   const [data, setData] = useState<any[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
@@ -44,8 +46,12 @@ export default function WardrobeScreen() {
     const fetchItems = async () => {
       let items: any[] = [];
       try {
+        if (!session) {
+          return;
+        }
         items = await fetchAllImageUrls(
-          tabs[tabIndex]["tableName"] as keyof TableTypes
+          tabs[tabIndex]["tableName"] as keyof TableTypes,
+          session
         );
       } catch (error: any) {
         // Error: Cannot find name 'error'.
