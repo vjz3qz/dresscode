@@ -1,6 +1,7 @@
 import { Look, Outfit } from "@/types";
 import { supabase } from "@/utils/Supabase";
 import { addImageUrls } from "@/api/FetchImageUrl";
+import { Session } from "@supabase/supabase-js";
 
 // Function to fetch looks from the Supabase table
 export async function fetchLooks(): Promise<Look[]> {
@@ -56,12 +57,13 @@ export async function fetchOutfitsByLook(LookId: string): Promise<Outfit[]> {
 }
 
 export async function loadLooksWithOutfits(
-  fetchedLooks: Look[]
+  fetchedLooks: Look[],
+  session: Session
 ): Promise<Look[]> {
   try {
     for (const look of fetchedLooks) {
       const outfits = await fetchOutfitsByLook((look.id || "").toString());
-      const outfitsWithImages = await addImageUrls(outfits);
+      const outfitsWithImages = await addImageUrls(outfits, session);
       look.outfits = outfitsWithImages;
     }
 

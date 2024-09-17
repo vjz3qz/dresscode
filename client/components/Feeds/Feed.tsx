@@ -10,6 +10,7 @@ import {
 import { Image } from "expo-image";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { TableTypes } from "@/types";
+import { useSession } from "@/contexts/SessionContext";
 
 const { height } = Dimensions.get("window");
 
@@ -22,6 +23,7 @@ export default function Feed({
   tableName: keyof TableTypes;
   rawData?: any[];
 }) {
+  const { session } = useSession();
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -29,7 +31,10 @@ export default function Feed({
       let objects: any[] = [];
       try {
         if (tableName) {
-          objects = await fetchAllImageUrls(tableName);
+          if (!session) {
+            return;
+          }
+          objects = await fetchAllImageUrls(tableName, session);
         } else {
           console.error("tableName is undefined");
         }

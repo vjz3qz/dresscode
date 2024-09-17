@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
-import { fetchImageUrl } from "@/api/FetchImageUrl";
 import { Look, Outfit, TableTypes } from "@/types";
 import { fetchLooks, loadLooksWithOutfits } from "@/api/FetchLooks";
+import { useSession } from "@/contexts/SessionContext";
 
 const { height } = Dimensions.get("window");
 
@@ -21,14 +21,19 @@ export default function LookFeed({
   onLookClick: (look: Look, index: number) => void;
   tableName: keyof TableTypes;
 }) {
+  const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
 
   useEffect(() => {
     const loadLooks = async () => {
       try {
         const fetchedLooks = await fetchLooks();
+        if (!session) {
+          return;
+        }
         const fetchedLooksWithOutfits = await loadLooksWithOutfits(
-          fetchedLooks
+          fetchedLooks,
+          session
         );
 
         setLooks(fetchedLooksWithOutfits);
