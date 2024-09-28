@@ -50,7 +50,7 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
-    if (!session)
+    else if (!session)
       Alert.alert("Please check your inbox for email verification!");
     setLoading(false);
   }
@@ -65,7 +65,7 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
-    if (!session) Alert.alert("Please check your phone for the OTP!");
+    else if (!session) Alert.alert("Please check your phone for the OTP!");
     setLoading(false);
   }
 
@@ -81,7 +81,7 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
-    if (session) Alert.alert("Phone verified!");
+    else if (session) Alert.alert("Phone verified!");
     setLoading(false);
   }
 
