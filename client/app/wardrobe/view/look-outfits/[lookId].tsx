@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import Gallery from "react-native-awesome-gallery";
 import { addImageUrls } from "@/api/FetchImageUrl";
@@ -24,48 +25,53 @@ export default function LookOutfits() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
-
   const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const loadLook = async () => {
+      setLoading(true); // Start loading
       try {
         const fetchedLook = await fetchLookById(
           Array.isArray(lookId) ? lookId[0] : lookId
         );
-
         setLook(fetchedLook);
       } catch (error: any) {
-        console.error("Error fetching looks:", error.message);
+        console.error("Error fetching look:", error.message);
         setLook(null);
-        return;
       }
     };
+
     const loadOutfits = async () => {
       try {
         const fetchedOutfits = await fetchOutfitsByLook(
           Array.isArray(lookId) ? lookId[0] : lookId
         );
-        // add the image_url to the outfits
-        if (!session) {
-          return;
-        }
+        if (!session) return;
         const fetchedOutfitsWithImages = await addImageUrls(
           fetchedOutfits,
           session
         );
-
         setOutfits(fetchedOutfitsWithImages);
       } catch (error: any) {
-        console.error("Error fetching looks:", error.message);
+        console.error("Error fetching outfits:", error.message);
         setOutfits([]);
-        return;
+      } finally {
+        setLoading(false); // End loading after data is fetched
       }
     };
 
     loadLook();
     loadOutfits();
   }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6b7280" />
+      </View>
+    );
+  }
 
   if (selectedImageIndex !== null) {
     return (
@@ -77,7 +83,7 @@ export default function LookOutfits() {
             setSelectedImageIndex(null);
           }}
         >
-          <Text style={styles.closeButtonText}>X</Text>
+          <Text style={styles.closeButtonText}>x</Text>
         </TouchableOpacity>
         <Gallery
           initialIndex={selectedImageIndex}
@@ -133,7 +139,6 @@ const styles = StyleSheet.create({
     width: "33.33333333333333333333333%",
     height: height / 7,
     borderWidth: 0.5,
-
     borderColor: "white",
   },
   closeButton: {
@@ -149,5 +154,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
