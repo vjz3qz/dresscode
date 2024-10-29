@@ -13,7 +13,7 @@ import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 export default function Feed({
   onObjectClick,
@@ -26,11 +26,11 @@ export default function Feed({
 }) {
   const { session } = useSession();
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchObjects = async () => {
-      setLoading(true); // Set loading to true when starting to fetch data
+      setLoading(true);
       let objects: any[] = [];
       try {
         if (tableName) {
@@ -47,12 +47,12 @@ export default function Feed({
         return;
       }
       setData(objects);
-      setLoading(false); // Set loading to false once data is fetched
+      setLoading(false);
     };
 
     if (rawData) {
       setData(rawData);
-      setLoading(false); // If rawData is provided, no need to fetch, so set loading to false
+      setLoading(false);
     } else {
       fetchObjects();
     }
@@ -82,7 +82,9 @@ export default function Feed({
             key={item.id}
             onPress={() => onObjectClick(data[index], index)}
           >
-            <Image source={{ uri: item.image_url }} style={styles.image} />
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: item.image_url }} style={styles.image} />
+            </View>
           </TouchableWithoutFeedback>
         ))
       )}
@@ -95,12 +97,24 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexDirection: "row",
     flexWrap: "wrap",
+    paddingVertical: 10,
+  },
+  imageContainer: {
+    width: width / 3 - 10, // Divide width into 3 with spacing
+    margin: 5,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#f8f8f8",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
   },
   image: {
-    width: "33.33333333333333333333333%",
-    height: height / 7,
-    borderWidth: 0.5,
-    borderColor: "white",
+    width: "100%",
+    height: height / 6,
+    resizeMode: "cover",
   },
   loadingContainer: {
     flex: 1,
