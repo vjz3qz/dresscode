@@ -19,17 +19,19 @@ export default function Account({ session }: { session: Session }) {
   const [updateProfilePage, setUpdateProfilePage] = useState(false);
 
   useEffect(() => {
-    if (session) getProfile();
+    const fetchData = async () => {
+      if (session) await getProfile();
+    };
+    fetchData();
   }, [session]);
 
   async function getProfile() {
     try {
       setLoading(true);
       if (!session?.user) throw new Error("No user on the session!");
-
       const { data, error, status } = await supabase
         .from("profiles")
-        .select(`username, avatar_url`)
+        .select("*")
         .eq("id", session?.user.id)
         .single();
 
