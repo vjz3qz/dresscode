@@ -84,15 +84,16 @@ export default function WardrobeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
-      <Image
-        source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
-        style={styles.avatar}
-      />
-      <Text style={styles.nameText}>{username || "Name"}</Text>
-      <Text style={styles.usernameText}>@{username || "name"}</Text>
-      {/* Welcome Text */}
-      <Text style={styles.welcomeText}>Welcome to Dress Code.</Text>
-
+      <View style={styles.header}>
+        <Image
+          source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
+          style={styles.avatar}
+        />
+        <Text style={styles.nameText}>{username || "Name"}</Text>
+        <Text style={styles.usernameText}>@{username || "name"}</Text>
+        {/* Welcome Text */}
+        {/* <Text style={styles.welcomeText}>Welcome to Dress Code.</Text> */}
+      </View>
       {/* Tabs */}
       <View style={styles.tabsContainer}>
         {tabs.map((item, index) => {
@@ -147,7 +148,6 @@ export default function WardrobeScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingTop: 20,
