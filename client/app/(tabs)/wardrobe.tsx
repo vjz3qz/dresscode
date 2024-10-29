@@ -4,9 +4,11 @@ import {
   StyleSheet,
   View,
   Text,
+  TextInput,
   TouchableWithoutFeedback,
   SafeAreaView,
   Dimensions,
+  Image,
 } from "react-native";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
@@ -15,6 +17,7 @@ import Feed from "@/components/Feeds/Feed";
 import LookFeed from "@/components/Feeds/LookFeed";
 import ImageGallery from "@/components/ImageGallery";
 import { useSession } from "@/contexts/SessionContext";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
 const { height } = Dimensions.get("window");
 
@@ -79,8 +82,20 @@ export default function WardrobeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={{ uri: "https://via.placeholder.com/40" }} // Replace with actual logo URL
+          style={styles.logo}
+        />
+        <Text style={styles.title}>Mashi</Text>
+      </View>
+
+      {/* Welcome Text */}
+      <Text style={styles.welcomeText}>Welcome to Dress Code.</Text>
+
       {/* Tabs */}
-      <View style={styles.container}>
+      <View style={styles.tabsContainer}>
         {tabs.map((item, index) => {
           const isActive = index === tabIndex;
           return (
@@ -96,6 +111,16 @@ export default function WardrobeScreen() {
             </TouchableWithoutFeedback>
           );
         })}
+      </View>
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#6b7280" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search..."
+          placeholderTextColor="#6b7280"
+        />
+        <Ionicons name="mic-outline" size={20} color="#6b7280" />
       </View>
 
       {/* Feeds */}
@@ -122,9 +147,61 @@ export default function WardrobeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  header: {
     flexDirection: "row",
-    paddingVertical: 20,
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6", // Placeholder background color
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginLeft: 8,
+    flex: 1,
+    color: "#333",
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: "#6b7280",
+    paddingHorizontal: 8,
+    marginTop: 4,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EAE6E5",
+    marginHorizontal: 16,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginVertical: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 8,
+    color: "#333",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  viewAll: {
+    fontSize: 14,
+    color: "#6b7280",
+    textDecorationLine: "underline",
+  },
+  tabsContainer: {
+    flexDirection: "row",
+    paddingTop: 12,
+
     paddingHorizontal: 16,
     justifyContent: "space-around",
   },
@@ -142,38 +219,10 @@ const styles = StyleSheet.create({
     color: "#6b7280", // Neutral gray for inactive text
   },
   activeItem: {
-    backgroundColor: "#EAE6E5", // Light purple background for active tab
+    backgroundColor: "#EAE6E5", // Light background for active tab
     borderRadius: 8,
   },
   activeText: {
-    color: "#0f0f0f", // Deep indigo for active tab text
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: 8, // Adds spacing around the gallery
-  },
-  image: {
-    width: "32.5%", // Provides margin between images
-    height: height / 7,
-    margin: 2, // Space between images
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#e5e7eb", // Light gray border to separate images
-  },
-  closeButton: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    zIndex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 10,
-    borderRadius: 20,
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: "#0f0f0f",
   },
 });
