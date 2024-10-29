@@ -203,10 +203,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
   },
-  preview: {
-    flex: 1,
-    alignSelf: "stretch",
-  },
   actionContainer: {
     position: "absolute",
     bottom: 30,
