@@ -28,7 +28,8 @@ const tabs = [
 ];
 
 export default function WardrobeScreen() {
-  const { session } = useSession();
+  const { session, username, setUsername, avatarUrl, setAvatarUrl, loading } =
+    useSession();
   const [tabIndex, setTabIndex] = useState(0);
   const [data, setData] = useState<any[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
@@ -83,14 +84,12 @@ export default function WardrobeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
-      <View style={styles.header}>
-        <Image
-          source={{ uri: "https://via.placeholder.com/40" }} // Replace with actual logo URL
-          style={styles.logo}
-        />
-        <Text style={styles.title}>Mashi</Text>
-      </View>
-
+      <Image
+        source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
+        style={styles.avatar}
+      />
+      <Text style={styles.nameText}>{username || "Name"}</Text>
+      <Text style={styles.usernameText}>@{username || "name"}</Text>
       {/* Welcome Text */}
       <Text style={styles.welcomeText}>Welcome to Dress Code.</Text>
 
@@ -224,5 +223,22 @@ const styles = StyleSheet.create({
   },
   activeText: {
     color: "#0f0f0f",
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#EAE6E5",
+    marginBottom: 10,
+  },
+  nameText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  usernameText: {
+    fontSize: 16,
+    color: "#888",
+    marginBottom: 20,
   },
 });
