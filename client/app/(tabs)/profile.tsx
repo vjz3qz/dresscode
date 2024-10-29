@@ -4,5 +4,5 @@ import { useSession } from "@/contexts/SessionContext";
 
 export default function ProfileScreen() {
   const { session } = useSession(); // Access session from context
-  return session ? <Account session={session} /> : null;
+  return session ? <Account /> : null;
 }
