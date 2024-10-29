@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
@@ -22,18 +23,21 @@ export default function SelectFeed({
 }) {
   const [data, setData] = useState<Outfit[]>([]);
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchOutfits = async () => {
+      setLoading(true); // Start loading
       let items: Outfit[] = [];
       try {
         items = (await fetchAllImageUrls(tableName)) as Outfit[];
       } catch (error: any) {
         console.error("Error fetching items:", error.message);
         setData([]);
-        return;
+      } finally {
+        setData(items);
+        setLoading(false); // End loading
       }
-      setData(items);
     };
 
     fetchOutfits();
@@ -50,6 +54,14 @@ export default function SelectFeed({
     setSelectedOutfits(newSelectedOutfits);
     onSelect(newSelectedOutfits);
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6b7280" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -103,5 +115,10 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
