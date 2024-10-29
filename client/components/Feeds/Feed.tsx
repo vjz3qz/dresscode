@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
@@ -25,9 +26,11 @@ export default function Feed({
 }) {
   const { session } = useSession();
   const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchObjects = async () => {
+      setLoading(true); // Set loading to true when starting to fetch data
       let objects: any[] = [];
       try {
         if (tableName) {
@@ -39,20 +42,29 @@ export default function Feed({
           console.error("tableName is undefined");
         }
       } catch (error: any) {
-        // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
         setData([]);
         return;
       }
       setData(objects);
+      setLoading(false); // Set loading to false once data is fetched
     };
 
     if (rawData) {
       setData(rawData);
+      setLoading(false); // If rawData is provided, no need to fetch, so set loading to false
     } else {
       fetchObjects();
     }
   }, [tableName, rawData]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6b7280" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -89,5 +101,10 @@ const styles = StyleSheet.create({
     height: height / 7,
     borderWidth: 0.5,
     borderColor: "white",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
