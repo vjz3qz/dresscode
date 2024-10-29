@@ -24,11 +24,11 @@ export default function LookFeed({
 }) {
   const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadLooks = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       try {
         const fetchedLooks = await fetchLooks();
         if (!session) {
@@ -44,7 +44,7 @@ export default function LookFeed({
         console.error("Error fetching looks:", error.message);
         setLooks([]);
       } finally {
-        setLoading(false); // End loading
+        setLoading(false);
       }
     };
 
@@ -129,7 +129,7 @@ export default function LookFeed({
             {renderOutfitGrid(look.outfits || [])}
             <View style={styles.textContainer}>
               <Text style={styles.lookTitle}>{look.name}</Text>
-              <Text style={styles.lookDescription}>{look.description}</Text>
+              {/* <Text style={styles.lookDescription}>{look.description}</Text> */}
             </View>
           </TouchableOpacity>
         ))
@@ -141,34 +141,44 @@ export default function LookFeed({
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
+    paddingHorizontal: 10,
     paddingBottom: 20,
     flexDirection: "row",
     flexWrap: "wrap",
+    // backgroundColor: "#f8f8f8",
   },
   lookContainer: {
-    width: "50%",
+    width: "47%",
+    marginHorizontal: "1.5%",
     height: height / 4.35,
-    borderWidth: 0.5,
-    borderColor: "white",
-    marginBottom: 60,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
   },
   textContainer: {
-    marginTop: 10,
+    marginTop: 5,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 5,
   },
   lookTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 2,
   },
   lookDescription: {
-    fontSize: 14,
-    marginBottom: 10,
+    fontSize: 12,
     color: "#6b7280",
   },
   gridContainer: {
     flexDirection: "column",
+    padding: 5,
   },
   row: {
     flexDirection: "row",
@@ -176,20 +186,23 @@ const styles = StyleSheet.create({
   },
   cell: {
     flex: 1,
+    margin: 4,
     alignItems: "center",
   },
   gridImage: {
-    width: 107,
-    height: 107,
+    width: 80,
+    height: 80,
+    borderRadius: 5,
     borderWidth: 0.5,
-    borderColor: "white",
+    borderColor: "#ddd",
   },
   placeholderCell: {
-    width: 107,
-    height: 107,
+    width: 77,
+    height: 77,
     backgroundColor: "#e0e0e0",
+    borderRadius: 5,
     borderWidth: 0.5,
-    borderColor: "white",
+    borderColor: "#ddd",
   },
   loadingContainer: {
     flex: 1,
