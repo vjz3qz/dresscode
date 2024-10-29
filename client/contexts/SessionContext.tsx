@@ -2,16 +2,19 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/utils/Supabase";
 import { Session } from "@supabase/supabase-js";
 
-// Create the SessionContext with the correct type
 type SessionContextType = {
   session: Session | null;
   setSession: React.Dispatch<React.SetStateAction<Session | null>>;
+  username: string;
+  avatarUrl: string;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
+  setAvatarUrl: React.Dispatch<React.SetStateAction<string>>;
+  loading: boolean;
 };
 
 // Initialize the context with default values
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-// Create a custom hook to use the SessionContext
 export const useSession = () => {
   const context = useContext(SessionContext);
   if (!context) {
@@ -20,24 +23,28 @@ export const useSession = () => {
   return context;
 };
 
-// Create the SessionProvider component
 export const SessionProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
   const [session, setSession] = useState<Session | null>(null);
+  const [username, setUsername] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        // Get the initial session
         const {
           data: { session },
           error,
         } = await supabase.auth.getSession();
         if (error) throw error;
         setSession(session);
+        if (session) {
+          await fetchProfile(session);
+        }
       } catch (error) {
         console.error("Error fetching session:", error);
       }
@@ -45,21 +52,55 @@ export const SessionProvider = ({
 
     fetchSession();
 
-    // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
+        if (session) {
+          fetchProfile(session);
+        }
       }
     );
 
-    // Clean up the listener on unmount
     return () => {
-      authListener?.subscription?.unsubscribe(); // Ensure `unsubscribe` is properly handled
+      authListener?.subscription?.unsubscribe();
     };
   }, []);
 
+  // Fetch Profile Data
+  const fetchProfile = async (session: Session) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setUsername(data.username);
+        setAvatarUrl(data.avatar_url);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <SessionContext.Provider value={{ session, setSession }}>
+    <SessionContext.Provider
+      value={{
+        session,
+        setSession,
+        username,
+        setUsername,
+        avatarUrl,
+        setAvatarUrl,
+        loading,
+      }}
+    >
       {children}
     </SessionContext.Provider>
   );
