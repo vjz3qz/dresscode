@@ -54,7 +54,6 @@ export default function WardrobeScreen() {
           session
         );
       } catch (error: any) {
-        // Error: Cannot find name 'error'.
         console.error("Error fetching items:", error.message);
         setData([]);
         return;
@@ -80,24 +79,17 @@ export default function WardrobeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={[styles.container]}>
+      {/* Tabs */}
+      <View style={styles.container}>
         {tabs.map((item, index) => {
           const isActive = index === tabIndex;
-
           return (
             <TouchableWithoutFeedback
               key={item.name}
-              onPress={() => {
-                setTabIndex(index);
-              }}
+              onPress={() => setTabIndex(index)}
             >
-              <View
-                style={[
-                  styles.item,
-                  isActive && { backgroundColor: "#e0e7ff" },
-                ]}
-              >
-                <Text style={[styles.text, isActive && { color: "#4338ca" }]}>
+              <View style={[styles.item, isActive && styles.activeItem]}>
+                <Text style={[styles.text, isActive && styles.activeText]}>
                   {item.name}
                 </Text>
               </View>
@@ -105,10 +97,11 @@ export default function WardrobeScreen() {
           );
         })}
       </View>
+
+      {/* Feeds */}
       {tabs[tabIndex]["tableName"] === "looks" ? (
         <LookFeed
           onLookClick={(look: any, index: number) => {
-            // console.log("Look clicked:", look, index);
             router.push(`/wardrobe/view/look-outfits/${look.id}`);
           }}
           tableName={tabs[tabIndex]["tableName"] as keyof TableTypes}
@@ -121,6 +114,8 @@ export default function WardrobeScreen() {
           tableName={tabs[tabIndex]["tableName"] as keyof TableTypes}
         />
       )}
+
+      {/* Upload Button */}
       <UploadButton onPress={onPlusButtonClick} />
     </SafeAreaView>
   );
@@ -129,8 +124,8 @@ export default function WardrobeScreen() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    paddingVertical: 24,
-    paddingHorizontal: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     justifyContent: "space-around",
   },
   item: {
@@ -138,40 +133,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     backgroundColor: "transparent",
-    borderRadius: 6,
+    borderRadius: 8,
     width: 100, // Fixed width for each tab
   },
   text: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
-    color: "#6b7280",
+    color: "#6b7280", // Neutral gray for inactive text
   },
-  debugBorder: {
-    borderWidth: 1,
-    borderColor: "red",
+  activeItem: {
+    backgroundColor: "#EAE6E5", // Light purple background for active tab
+    borderRadius: 8,
+  },
+  activeText: {
+    color: "#0f0f0f", // Deep indigo for active tab text
   },
   scrollContainer: {
     flexGrow: 1,
     flexDirection: "row",
     flexWrap: "wrap",
+    padding: 8, // Adds spacing around the gallery
   },
   image: {
-    width: "33.33333333333333333333333%",
+    width: "32.5%", // Provides margin between images
     height: height / 7,
-    borderWidth: 0.5,
-    // borderRightWidth: 0,
-    // borderBottomWidth: 1,
-    // borderTopWidth: 1,
-    // borderLeftWidth: 0,
-
-    borderColor: "white",
+    margin: 2, // Space between images
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb", // Light gray border to separate images
   },
   closeButton: {
     position: "absolute",
     top: 40,
     left: 20,
     zIndex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 10,
     borderRadius: 20,
   },
