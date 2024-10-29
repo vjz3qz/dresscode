@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/utils/Supabase";
+import { useSession } from "@/contexts/SessionContext"; // Adjust the import path as needed
 import {
   StyleSheet,
   View,
@@ -12,45 +13,10 @@ import {
 import { Session } from "@supabase/supabase-js";
 import { Input } from "@rneui/themed";
 
-export default function Account({ session }: { session: Session }) {
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+export default function Account() {
+  const { session, username, setUsername, avatarUrl, setAvatarUrl, loading } =
+    useSession();
   const [updateProfilePage, setUpdateProfilePage] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (session) await getProfile();
-    };
-    fetchData();
-  }, [session]);
-
-  async function getProfile() {
-    try {
-      setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
-      const { data, error, status } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session?.user.id)
-        .single();
-
-      if (error && status !== 406) {
-        throw error;
-      }
-
-      if (data) {
-        setUsername(data.username);
-        setAvatarUrl(data.avatar_url);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function UpdateProfile({
     username,
@@ -133,7 +99,6 @@ export default function Account({ session }: { session: Session }) {
     />
   ) : (
     <View style={styles.container}>
-      {/* Profile Image and Username */}
       <Image
         source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
         style={styles.avatar}
