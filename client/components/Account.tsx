@@ -67,7 +67,6 @@ export default function Account() {
     avatar_url: string;
   }) {
     try {
-      setLoading(true);
       if (!session?.user) throw new Error("No user on the session!");
 
       const updates = {
@@ -86,8 +85,6 @@ export default function Account() {
       if (error instanceof Error) {
         Alert.alert(error.message);
       }
-    } finally {
-      setLoading(false);
     }
   }
 
