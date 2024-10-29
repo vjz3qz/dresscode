@@ -29,10 +29,21 @@ export const SessionProvider = ({
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    // Get the initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    const fetchSession = async () => {
+      try {
+        // Get the initial session
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+        if (error) throw error;
+        setSession(session);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
+    };
+
+    fetchSession();
 
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -43,7 +54,7 @@ export const SessionProvider = ({
 
     // Clean up the listener on unmount
     return () => {
-      authListener.subscription?.unsubscribe(); // Ensure `unsubscribe` is properly handled
+      authListener?.subscription?.unsubscribe(); // Ensure `unsubscribe` is properly handled
     };
   }, []);
 
