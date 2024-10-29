@@ -7,6 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import Gallery from "react-native-awesome-gallery";
 import { addImageUrls } from "@/api/FetchImageUrl";
@@ -15,6 +16,7 @@ import { Item, Look, Outfit } from "@/types";
 import Feed from "@/components/Feeds/Feed";
 import { fetchLookById, fetchOutfitsByLook } from "@/api/FetchLooks";
 import { useSession } from "@/contexts/SessionContext";
+import { Icon } from "@rneui/themed";
 
 const { height } = Dimensions.get("window");
 
@@ -26,11 +28,11 @@ export default function LookOutfits() {
     null
   );
   const [outfits, setOutfits] = useState<Outfit[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadLook = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       try {
         const fetchedLook = await fetchLookById(
           Array.isArray(lookId) ? lookId[0] : lookId
@@ -57,13 +59,32 @@ export default function LookOutfits() {
         console.error("Error fetching outfits:", error.message);
         setOutfits([]);
       } finally {
-        setLoading(false); // End loading after data is fetched
+        setLoading(false);
       }
     };
 
     loadLook();
     loadOutfits();
   }, []);
+
+  const handleShare = async () => {
+    try {
+      const result = await Share.share({
+        message: `Check out this look: ${look?.name || "Look"}`,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log("Shared with activity type:", result.activityType);
+        } else {
+          console.log("Shared successfully");
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log("Share dismissed");
+      }
+    } catch (error: any) {
+      console.error("Error sharing:", error.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -95,6 +116,16 @@ export default function LookOutfits() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>
+          {look ? look.name : "Look"} Outfits
+        </Text>
+        {/* <IoSend /> */}
+        <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+          <Icon type="ionicon" name="send" />
+        </TouchableOpacity>
+      </View>
+
       <Feed
         onObjectClick={(item: Item, index: number) => {
           setSelectedImageIndex(index);
@@ -107,39 +138,20 @@ export default function LookOutfits() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  headerContainer: {
     flexDirection: "row",
-    paddingVertical: 24,
-    paddingHorizontal: 12,
-    justifyContent: "space-around",
-  },
-  item: {
-    justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 10,
-    backgroundColor: "transparent",
-    borderRadius: 6,
-    width: 100, // Fixed width for each tab
+    justifyContent: "space-between",
+    marginBottom: 20,
+    marginTop: 10,
+    paddingHorizontal: 16,
   },
-  text: {
-    fontSize: 13,
-    fontWeight: "600",
+  headerText: {
+    fontSize: 20,
     color: "#6b7280",
   },
-  debugBorder: {
-    borderWidth: 1,
-    borderColor: "red",
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  image: {
-    width: "33.33333333333333333333333%",
-    height: height / 7,
-    borderWidth: 0.5,
-    borderColor: "white",
+  shareButton: {
+    padding: 8,
   },
   closeButton: {
     position: "absolute",
