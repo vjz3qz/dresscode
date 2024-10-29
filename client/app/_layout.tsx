@@ -35,7 +35,8 @@ function RootLayoutContent() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
+      {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
       {session && session.user ? (
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
