@@ -6,6 +6,7 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { Look, Outfit, TableTypes } from "@/types";
@@ -23,9 +24,11 @@ export default function LookFeed({
 }) {
   const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const loadLooks = async () => {
+      setLoading(true); // Start loading
       try {
         const fetchedLooks = await fetchLooks();
         if (!session) {
@@ -40,7 +43,8 @@ export default function LookFeed({
       } catch (error: any) {
         console.error("Error fetching looks:", error.message);
         setLooks([]);
-        return;
+      } finally {
+        setLoading(false); // End loading
       }
     };
 
@@ -96,6 +100,14 @@ export default function LookFeed({
       </View>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6b7280" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -178,5 +190,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
     borderWidth: 0.5,
     borderColor: "white",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
