@@ -1,6 +1,5 @@
 import { Tabs } from "expo-router";
 import React from "react";
-
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -13,6 +12,20 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarInactiveTintColor: "#333",
+        tabBarStyle: {
+          backgroundColor: "#EAE6E5", // Light beige background
+          borderTopWidth: 0, // Remove top border for a cleaner look
+          paddingVertical: 10, // Increase vertical padding for better spacing
+          height: 95, // Increase height for larger buttons
+        },
+        tabBarLabelStyle: {
+          fontSize: 12, // Adjust font size for labels
+          fontWeight: "500",
+        },
+        tabBarItemStyle: {
+          marginVertical: 5, // Add vertical margin for icon spacing
+        },
         headerShown: false,
       }}
     >
