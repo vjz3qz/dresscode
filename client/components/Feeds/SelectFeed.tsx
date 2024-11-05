@@ -11,8 +11,9 @@ import {
 import { Image } from "expo-image";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { Outfit, TableTypes } from "@/types";
+import { useSession } from "@/contexts/SessionContext";
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 export default function SelectFeed({
   tableName,
@@ -21,22 +22,26 @@ export default function SelectFeed({
   tableName: keyof TableTypes;
   onSelect: (selectedOutfits: Outfit[]) => void;
 }) {
+  const { session } = useSession();
   const [data, setData] = useState<Outfit[]>([]);
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchOutfits = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       let items: Outfit[] = [];
       try {
-        items = (await fetchAllImageUrls(tableName)) as Outfit[];
+        if (!session) {
+          return;
+        }
+        items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
       } catch (error: any) {
         console.error("Error fetching items:", error.message);
         setData([]);
       } finally {
         setData(items);
-        setLoading(false); // End loading
+        setLoading(false);
       }
     };
 
@@ -66,10 +71,8 @@ export default function SelectFeed({
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       {data.length === 0 ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ fontSize: 20, color: "#6b7280" }}>
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>
             No {tableName} found. Add some {tableName}!
           </Text>
         </View>
@@ -101,24 +104,42 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexDirection: "row",
     flexWrap: "wrap",
+    paddingVertical: 10,
   },
   imageContainer: {
-    width: "33.33333333333333333333333%",
-    height: height / 7,
-    borderWidth: 0.5,
-    borderColor: "white",
+    width: width / 3 - 10, // Divide width into 3 with spacing
+    margin: 5,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#f8f8f8",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    borderWidth: 2,
+    borderColor: "transparent", // Default border color
   },
   selectedImageContainer: {
-    borderColor: "blue", // Change border color to indicate selection
-    borderWidth: 2,
+    borderColor: "gray", // Change border color to indicate selection
   },
   image: {
     width: "100%",
-    height: "100%",
+    height: height / 6,
+    resizeMode: "cover",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noDataText: {
+    fontSize: 20,
+    color: "#6b7280",
   },
 });
