@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
 import { Look, Outfit, TableTypes } from "@/types";
 import { fetchLooks, loadLooksWithOutfits } from "@/api/FetchLooks";
 import { useSession } from "@/contexts/SessionContext";
@@ -26,51 +27,63 @@ export default function LookFeed({
   const [looks, setLooks] = useState<Look[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadLooks = async () => {
-      setLoading(true);
+  const fetchAndCacheLooks = useCallback(async () => {
+    if (!session) return;
+
+    setLoading(true);
+    const cacheKey = `looks_${tableName}`;
+    const cachedLooks = await AsyncStorage.getItem(cacheKey);
+
+    if (cachedLooks) {
+      setLooks(JSON.parse(cachedLooks));
+      setLoading(false);
+    } else {
       try {
         const fetchedLooks = await fetchLooks();
-        if (!session) {
-          return;
-        }
         const fetchedLooksWithOutfits = await loadLooksWithOutfits(
           fetchedLooks,
           session
         );
 
         setLooks(fetchedLooksWithOutfits);
+        AsyncStorage.setItem(cacheKey, JSON.stringify(fetchedLooksWithOutfits)); // Cache the data
       } catch (error: any) {
         console.error("Error fetching looks:", error.message);
         setLooks([]);
       } finally {
         setLoading(false);
       }
-    };
+    }
+  }, [tableName, session]);
 
-    loadLooks();
-  }, [tableName]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchAndCacheLooks();
+    }, 300); // Debounce the fetch by 300ms to avoid excessive requests
+
+    return () => clearTimeout(timer);
+  }, [tableName, fetchAndCacheLooks]);
 
   const renderOutfitGrid = (outfits: Outfit[]) => {
     const firstFourOutfits = outfits.slice(0, 4); // Get up to the first 4 outfits
 
-    // Split the outfits into two rows, each with two outfits
     const rows: Outfit[][] = [];
-    for (let i = 0; i < 2; i += 1) {
-      for (let j = 0; j < 2; j += 1) {
-        if (!rows[i]) rows[i] = []; // Initialize the row if it doesn't exist
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        if (!rows[i]) rows[i] = [];
         rows[i].push({
           id: i + j + Math.floor(Math.random() * 1000),
           image_url: "",
         } as Outfit); // Placeholder outfit
       }
     }
+
     let k = 0;
-    for (let i = 0; i < 2; i += 1) {
-      for (let j = 0; j < 2; j += 1) {
-        if (k >= firstFourOutfits.length) break; // Break if there are no more outfits
-        rows[i][j] = firstFourOutfits[k]; // Replace the placeholder outfit with the actual outfit
-        k += 1; // Move to the next outfit
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        if (k >= firstFourOutfits.length) break;
+        rows[i][j] = firstFourOutfits[k];
+        k++;
       }
     }
 
@@ -112,10 +125,8 @@ export default function LookFeed({
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       {looks.length === 0 ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ fontSize: 20, color: "#6b7280" }}>
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>
             No {tableName} found. Add some {tableName}!
           </Text>
         </View>
@@ -129,7 +140,6 @@ export default function LookFeed({
             {renderOutfitGrid(look.outfits || [])}
             <View style={styles.textContainer}>
               <Text style={styles.lookTitle}>{look.name}</Text>
-              {/* <Text style={styles.lookDescription}>{look.description}</Text> */}
             </View>
           </TouchableOpacity>
         ))
@@ -145,7 +155,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     flexDirection: "row",
     flexWrap: "wrap",
-    // backgroundColor: "#f8f8f8",
   },
   lookContainer: {
     width: "47%",
@@ -171,10 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 2,
-  },
-  lookDescription: {
-    fontSize: 12,
-    color: "#6b7280",
   },
   gridContainer: {
     flexDirection: "column",
@@ -208,5 +213,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noDataText: {
+    fontSize: 20,
+    color: "#6b7280",
   },
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
@@ -28,35 +29,45 @@ export default function Feed({
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchObjects = async () => {
-      setLoading(true);
-      let objects: any[] = [];
+  // Retrieve data from cache or fetch from API if not cached
+  const fetchAndCacheData = useCallback(async () => {
+    if (!session) return;
+
+    setLoading(true);
+
+    const cacheKey = `image_urls_${tableName}`;
+    const cachedData = await AsyncStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      setData(JSON.parse(cachedData));
+      setLoading(false);
+    } else {
       try {
-        if (tableName) {
-          if (!session) {
-            return;
-          }
-          objects = await fetchAllImageUrls(tableName, session);
-        } else {
-          console.error("tableName is undefined");
-        }
+        const objects = await fetchAllImageUrls(tableName, session);
+        setData(objects);
+        AsyncStorage.setItem(cacheKey, JSON.stringify(objects)); // Cache the data
       } catch (error: any) {
         console.error("Error fetching items:", error.message);
         setData([]);
-        return;
+      } finally {
+        setLoading(false);
       }
-      setData(objects);
-      setLoading(false);
-    };
-
-    if (rawData) {
-      setData(rawData);
-      setLoading(false);
-    } else {
-      fetchObjects();
     }
-  }, [tableName, rawData]);
+  }, [tableName, session]);
+
+  // Update feed when tableName or rawData changes, debounce refetching
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (rawData) {
+        setData(rawData);
+        setLoading(false);
+      } else {
+        fetchAndCacheData();
+      }
+    }, 300); // 300ms debounce to avoid excessive refetching
+
+    return () => clearTimeout(timer); // Clear timeout on unmount
+  }, [tableName, rawData, fetchAndCacheData]);
 
   if (loading) {
     return (
@@ -69,10 +80,8 @@ export default function Feed({
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       {data.length === 0 ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ fontSize: 20, color: "#6b7280" }}>
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>
             No {tableName} found. Add some {tableName}!
           </Text>
         </View>
@@ -100,7 +109,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   imageContainer: {
-    width: width / 3 - 10, // Divide width into 3 with spacing
+    width: width / 3 - 10,
     margin: 5,
     borderRadius: 10,
     overflow: "hidden",
@@ -120,5 +129,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noDataText: {
+    fontSize: 20,
+    color: "#6b7280",
   },
 });

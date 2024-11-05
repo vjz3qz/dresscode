@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { Outfit, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
@@ -27,26 +28,37 @@ export default function SelectFeed({
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchOutfits = async () => {
-      setLoading(true);
-      let items: Outfit[] = [];
+  const fetchAndCacheOutfits = useCallback(async () => {
+    if (!session) return;
+
+    setLoading(true);
+    const cacheKey = `outfits_${tableName}`;
+    const cachedData = await AsyncStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      setData(JSON.parse(cachedData));
+      setLoading(false);
+    } else {
       try {
-        if (!session) {
-          return;
-        }
-        items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
+        const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
+        setData(items);
+        AsyncStorage.setItem(cacheKey, JSON.stringify(items)); // Cache the data
       } catch (error: any) {
         console.error("Error fetching items:", error.message);
         setData([]);
       } finally {
-        setData(items);
         setLoading(false);
       }
-    };
+    }
+  }, [tableName, session]);
 
-    fetchOutfits();
-  }, [tableName]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchAndCacheOutfits();
+    }, 300); // Debounce fetch by 300ms to avoid excessive refetching
+
+    return () => clearTimeout(timer);
+  }, [tableName, fetchAndCacheOutfits]);
 
   const toggleSelection = (item: Outfit) => {
     const isSelected = selectedOutfits.some(
@@ -70,16 +82,7 @@ export default function SelectFeed({
 
   return (
     <>
-      <Text
-        style={{
-          textAlign: "center",
-          fontSize: 20,
-          fontWeight: "bold",
-          color: "black",
-        }}
-      >
-        Select {tableName}
-      </Text>
+      <Text style={styles.titleText}>Select {tableName}</Text>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 ? (
           <View style={styles.noDataContainer}>
@@ -112,6 +115,12 @@ export default function SelectFeed({
 }
 
 const styles = StyleSheet.create({
+  titleText: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "black",
+  },
   scrollContainer: {
     flexGrow: 1,
     flexDirection: "row",
@@ -119,7 +128,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   imageContainer: {
-    width: width / 3 - 10, // Divide width into 3 with spacing
+    width: width / 3 - 10,
     margin: 5,
     borderRadius: 10,
     overflow: "hidden",
@@ -130,10 +139,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2,
     borderWidth: 2,
-    borderColor: "transparent", // Default border color
+    borderColor: "transparent",
   },
   selectedImageContainer: {
-    borderColor: "gray", // Change border color to indicate selection
+    borderColor: "gray",
   },
   image: {
     width: "100%",
