@@ -69,33 +69,45 @@ export default function SelectFeed({
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {data.length === 0 ? (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>
-            No {tableName} found. Add some {tableName}!
-          </Text>
-        </View>
-      ) : (
-        data.map((item) => {
-          const isSelected = selectedOutfits.some(
-            (selected) => selected.id === item.id
-          );
-          return (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => toggleSelection(item)}
-              style={[
-                styles.imageContainer,
-                isSelected && styles.selectedImageContainer,
-              ]}
-            >
-              <Image source={{ uri: item.image_url }} style={styles.image} />
-            </TouchableOpacity>
-          );
-        })
-      )}
-    </ScrollView>
+    <>
+      <Text
+        style={{
+          textAlign: "center",
+          fontSize: 20,
+          fontWeight: "bold",
+          color: "black",
+        }}
+      >
+        Select {tableName}
+      </Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {data.length === 0 ? (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>
+              No {tableName} found. Add some {tableName}!
+            </Text>
+          </View>
+        ) : (
+          data.map((item) => {
+            const isSelected = selectedOutfits.some(
+              (selected) => selected.id === item.id
+            );
+            return (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => toggleSelection(item)}
+                style={[
+                  styles.imageContainer,
+                  isSelected && styles.selectedImageContainer,
+                ]}
+              >
+                <Image source={{ uri: item.image_url }} style={styles.image} />
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </ScrollView>
+    </>
   );
 }
 
