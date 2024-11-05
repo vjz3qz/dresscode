@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/utils/Supabase";
 import { Session } from "@supabase/supabase-js";
+import { fetchSession } from "@/utils/FetchSession";
 
 type SessionContextType = {
   session: Session | null;
@@ -34,23 +35,15 @@ export const SessionProvider = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-        if (error) throw error;
-        setSession(session);
-        if (session) {
-          await fetchProfile(session);
-        }
-      } catch (error) {
-        console.error("Error fetching session:", error);
+    const fetchAndSetSession = async () => {
+      const fetchedSession = await fetchSession();
+      setSession(fetchedSession ?? null);
+      if (fetchedSession) {
+        fetchProfile(fetchedSession);
       }
     };
 
-    fetchSession();
+    fetchAndSetSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
