@@ -82,26 +82,27 @@ const DraggableImage = forwardRef<DraggableImageRef, DraggableImageProps>(
 
     return (
       <GestureDetector gesture={combinedGesture}>
-        <Animated.View style={[styles.box(initialSize), animatedStyle]}>
-          <Image source={{ uri: imageUri }} style={styles.image} />
+        <Animated.View style={[styles(initialSize).box, animatedStyle]}>
+          <Image source={{ uri: imageUri }} />
         </Animated.View>
       </GestureDetector>
     );
   }
 );
 
-const styles = StyleSheet.create({
-  box: (initialSize: number) => ({
-    width: initialSize,
-    height: initialSize,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-  }),
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-});
+const styles = (initialSize: number) =>
+  StyleSheet.create({
+    box: {
+      width: initialSize,
+      height: initialSize,
+      justifyContent: "center",
+      alignItems: "center",
+      position: "absolute",
+    },
+    image: {
+      width: "100%",
+      height: "100%",
+    },
+  });
 
 export default DraggableImage;
