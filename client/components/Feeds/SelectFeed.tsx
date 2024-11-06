@@ -28,6 +28,8 @@ export default function SelectFeed({
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
+
   const fetchAndCacheOutfits = useCallback(async () => {
     if (!session) return;
 
@@ -36,19 +38,32 @@ export default function SelectFeed({
     const cachedData = await AsyncStorage.getItem(cacheKey);
 
     if (cachedData) {
-      setData(JSON.parse(cachedData));
-      setLoading(false);
-    } else {
-      try {
-        const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
-        setData(items);
-        AsyncStorage.setItem(cacheKey, JSON.stringify(items)); // Cache the data
-      } catch (error: any) {
-        console.error("Error fetching items:", error.message);
-        setData([]);
-      } finally {
+      const parsedData = JSON.parse(cachedData);
+      const { timestamp, items: cachedItems } = parsedData;
+
+      // Check if cached data is still valid
+      if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
+        setData(cachedItems);
         setLoading(false);
+        return;
       }
+    }
+
+    // Fetch new data if cache is expired or doesn't exist
+    try {
+      const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
+      setData(items);
+
+      // Cache the data with a new timestamp
+      AsyncStorage.setItem(
+        cacheKey,
+        JSON.stringify({ timestamp: Date.now(), items })
+      );
+    } catch (error: any) {
+      console.error("Error fetching items:", error.message);
+      setData([]);
+    } finally {
+      setLoading(false);
     }
   }, [tableName, session]);
 

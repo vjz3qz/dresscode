@@ -29,7 +29,9 @@ export default function Feed({
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Retrieve data from cache or fetch from API if not cached
+  // Set a cache expiry time in milliseconds (e.g., 1 hour)
+  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour
+
   const fetchAndCacheData = useCallback(async () => {
     if (!session) return;
 
@@ -39,19 +41,32 @@ export default function Feed({
     const cachedData = await AsyncStorage.getItem(cacheKey);
 
     if (cachedData) {
-      setData(JSON.parse(cachedData));
-      setLoading(false);
-    } else {
-      try {
-        const objects = await fetchAllImageUrls(tableName, session);
+      const parsedData = JSON.parse(cachedData);
+      const { timestamp, objects } = parsedData;
+
+      // Check if cached data is still valid
+      if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
         setData(objects);
-        AsyncStorage.setItem(cacheKey, JSON.stringify(objects)); // Cache the data
-      } catch (error: any) {
-        console.error("Error fetching items:", error.message);
-        setData([]);
-      } finally {
         setLoading(false);
+        return;
       }
+    }
+
+    // Fetch new data if cache is expired or doesn't exist
+    try {
+      const objects = await fetchAllImageUrls(tableName, session);
+      setData(objects);
+
+      // Cache the data with a new timestamp
+      AsyncStorage.setItem(
+        cacheKey,
+        JSON.stringify({ timestamp: Date.now(), objects })
+      );
+    } catch (error: any) {
+      console.error("Error fetching items:", error.message);
+      setData([]);
+    } finally {
+      setLoading(false);
     }
   }, [tableName, session]);
 

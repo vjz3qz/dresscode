@@ -26,6 +26,7 @@ export default function LookFeed({
   const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
   const [loading, setLoading] = useState(true);
+  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
 
   const fetchAndCacheLooks = useCallback(async () => {
     if (!session) return;
@@ -35,24 +36,40 @@ export default function LookFeed({
     const cachedLooks = await AsyncStorage.getItem(cacheKey);
 
     if (cachedLooks) {
-      setLooks(JSON.parse(cachedLooks));
-      setLoading(false);
-    } else {
-      try {
-        const fetchedLooks = await fetchLooks();
-        const fetchedLooksWithOutfits = await loadLooksWithOutfits(
-          fetchedLooks,
-          session
-        );
+      const parsedData = JSON.parse(cachedLooks);
+      const { timestamp, looks: cachedLooksData } = parsedData;
 
-        setLooks(fetchedLooksWithOutfits);
-        AsyncStorage.setItem(cacheKey, JSON.stringify(fetchedLooksWithOutfits)); // Cache the data
-      } catch (error: any) {
-        console.error("Error fetching looks:", error.message);
-        setLooks([]);
-      } finally {
+      // Check if cached data is still valid
+      if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
+        setLooks(cachedLooksData);
         setLoading(false);
+        return;
       }
+    }
+
+    // Fetch new data if cache is expired or doesn't exist
+    try {
+      const fetchedLooks = await fetchLooks();
+      const fetchedLooksWithOutfits = await loadLooksWithOutfits(
+        fetchedLooks,
+        session
+      );
+
+      setLooks(fetchedLooksWithOutfits);
+
+      // Cache the data with a new timestamp
+      AsyncStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          timestamp: Date.now(),
+          looks: fetchedLooksWithOutfits,
+        })
+      );
+    } catch (error: any) {
+      console.error("Error fetching looks:", error.message);
+      setLooks([]);
+    } finally {
+      setLoading(false);
     }
   }, [tableName, session]);
 
