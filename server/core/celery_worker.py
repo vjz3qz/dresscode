@@ -36,15 +36,15 @@ def upload_task(file_content, file_name, file_content_type):
     return {"filename": "processed_" + file_name, "status": "file uploaded successfully"}
 
 @celery.task(name="tasks.get_image_url")
-def get_image_url_task(filename):
+def get_image_url_task(key):
     """
     Get the URL of an image in the S3 bucket.
     Args:
-        filename (str): The name of the image file.
+        key (str): The name of the image file.
     Returns:
         str: The URL of the image.
     """
-    return get_image_url_s3(filename)
+    return get_image_url_s3(key)
 
 
 

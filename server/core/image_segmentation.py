@@ -53,13 +53,13 @@ def process_image_s3(bucket_name, input_key, output_key):
 
     print(f'Processed image saved to {output_key} in bucket {bucket_name}')
 
-def get_image_url_s3(filename):
+def get_image_url_s3(key):
 
     try:
         # Generate a presigned URL for the S3 object
         url = s3.generate_presigned_url(
             'get_object',
-            Params={'Bucket': os.getenv("S3_BUCKET_NAME"), 'Key': filename},
+            Params={'Bucket': os.getenv("S3_BUCKET_NAME"), 'Key': key},
             ExpiresIn=3600  # URL expiration time in seconds
         )
         return {"url": url}

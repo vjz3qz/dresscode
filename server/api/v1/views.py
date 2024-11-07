@@ -46,16 +46,16 @@ async def upload(file: UploadFile = File(...), token_payload: dict = Depends(val
 
 
 
-@router.get("/get-image-url/{filename}")
-async def get_image_url(filename: str, token_payload: dict = Depends(validate_token)):
+@router.get("/get-image-url/{key}")
+async def get_image_url(key: str, token_payload: dict = Depends(validate_token)):
     """
     Get the URL of an image in the S3 bucket.
     Args:
-        filename (str): The name of the image file.
+        key (str): The name of the image file.
     Returns:
         JSONResponse: Returns the URL of the image.
     """
-    task = celery.send_task("tasks.get_image_url", args=[filename])
+    task = celery.send_task("tasks.get_image_url", args=[key])
     return return_task(task)
 
 
