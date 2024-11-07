@@ -86,7 +86,7 @@ export default function WardrobeScreen() {
       {tabIndex === 2 ? (
         <LookFeed
           onLookClick={(look: Look, index: number) => {
-            if (look.id) router.push(`/wardrobe/view/look/${look.id}` as Href);
+            if (look.id) router.push(`/wardrobe/view/looks/${look.id}` as Href);
           }}
           tableName={tabs[tabIndex].tableName as keyof TableTypes}
         />
