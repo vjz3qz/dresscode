@@ -117,11 +117,11 @@ export default function ItemView() {
       </View>
 
       <View style={styles.detailsContainer}>
-        <Text style={styles.detailTitle}>Category</Text>
-        <Text style={styles.detailText}>Glasses &gt; Sunglasses</Text>
+        <Text style={styles.detailTitle}>Name</Text>
+        <Text style={styles.detailText}>{item?.name}</Text>
         <View style={styles.divider} />
-        <Text style={styles.detailTitle}>Brand</Text>
-        <Text style={styles.detailText}>Select a brand</Text>
+        <Text style={styles.detailTitle}>Type</Text>
+        <Text style={styles.detailText}>{item?.type}</Text>
       </View>
     </SafeAreaView>
   );
