@@ -4,22 +4,19 @@ import { supabase } from "@/utils/Supabase";
 import { Session } from "@supabase/supabase-js";
 import axios from "axios";
 
-export async function fetchImageUrl(imageName: string, session: Session) {
-  if (!imageName) {
+export async function fetchImageUrl(key: string, session: Session) {
+  if (!key) {
     return;
   }
 
   try {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-    const response = await axios.get(
-      `${BACKEND_URL}/get-image-url/${imageName}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${BACKEND_URL}/get-image-url/${key}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
 
     return response.data["result"]["url"];
   } catch (error) {
