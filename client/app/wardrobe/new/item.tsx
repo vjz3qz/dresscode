@@ -4,6 +4,7 @@ import { fetchImageUrl } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
 import ImageGallery from "@/components/ImageGallery";
 import { useSession } from "@/contexts/SessionContext";
+import { saveItem } from "@/api/SaveItem";
 
 export default function WardrobeScreen() {
   const { session } = useSession();
@@ -33,15 +34,26 @@ export default function WardrobeScreen() {
     loadImageUrl();
   }, [imageName]);
 
+  async function uploadPicture(photoUri: string) {
+    if (photoUri) {
+      try {
+        const item = { name: "", type: "clothing" };
+        const createdItems = await saveItem(item, photoUri);
+
+        if (createdItems && createdItems.length > 0) {
+          setImageName(createdItems[0].name || "");
+        }
+      } catch (error) {
+        console.error("Error saving the item:", error);
+      }
+      router.dismiss();
+    }
+  }
+
   if (cameraOpen) {
-    return (
-      <Camera
-        exitCamera={() => {
-          router.dismiss();
-        }}
-        setImageName={setImageName}
-      />
-    );
+    if (cameraOpen) {
+      return <Camera uploadPicture={uploadPicture} />;
+    }
   }
   if (imageName) {
     return (

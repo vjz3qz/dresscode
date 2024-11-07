@@ -1,14 +1,12 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import React, { useState, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
-import { saveItem } from "@/api/SaveItem";
+import { router } from "expo-router";
 
 export default function Camera({
-  exitCamera,
-  setImageName,
+  uploadPicture,
 }: {
-  exitCamera: () => void;
-  setImageName: React.Dispatch<React.SetStateAction<string | null>>;
+  uploadPicture: (photoUri: string) => void;
 }) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
@@ -51,25 +49,12 @@ export default function Camera({
     }
   }
 
-  async function uploadPicture() {
-    if (photoUri) {
-      try {
-        const item = { name: "New Item", type: "clothing" };
-        const createdItems = await saveItem(item, photoUri);
-
-        if (createdItems && createdItems.length > 0) {
-          setImageName(createdItems[0].name || "");
-        }
-      } catch (error) {
-        console.error("Error saving the item:", error);
-      }
-      exitCamera();
-    }
-  }
-
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.closeButton} onPress={exitCamera}>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => router.dismiss()}
+      >
         <Text style={styles.closeButtonText}>✕</Text>
       </TouchableOpacity>
 
@@ -87,7 +72,7 @@ export default function Camera({
 
             <TouchableOpacity
               style={styles.uploadButton}
-              onPress={uploadPicture}
+              onPress={() => uploadPicture(photoUri)}
             >
               <Text style={styles.uploadButtonText}>Upload</Text>
             </TouchableOpacity>
