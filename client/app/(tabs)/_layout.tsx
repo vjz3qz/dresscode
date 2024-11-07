@@ -11,10 +11,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        tabBarInactiveTintColor: "#333",
+        // tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors["dark"].tint,
+        tabBarInactiveTintColor: "#333", // Set your desired inactive tint color
         tabBarStyle: {
-          backgroundColor: "#EAE6E5", // Light beige background
+          backgroundColor: "#EAE6E5", // Set your desired background color
           borderTopWidth: 0, // Remove top border for a cleaner look
           paddingVertical: 10, // Increase vertical padding for better spacing
           height: 95, // Increase height for larger buttons
