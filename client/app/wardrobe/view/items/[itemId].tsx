@@ -24,7 +24,6 @@ export default function ItemView() {
   const { session } = useSession();
   const { itemId } = useLocalSearchParams();
   const [item, setItem] = useState<Item | null>(null);
-  console.log("itemId", item);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
