@@ -64,6 +64,7 @@ export type Outfit = {
   user_id?: number;
   s3_key?: string;
   image_url?: string;
+  description?: string;
   metadata: Item[];
 };
 
