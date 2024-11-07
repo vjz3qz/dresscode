@@ -20,7 +20,7 @@ import { Icon } from "@rneui/themed";
 
 const { height } = Dimensions.get("window");
 
-export default function LookOutfits() {
+export default function Look() {
   const { session } = useSession();
   const { lookId } = useLocalSearchParams();
   const [look, setLook] = useState<Look | null>(null);
