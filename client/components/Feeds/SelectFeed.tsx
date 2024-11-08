@@ -7,6 +7,7 @@ import {
   Dimensions,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
@@ -27,45 +28,51 @@ export default function SelectFeed({
   const [data, setData] = useState<Outfit[]>([]);
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
 
-  const fetchAndCacheOutfits = useCallback(async () => {
-    if (!session) return;
+  const fetchAndCacheOutfits = useCallback(
+    async (isRefreshing = false) => {
+      if (!session) return;
 
-    setLoading(true);
-    const cacheKey = `outfits_${tableName}`;
-    const cachedData = await AsyncStorage.getItem(cacheKey);
+      if (!isRefreshing) setLoading(true);
+      const cacheKey = `outfits_${tableName}`;
+      const cachedData = await AsyncStorage.getItem(cacheKey);
 
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      const { timestamp, items: cachedItems } = parsedData;
+      if (cachedData && !isRefreshing) {
+        const parsedData = JSON.parse(cachedData);
+        const { timestamp, items: cachedItems } = parsedData;
 
-      // Check if cached data is still valid
-      if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
-        setData(cachedItems);
-        setLoading(false);
-        return;
+        // Check if cached data is still valid
+        if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
+          setData(cachedItems);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
       }
-    }
 
-    // Fetch new data if cache is expired or doesn't exist
-    try {
-      const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
-      setData(items);
+      // Fetch new data if cache is expired or doesn't exist
+      try {
+        const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
+        setData(items);
 
-      // Cache the data with a new timestamp
-      AsyncStorage.setItem(
-        cacheKey,
-        JSON.stringify({ timestamp: Date.now(), items })
-      );
-    } catch (error: any) {
-      console.error("Error fetching items:", error.message);
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [tableName, session]);
+        // Cache the data with a new timestamp
+        AsyncStorage.setItem(
+          cacheKey,
+          JSON.stringify({ timestamp: Date.now(), items })
+        );
+      } catch (error: any) {
+        console.error("Error fetching items:", error.message);
+        setData([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [tableName, session]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -74,6 +81,11 @@ export default function SelectFeed({
 
     return () => clearTimeout(timer);
   }, [tableName, fetchAndCacheOutfits]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchAndCacheOutfits(true);
+  }, [fetchAndCacheOutfits]);
 
   const toggleSelection = (item: Outfit) => {
     const isSelected = selectedOutfits.some(
@@ -98,7 +110,12 @@ export default function SelectFeed({
   return (
     <>
       <Text style={styles.titleText}>Select {tableName}</Text>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {data.length === 0 ? (
           <View style={styles.noDataContainer}>
             <Text style={styles.noDataText}>

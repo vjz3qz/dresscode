@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
@@ -26,52 +27,58 @@ export default function LookFeed({
   const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
 
-  const fetchAndCacheLooks = useCallback(async () => {
-    if (!session) return;
+  const fetchAndCacheLooks = useCallback(
+    async (isRefreshing = false) => {
+      if (!session) return;
 
-    setLoading(true);
-    const cacheKey = `looks_${tableName}`;
-    const cachedLooks = await AsyncStorage.getItem(cacheKey);
+      if (!isRefreshing) setLoading(true);
+      const cacheKey = `looks_${tableName}`;
+      const cachedLooks = await AsyncStorage.getItem(cacheKey);
 
-    if (cachedLooks) {
-      const parsedData = JSON.parse(cachedLooks);
-      const { timestamp, looks: cachedLooksData } = parsedData;
+      if (cachedLooks && !isRefreshing) {
+        const parsedData = JSON.parse(cachedLooks);
+        const { timestamp, looks: cachedLooksData } = parsedData;
 
-      // Check if cached data is still valid
-      if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
-        setLooks(cachedLooksData);
-        setLoading(false);
-        return;
+        // Check if cached data is still valid
+        if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
+          setLooks(cachedLooksData);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
       }
-    }
 
-    // Fetch new data if cache is expired or doesn't exist
-    try {
-      const fetchedLooks = await fetchLooks();
-      const fetchedLooksWithOutfits = await loadLooksWithOutfits(
-        fetchedLooks,
-        session
-      );
+      // Fetch new data if cache is expired or doesn't exist
+      try {
+        const fetchedLooks = await fetchLooks();
+        const fetchedLooksWithOutfits = await loadLooksWithOutfits(
+          fetchedLooks,
+          session
+        );
 
-      setLooks(fetchedLooksWithOutfits);
+        setLooks(fetchedLooksWithOutfits);
 
-      // Cache the data with a new timestamp
-      AsyncStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          timestamp: Date.now(),
-          looks: fetchedLooksWithOutfits,
-        })
-      );
-    } catch (error: any) {
-      console.error("Error fetching looks:", error.message);
-      setLooks([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [tableName, session]);
+        // Cache the data with a new timestamp
+        AsyncStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            timestamp: Date.now(),
+            looks: fetchedLooksWithOutfits,
+          })
+        );
+      } catch (error: any) {
+        console.error("Error fetching looks:", error.message);
+        setLooks([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [tableName, session]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -80,6 +87,11 @@ export default function LookFeed({
 
     return () => clearTimeout(timer);
   }, [tableName, fetchAndCacheLooks]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchAndCacheLooks(true);
+  }, [fetchAndCacheLooks]);
 
   const renderOutfitGrid = (outfits: Outfit[]) => {
     const firstFourOutfits = outfits.slice(0, 4); // Get up to the first 4 outfits
@@ -140,7 +152,12 @@ export default function LookFeed({
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       {looks.length === 0 ? (
         <View style={styles.noDataContainer}>
           <Text style={styles.noDataText}>

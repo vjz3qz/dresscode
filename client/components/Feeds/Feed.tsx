@@ -7,6 +7,7 @@ import {
   Dimensions,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
@@ -28,47 +29,52 @@ export default function Feed({
   const { session } = useSession();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Set a cache expiry time in milliseconds (e.g., 1 hour)
   const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour
 
-  const fetchAndCacheData = useCallback(async () => {
-    if (!session) return;
+  const fetchAndCacheData = useCallback(
+    async (isRefreshing = false) => {
+      if (!session) return;
 
-    setLoading(true);
+      if (!isRefreshing) setLoading(true);
+      const cacheKey = `image_urls_${tableName}`;
+      const cachedData = await AsyncStorage.getItem(cacheKey);
 
-    const cacheKey = `image_urls_${tableName}`;
-    const cachedData = await AsyncStorage.getItem(cacheKey);
+      if (cachedData && !isRefreshing) {
+        const parsedData = JSON.parse(cachedData);
+        const { timestamp, objects } = parsedData;
 
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      const { timestamp, objects } = parsedData;
-
-      // Check if cached data is still valid
-      if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
-        setData(objects);
-        setLoading(false);
-        return;
+        // Check if cached data is still valid
+        if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
+          setData(objects);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
       }
-    }
 
-    // Fetch new data if cache is expired or doesn't exist
-    try {
-      const objects = await fetchAllImageUrls(tableName, session);
-      setData(objects);
+      // Fetch new data if cache is expired or doesn't exist
+      try {
+        const objects = await fetchAllImageUrls(tableName, session);
+        setData(objects);
 
-      // Cache the data with a new timestamp
-      AsyncStorage.setItem(
-        cacheKey,
-        JSON.stringify({ timestamp: Date.now(), objects })
-      );
-    } catch (error: any) {
-      console.error("Error fetching items:", error.message);
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [tableName, session]);
+        // Cache the data with a new timestamp
+        AsyncStorage.setItem(
+          cacheKey,
+          JSON.stringify({ timestamp: Date.now(), objects })
+        );
+      } catch (error: any) {
+        console.error("Error fetching items:", error.message);
+        setData([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [tableName, session]
+  );
 
   // Update feed when tableName or rawData changes, debounce refetching
   useEffect(() => {
@@ -84,6 +90,11 @@ export default function Feed({
     return () => clearTimeout(timer); // Clear timeout on unmount
   }, [tableName, rawData, fetchAndCacheData]);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchAndCacheData(true);
+  }, [fetchAndCacheData]);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -93,7 +104,12 @@ export default function Feed({
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       {data.length === 0 ? (
         <View style={styles.noDataContainer}>
           <Text style={styles.noDataText}>
