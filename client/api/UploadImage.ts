@@ -16,15 +16,11 @@ async function convertUriToFormData(uri: string): Promise<FormData> {
   const formData = new FormData();
 
   // Append the file to the FormData object with a fallback type
-  const fileBlob = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
+  formData.append("file", {
+    uri,
+    name: `file.${fileType}`, // Provide a default name if needed
+    type: `image/${fileType}`, // Use the file type from the URI or fallback
   });
-
-  const blob = new Blob([Buffer.from(fileBlob, "base64")], {
-    type: `image/${fileType}`,
-  });
-
-  formData.append("file", blob, `file.${fileType}`);
 
   return formData;
 }
