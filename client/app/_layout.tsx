@@ -12,13 +12,14 @@ import Auth from "@/components/Auth";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React from "react";
 import { SessionProvider, useSession } from "@/contexts/SessionContext"; // Import your session context
+import { ActivityIndicator, View, Image } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
-  const { session } = useSession(); // Access session from context
+  const { session, loading } = useSession(); // Add loading here
 
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -30,8 +31,27 @@ function RootLayoutContent() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
+  if (loading || !loaded) {
+    // loading page: add dresscode logo
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#E6E1DF",
+        }}
+      >
+        <Image
+          source={require("../assets/images/logo.png")}
+          style={{
+            width: 390,
+            height: 575,
+            resizeMode: "contain",
+          }}
+        />
+      </View>
+    );
   }
 
   return (
