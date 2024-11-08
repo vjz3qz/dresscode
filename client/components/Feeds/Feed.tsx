@@ -30,9 +30,11 @@ export default function Feed({
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null);
 
   // Set a cache expiry time in milliseconds (e.g., 1 hour)
   const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour
+  const REFRESH_COOLDOWN = 10000; // Cooldown time in milliseconds (e.g., 10 seconds)
 
   const fetchAndCacheData = useCallback(
     async (isRefreshing = false) => {
@@ -91,9 +93,18 @@ export default function Feed({
   }, [tableName, rawData, fetchAndCacheData]);
 
   const onRefresh = useCallback(() => {
+    const now = Date.now();
+    if (lastRefreshTime && now - lastRefreshTime < REFRESH_COOLDOWN) {
+      // If within cooldown period, do not refresh
+      console.log("Refresh is throttled. Please wait before refreshing again.");
+      setRefreshing(false);
+      return;
+    }
+
     setRefreshing(true);
+    setLastRefreshTime(now); // Update the last refresh time
     fetchAndCacheData(true);
-  }, [fetchAndCacheData]);
+  }, [fetchAndCacheData, lastRefreshTime]);
 
   if (loading) {
     return (

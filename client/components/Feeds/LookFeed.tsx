@@ -28,7 +28,10 @@ export default function LookFeed({
   const [looks, setLooks] = useState<Look[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null);
+
   const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
+  const REFRESH_COOLDOWN = 10000; // Cooldown time in milliseconds (e.g., 10 seconds)
 
   const fetchAndCacheLooks = useCallback(
     async (isRefreshing = false) => {
@@ -89,9 +92,18 @@ export default function LookFeed({
   }, [tableName, fetchAndCacheLooks]);
 
   const onRefresh = useCallback(() => {
+    const now = Date.now();
+    if (lastRefreshTime && now - lastRefreshTime < REFRESH_COOLDOWN) {
+      // If within cooldown period, do not refresh
+      console.log("Refresh is throttled. Please wait before refreshing again.");
+      setRefreshing(false);
+      return;
+    }
+
     setRefreshing(true);
+    setLastRefreshTime(now); // Update the last refresh time
     fetchAndCacheLooks(true);
-  }, [fetchAndCacheLooks]);
+  }, [fetchAndCacheLooks, lastRefreshTime]);
 
   const renderOutfitGrid = (outfits: Outfit[]) => {
     const firstFourOutfits = outfits.slice(0, 4); // Get up to the first 4 outfits

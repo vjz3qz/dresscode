@@ -10,7 +10,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
 import { Outfit, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
@@ -29,8 +29,10 @@ export default function SelectFeed({
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null);
 
   const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
+  const REFRESH_COOLDOWN = 10000; // Cooldown time in milliseconds (e.g., 10 seconds)
 
   const fetchAndCacheOutfits = useCallback(
     async (isRefreshing = false) => {
@@ -83,9 +85,18 @@ export default function SelectFeed({
   }, [tableName, fetchAndCacheOutfits]);
 
   const onRefresh = useCallback(() => {
+    const now = Date.now();
+    if (lastRefreshTime && now - lastRefreshTime < REFRESH_COOLDOWN) {
+      // If within cooldown period, do not refresh
+      console.log("Refresh is throttled. Please wait before refreshing again.");
+      setRefreshing(false);
+      return;
+    }
+
     setRefreshing(true);
+    setLastRefreshTime(now); // Update the last refresh time
     fetchAndCacheOutfits(true);
-  }, [fetchAndCacheOutfits]);
+  }, [fetchAndCacheOutfits, lastRefreshTime]);
 
   const toggleSelection = (item: Outfit) => {
     const isSelected = selectedOutfits.some(
