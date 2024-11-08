@@ -12,7 +12,7 @@ import Auth from "@/components/Auth";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React from "react";
 import { SessionProvider, useSession } from "@/contexts/SessionContext"; // Import your session context
-import { ActivityIndicator, View, Image } from "react-native";
+import { ActivityIndicator, View, Image, StatusBar } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -56,6 +56,7 @@ function RootLayoutContent() {
 
   return (
     <ThemeProvider value={DefaultTheme}>
+      <StatusBar barStyle="dark-content" />
       {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
       {session && session.user ? (
         <Stack>
