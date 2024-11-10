@@ -17,8 +17,12 @@ import { fetchItemById } from "@/api/fetchItems";
 import { useSession } from "@/contexts/SessionContext";
 import { fetchImageUrl } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
+import {
+  ScrollView,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
-const { height, width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 export default function ItemView() {
   const { session } = useSession();
@@ -80,50 +84,85 @@ export default function ItemView() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.dismiss()}>
-          <Text style={styles.closeIcon}>✕</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-          <Icon type="ionicon" name="send" color="black" size={24} />
-        </TouchableOpacity>
-      </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.dismiss()}>
+            <Text style={styles.closeIcon}>✕</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+            <Icon type="ionicon" name="send" color="black" size={24} />
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.imageContainer}>
-        <Icon
-          type="ionicon"
-          name="eye-outline"
-          color="gray"
-          size={24}
-          style={styles.eyeIcon}
-        />
-        <Icon
-          type="ionicon"
-          name="heart-outline"
-          color="gray"
-          size={24}
-          style={styles.heartIcon}
-        />
-        {item && (
-          <Image source={{ uri: item.image_url }} style={styles.itemImage} />
-        )}
-      </View>
+        <View style={styles.imageContainer}>
+          <Icon
+            type="ionicon"
+            name="eye-outline"
+            color="gray"
+            size={24}
+            style={styles.eyeIcon}
+          />
+          <Icon
+            type="ionicon"
+            name="heart-outline"
+            color="gray"
+            size={24}
+            style={styles.heartIcon}
+          />
+          {item && (
+            <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+          )}
+        </View>
 
-      <View style={styles.tabsContainer}>
-        <Text style={[styles.tabText, styles.activeTab]}>About</Text>
-        <Text style={styles.tabText}>Styling</Text>
-        <Text style={styles.tabText}>Details</Text>
-      </View>
+        <View style={styles.tabsContainer}>
+          <Text style={[styles.tabText, styles.activeTab]}>About</Text>
+          <Text style={styles.tabText}>Styling</Text>
+          <Text style={styles.tabText}>Details</Text>
+        </View>
 
-      <View style={styles.detailsContainer}>
-        <Text style={styles.detailTitle}>Name</Text>
-        <Text style={styles.detailText}>{item?.name}</Text>
-        <View style={styles.divider} />
-        <Text style={styles.detailTitle}>Type</Text>
-        <Text style={styles.detailText}>{item?.type}</Text>
-      </View>
-    </SafeAreaView>
+        <ScrollView style={styles.detailsContainer}>
+          <Text style={styles.detailTitle}>Name</Text>
+          <Text style={styles.detailText}>{item?.name}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Type</Text>
+          <Text style={styles.detailText}>{item?.type}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Color</Text>
+          <Text style={styles.detailText}>{item?.color}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Size</Text>
+          <Text style={styles.detailText}>{item?.size}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Brand</Text>
+          <Text style={styles.detailText}>{item?.brand}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Material</Text>
+          <Text style={styles.detailText}>{item?.material}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Season</Text>
+          <Text style={styles.detailText}>
+            {item?.season?.join(", ") || "N/A"}
+          </Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Style</Text>
+          <Text style={styles.detailText}>
+            {item?.style?.join(", ") || "N/A"}
+          </Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Condition</Text>
+          <Text style={styles.detailText}>{item?.condition}</Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Tags</Text>
+          <Text style={styles.detailText}>
+            {item?.tags?.join(", ") || "N/A"}
+          </Text>
+          <View style={styles.divider} />
+          <Text style={styles.detailTitle}>Fit</Text>
+          <Text style={styles.detailText}>{item?.fit}</Text>
+        </ScrollView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
