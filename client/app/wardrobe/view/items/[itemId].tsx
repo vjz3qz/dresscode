@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Share,
   Image,
+  TextInput,
 } from "react-native";
 import { Icon } from "@rneui/themed";
 import { useLocalSearchParams } from "expo-router";
@@ -21,6 +22,7 @@ import {
   ScrollView,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import { supabase } from "@/utils/Supabase";
 
 const { width } = Dimensions.get("window");
 
@@ -37,7 +39,6 @@ export default function ItemView() {
         let fetchedItem = await fetchItemById(
           Array.isArray(itemId) ? itemId[0] : itemId
         );
-        // get item image url
         if (!fetchedItem.s3_key) return;
         if (!session) return;
         fetchedItem.image_url = await fetchImageUrl(
@@ -55,6 +56,27 @@ export default function ItemView() {
 
     loadItem();
   }, []);
+
+  async function handleSave() {
+    if (!item) return;
+    // remove null keys and image url and save to itemToSave
+    let itemToSave = { ...item };
+    delete (itemToSave as any).image_url;
+    // Save the item to the user's wardrobe
+    // update the item in the database
+    const response = await supabase
+      .from("items")
+      .update({
+        ...itemToSave,
+      })
+      .eq("id", itemToSave.id)
+      .select();
+    const { error, data } = response;
+    if (error) {
+      console.error("Error saving item:", error.message);
+      return;
+    }
+  }
 
   const handleShare = async () => {
     try {
@@ -90,9 +112,14 @@ export default function ItemView() {
           <TouchableOpacity onPress={() => router.dismiss()}>
             <Text style={styles.closeIcon}>✕</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-            <Icon type="ionicon" name="send" color="black" size={24} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity onPress={handleSave} style={styles.shareButton}>
+              <Text style={{ fontSize: 16, color: "blue" }}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+              <Icon type="ionicon" name="send" color="black" size={24} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.imageContainer}>
@@ -122,44 +149,30 @@ export default function ItemView() {
         </View>
 
         <ScrollView style={styles.detailsContainer}>
-          <Text style={styles.detailTitle}>Name</Text>
-          <Text style={styles.detailText}>{item?.name}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Type</Text>
-          <Text style={styles.detailText}>{item?.type}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Color</Text>
-          <Text style={styles.detailText}>{item?.color}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Size</Text>
-          <Text style={styles.detailText}>{item?.size}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Brand</Text>
-          <Text style={styles.detailText}>{item?.brand}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Material</Text>
-          <Text style={styles.detailText}>{item?.material}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Season</Text>
-          <Text style={styles.detailText}>
-            {item?.season?.join(", ") || "N/A"}
-          </Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Style</Text>
-          <Text style={styles.detailText}>
-            {item?.style?.join(", ") || "N/A"}
-          </Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Condition</Text>
-          <Text style={styles.detailText}>{item?.condition}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Tags</Text>
-          <Text style={styles.detailText}>
-            {item?.tags?.join(", ") || "N/A"}
-          </Text>
-          <View style={styles.divider} />
-          <Text style={styles.detailTitle}>Fit</Text>
-          <Text style={styles.detailText}>{item?.fit}</Text>
+          {[
+            { title: "Name", key: "name" },
+            { title: "Type", key: "type" },
+            { title: "Color", key: "color" },
+            { title: "Size", key: "size" },
+            { title: "Brand", key: "brand" },
+            { title: "Material", key: "material" },
+            { title: "Condition", key: "condition" },
+            { title: "Fit", key: "fit" },
+          ].map((field) => (
+            <View key={field.key}>
+              <Text style={styles.detailTitle}>{field.title}</Text>
+              <TextInput
+                style={styles.detailTextInput}
+                value={item ? (item as any)[field.key] || "" : ""}
+                onChangeText={(text) =>
+                  setItem(item ? { ...item, [field.key]: text } : null)
+                }
+                placeholder={`Enter ${field.title.toLowerCase()}`}
+                placeholderTextColor="#b0b0b0"
+              />
+              <View style={styles.divider} />
+            </View>
+          ))}
         </ScrollView>
       </SafeAreaView>
     </GestureHandlerRootView>
@@ -235,9 +248,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 4,
   },
-  detailText: {
+  detailTextInput: {
     fontSize: 16,
     color: "#000",
+    paddingVertical: 4,
+    paddingTop: 12,
+    paddingHorizontal: 12,
+    borderColor: "#e0e0e0",
+    borderWidth: 0,
+    // backgroundColor: "#fff",
     marginBottom: 12,
   },
   divider: {
