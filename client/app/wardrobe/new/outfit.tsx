@@ -86,13 +86,25 @@ export default function NewOutfitScreen() {
       </GestureHandlerRootView>
 
       <View style={styles.controlsContainer}>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => {
+            setSelectedItems([]);
+            imageRefs.current = [];
+          }}
+        >
           <Text style={styles.icon}>⏪</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.saveButton} onPress={save}>
           <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => {
+            setSelectedItems(selectedItems.slice(0, -1));
+            imageRefs.current = imageRefs.current.slice(0, -1);
+          }}
+        >
           <Text style={styles.icon}>↩️</Text>
         </TouchableOpacity>
       </View>
