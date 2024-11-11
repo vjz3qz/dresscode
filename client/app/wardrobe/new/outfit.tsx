@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   bottomSheetButton: {
     backgroundColor: "black",
-    paddingVertical: 15,
+    paddingVertical: 30,
     alignItems: "center",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
