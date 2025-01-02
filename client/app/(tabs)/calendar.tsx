@@ -2,6 +2,7 @@ import ComingSoonScreen from "@/components/ComingSoon";
 import { Calendar, CalendarList, Agenda } from "react-native-calendars";
 import React from "react";
 import { SafeAreaView, View, StyleSheet } from "react-native";
+import UploadButton from "@/ui/UploadButton";
 
 interface Day {
   year: number;
@@ -19,6 +20,7 @@ export default function CalendarScreen() {
           console.log("selected day", day);
         }}
       />
+      <UploadButton onPress={() => console.log("Upload button pressed")} />
     </SafeAreaView>
   );
 }
