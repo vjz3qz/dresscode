@@ -37,7 +37,7 @@ export default function WardrobeScreen() {
       outfits: "/wardrobe/new/outfit",
       looks: "/wardrobe/new/look",
     };
-    router.push(paths[tabs[tabIndex].tableName] as Href<string>);
+    router.push(paths[tabs[tabIndex].tableName] as Href);
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>
