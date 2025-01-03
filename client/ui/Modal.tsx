@@ -12,9 +12,10 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 interface ModalProps {
   visible: boolean;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
-export default function Modal({ visible, onClose }: ModalProps) {
+export default function Modal({ visible, onClose, children }: ModalProps) {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.centeredView}>
@@ -26,13 +27,10 @@ export default function Modal({ visible, onClose }: ModalProps) {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Upload Content</Text>
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={onClose}
-              >
-                <Text style={styles.textStyle}>Close</Text>
+              <Pressable style={styles.closeButton} onPress={onClose}>
+                <Text style={styles.closeButtonText}>✕</Text>
               </Pressable>
+              {children}
             </View>
           </View>
         </ReactNativeModal>
@@ -61,6 +59,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    position: "relative",
+    minWidth: 300,
   },
   button: {
     borderRadius: 20,
@@ -81,5 +81,16 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    padding: 10,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: "#666",
   },
 });
