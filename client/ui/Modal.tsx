@@ -9,38 +9,33 @@ import {
 } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
-export default function Modal() {
-  const [modalVisible, setModalVisible] = useState(false);
+interface ModalProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+export default function Modal({ visible, onClose }: ModalProps) {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.centeredView}>
         <ReactNativeModal
           animationType="slide"
           transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            Alert.alert("Modal has been closed.");
-            setModalVisible(!modalVisible);
-          }}
+          visible={visible}
+          onRequestClose={onClose}
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Hello World!</Text>
+              <Text style={styles.modalText}>Upload Content</Text>
               <Pressable
                 style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}
+                onPress={onClose}
               >
-                <Text style={styles.textStyle}>Hide Modal</Text>
+                <Text style={styles.textStyle}>Close</Text>
               </Pressable>
             </View>
           </View>
         </ReactNativeModal>
-        <Pressable
-          style={[styles.button, styles.buttonOpen]}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.textStyle}>Show Modal</Text>
-        </Pressable>
       </SafeAreaView>
     </SafeAreaProvider>
   );
