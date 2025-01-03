@@ -1,8 +1,9 @@
 import ComingSoonScreen from "@/components/ComingSoon";
 import { Calendar, CalendarList, Agenda } from "react-native-calendars";
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView, View, StyleSheet } from "react-native";
 import UploadButton from "@/ui/UploadButton";
+import Modal from "@/ui/Modal";
 
 interface Day {
   year: number;
@@ -12,6 +13,8 @@ interface Day {
   dateString: string;
 }
 export default function CalendarScreen() {
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <CalendarList
@@ -20,7 +23,8 @@ export default function CalendarScreen() {
           console.log("selected day", day);
         }}
       />
-      <UploadButton onPress={() => console.log("Upload button pressed")} />
+      <Modal visible={modalVisible} onClose={() => setModalVisible(false)} />
+      <UploadButton onPress={() => setModalVisible(true)} />
     </SafeAreaView>
   );
 }
