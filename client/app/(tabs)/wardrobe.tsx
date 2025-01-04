@@ -92,7 +92,7 @@ export default function WardrobeScreen() {
         />
       ) : (
         <Feed
-          onObjectClick={(item: any, index: number) =>
+          onClick={(item: any, index: number) =>
             router.push(
               `/wardrobe/view/${tabs[tabIndex].tableName}/${item.id}` as Href
             )

@@ -18,11 +18,11 @@ import { useSession } from "@/contexts/SessionContext";
 const { height, width } = Dimensions.get("window");
 
 export default function Feed({
-  onObjectClick,
+  onClick,
   tableName,
   rawData,
 }: {
-  onObjectClick: (object: any, index: number) => void;
+  onClick: (object: any, index: number) => void;
   tableName: keyof TableTypes;
   rawData?: any[];
 }) {
@@ -131,7 +131,7 @@ export default function Feed({
         data.map((item, index) => (
           <TouchableWithoutFeedback
             key={item.id}
-            onPress={() => onObjectClick(data[index], index)}
+            onPress={() => onClick(data[index], index)}
           >
             <View style={styles.imageContainer}>
               <Image source={{ uri: item.image_url }} style={styles.image} />

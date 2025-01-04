@@ -127,7 +127,7 @@ export default function LookView() {
       </View>
 
       <Feed
-        onObjectClick={(item: Item, index: number) => {
+        onClick={(item: Item, index: number) => {
           setSelectedImageIndex(index);
         }}
         rawData={outfits}

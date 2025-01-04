@@ -125,7 +125,7 @@ export default function NewOutfitScreen() {
         }}
       >
         <Feed
-          onObjectClick={(item: Item) => {
+          onClick={(item: Item) => {
             item.x = Math.random() * 200;
             item.y = Math.random() * 200;
             item.size = 100;
