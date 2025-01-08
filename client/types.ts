@@ -1,18 +1,4 @@
-export type CardItemT = {
-  description?: string;
-  image: any;
-  name: string;
-  price?: string;
-};
-
-export type IconT = {
-  name: any;
-  size: number;
-  color: string;
-  style?: any;
-};
-
-export type DataT = {
+export type ShoppingCard = {
   id: number;
   name: string;
   description: string;
@@ -92,8 +78,37 @@ export type LookOutfit = {
   created_at?: string;
 };
 
+export type CalendarEvent = {
+  id?: number;
+  created_at?: string;
+  user_id: number;
+  outfit_id: number;
+  start_date: string; // ISO date string
+  end_date?: string; // Optional, for multi-day events
+  event_type?: string; // e.g., "planned_outfit", "worn_outfit", "event"
+  event_title?: string; // Optional event name/description
+  recurrence?: string; // Optional, for recurring outfits (e.g., "weekly", "monthly")
+  weather_conditions?: string; // Optional, to track what weather the outfit was worn in
+  notes?: string; // Any additional notes about the outfit/event
+};
+
+// CREATE TABLE calendar_events (
+//   id SERIAL PRIMARY KEY,
+//   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+//   user_id INTEGER REFERENCES users(id),
+//   outfit_id INTEGER REFERENCES outfits(id),
+//   start_date DATE NOT NULL,
+//   end_date DATE,
+//   event_type VARCHAR(50),
+//   event_title TEXT,
+//   recurrence VARCHAR(50),
+//   weather_conditions TEXT,
+//   notes TEXT
+// );
+
 export type TableTypes = {
   items: Item;
   looks: Look;
   outfits: Outfit;
+  // calendar_events: CalendarEvent;
 };

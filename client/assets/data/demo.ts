@@ -1,4 +1,4 @@
-import { DataT } from "@/types";
+import { ShoppingCard } from "@/types";
 import IMAGE_01 from "@/assets/images/01.jpg";
 import IMAGE_02 from "@/assets/images/02.jpg";
 import IMAGE_03 from "@/assets/images/03.jpg";
@@ -10,7 +10,7 @@ import IMAGE_08 from "@/assets/images/08.jpg";
 import IMAGE_09 from "@/assets/images/09.jpg";
 import IMAGE_10 from "@/assets/images/10.jpg";
 
-const data: DataT[] = [
+const data: ShoppingCard[] = [
   {
     id: 1,
     name: "Classic White T-Shirt",
