@@ -36,26 +36,41 @@ export const SessionProvider = ({
 
   useEffect(() => {
     const fetchAndSetSession = async () => {
-      const fetchedSession = await fetchSession();
-      setSession(fetchedSession ?? null);
-      if (fetchedSession) {
-        fetchProfile(fetchedSession);
+      try {
+        const fetchedSession = await fetchSession();
+        setSession(fetchedSession ?? null);
+        if (fetchedSession) {
+          await fetchProfile(fetchedSession);
+        }
+      } catch (error) {
+        console.error("Session fetch error:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
+    // Initial fetch
     fetchAndSetSession();
 
+    // Retry every 5 seconds if no session is found
+    const retryInterval = setInterval(() => {
+      if (!session) {
+        fetchAndSetSession();
+      }
+    }, 5000);
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setSession(session);
         if (session) {
-          fetchProfile(session);
+          await fetchProfile(session);
         }
       }
     );
 
     return () => {
       authListener?.subscription?.unsubscribe();
+      clearInterval(retryInterval);
     };
   }, []);
 
