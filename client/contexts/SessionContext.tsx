@@ -41,21 +41,25 @@ export const SessionProvider = ({
         setSession(fetchedSession ?? null);
         if (fetchedSession) {
           await fetchProfile(fetchedSession);
+          setLoading(false);
+          return true;
         }
       } catch (error) {
         console.error("Session fetch error:", error);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
+      return false;
     };
 
     // Initial fetch
     fetchAndSetSession();
 
-    // Retry every 5 seconds if no session is found
-    const retryInterval = setInterval(() => {
+    const retryInterval = setInterval(async () => {
       if (!session) {
-        fetchAndSetSession();
+        const found = await fetchAndSetSession();
+        if (found) {
+          clearInterval(retryInterval);
+        }
       }
     }, 5000);
 
