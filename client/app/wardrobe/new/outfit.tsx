@@ -8,10 +8,11 @@ import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
 import Feed from "@/components/Feeds/Feed";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { saveOutfit } from "@/api/SaveOutfit";
 
 export default function NewOutfitScreen() {
+  const { fromCalendar, selectedDate } = useLocalSearchParams(); // TODO: add to specified date after creating outfits
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const imageRefs = useRef<(DraggableImageRef | null)[]>([]); // Array of refs for DraggableImage components
   const [status, requestPermission] = MediaLibrary.usePermissions();

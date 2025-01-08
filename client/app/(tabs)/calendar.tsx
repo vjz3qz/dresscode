@@ -22,12 +22,15 @@ interface Day {
 }
 export default function CalendarScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Day | null>(null);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <CalendarList
         style={styles.calendar}
         onDayPress={(day: Day) => {
+          setSelectedDay(day);
+          setModalVisible(true);
           console.log("selected day", day);
         }}
       />
@@ -45,7 +48,13 @@ export default function CalendarScreen() {
           <TouchableOpacity
             onPress={() => {
               setModalVisible(false);
-              router.push("/wardrobe/new/outfit");
+              router.push({
+                pathname: "/wardrobe/new/outfit",
+                params: {
+                  fromCalendar: "true",
+                  selectedDate: selectedDay?.dateString,
+                },
+              });
             }}
             style={styles.button}
           >
@@ -65,7 +74,6 @@ export default function CalendarScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
-      <UploadButton onPress={() => setModalVisible(true)} />
     </SafeAreaView>
   );
 }
