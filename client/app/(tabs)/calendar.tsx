@@ -34,7 +34,10 @@ export default function CalendarScreen() {
       <Modal visible={modalVisible} onClose={() => setModalVisible(false)}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={() => console.log("outfit selection")}
+            onPress={() => {
+              setModalVisible(false);
+              router.push("/wardrobe/view/outfitsFeed");
+            }}
             style={styles.button}
           >
             <Text style={styles.buttonText}>{"Pick Outfit from Wardrobe"}</Text>
