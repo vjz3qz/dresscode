@@ -16,7 +16,13 @@ import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
 import Feed from "@/components/Feeds/Feed";
 import { theme } from "@/theme";
 
-export default function OutfitsFeedScreen() {
+export default function OutfitsFeedScreen({
+  fromCalendar,
+  selectedDate,
+}: {
+  fromCalendar: string;
+  selectedDate: string;
+}) {
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
   const [metadata, setMetadata] = useState({
     name: "New Look",

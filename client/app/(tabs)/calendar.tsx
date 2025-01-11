@@ -87,7 +87,13 @@ export default function CalendarScreen() {
               <TouchableOpacity
                 onPress={() => {
                   setModalVisible(false);
-                  router.push("/wardrobe/view/outfitsFeed");
+                  router.push({
+                    pathname: "/wardrobe/view/outfitsFeed",
+                    params: {
+                      fromCalendar: "true",
+                      selectedDate: selectedDay?.dateString,
+                    },
+                  });
                 }}
                 style={styles.button}
               >
