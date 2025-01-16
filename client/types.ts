@@ -81,28 +81,28 @@ export type LookOutfit = {
 export type CalendarEvent = {
   id?: number;
   created_at?: string;
-  user_id: number;
+  user_id: string;
   outfit_id: number;
-  start_date: string; // ISO date string
-  end_date?: string; // Optional, for multi-day events
+  all_day: boolean;
+  start_timestamp: string; // ISO date string
+  end_timestamp?: string; // Optional, for multi-day events
   event_type?: string; // e.g., "planned_outfit", "worn_outfit", "event"
   event_title?: string; // Optional event name/description
   recurrence?: string; // Optional, for recurring outfits (e.g., "weekly", "monthly")
-  weather_conditions?: string; // Optional, to track what weather the outfit was worn in
   notes?: string; // Any additional notes about the outfit/event
 };
 
 // CREATE TABLE calendar_events (
 //   id SERIAL PRIMARY KEY,
 //   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-//   user_id INTEGER REFERENCES users(id),
+//   user_id uuid REFERENCES users(id),
 //   outfit_id INTEGER REFERENCES outfits(id),
-//   start_date DATE NOT NULL,
-//   end_date DATE,
-//   event_type VARCHAR(50),
+//   all_day BOOLEAN DEFAULT TRUE,
+//   start_timestamp TIMESTAMPZ NOT NULL,
+//   end_timestamp TIMESTAMPZ,
+//   event_type TEXT,
 //   event_title TEXT,
-//   recurrence VARCHAR(50),
-//   weather_conditions TEXT,
+//   recurrence TEXT,
 //   notes TEXT
 // );
 
