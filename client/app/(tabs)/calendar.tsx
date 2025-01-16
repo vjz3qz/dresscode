@@ -29,9 +29,6 @@ export default function CalendarScreen() {
   const [selectedDay, setSelectedDay] = useState<Day | null>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
-  const [calendarEventsToOutfits, setCalendarEventsToOutfits] = useState<
-    Record<number, number>
-  >({});
   const [loading, setLoading] = useState(false);
 
   const fetchCalendarEvents = async (date: string) => {
@@ -39,26 +36,18 @@ export default function CalendarScreen() {
     try {
       const { data, error } = await supabase
         .from("calendar_events")
-        .select(`*, outfits (*)`)
+        .select(`*, outfit (*)`) // selecting the outfit for that event as well
         .gte("start_timestamp", `${date}T00:00:00`) // Start of day
         .lte("end_timestamp", `${date}T23:59:59`); // End of day
 
       // if data, get all the outfits
       let fetchedOutfits = [];
       if (data) {
-        fetchedOutfits = data.flatMap((event) => event.outfits || []);
+        fetchedOutfits = data.flatMap((event) => event.outfit || []);
         // fetch image urls for each outfit
         if (!session) return;
         fetchedOutfits = await addImageUrls(fetchedOutfits, session);
         setOutfits(fetchedOutfits);
-        setCalendarEventsToOutfits(
-          data.reduce((acc, event) => {
-            acc[event.id] = event.outfit_id;
-            return acc;
-          }, {} as Record<number, number>)
-        );
-        console.log("calendarEventsToOutfits", calendarEventsToOutfits);
-        console.log("outfits", outfits);
       }
 
       if (error) throw error;
@@ -107,10 +96,11 @@ export default function CalendarScreen() {
                 <Image
                   source={{
                     uri:
-                      outfits[calendarEventsToOutfits[event.id || 0]]
+                      outfits.find((outfit) => outfit.id === event.outfit_id)
                         ?.image_url || "",
                   }}
                   style={styles.image}
+                  contentFit="cover"
                 />
               </TouchableOpacity>
             ))
@@ -213,7 +203,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   image: {
-    width: "10%",
-    height: "10%",
+    width: 200,
+    height: 200,
   },
 });
