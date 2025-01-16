@@ -31,13 +31,8 @@ export default function CalendarScreen() {
     try {
       const { data, error } = await supabase
         .from("calendar_events")
-        .select(
-          `
-          *,
-          outfits (*)
-        `
-        )
-        .eq("start_date", date);
+        .select(`*, outfits (*)`)
+        .eq("start_timestamp", date);
 
       if (error) throw error;
       setCalendarEvents(data || []);
