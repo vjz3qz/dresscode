@@ -19,7 +19,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +44,15 @@
     "experiments": {
       "typedRoutes": true
     },
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "86be4339-23d6-48b4-aaee-5c672eb2764e"
+      }
+    },
+    "owner": "vjz3qz"
   }
 }
