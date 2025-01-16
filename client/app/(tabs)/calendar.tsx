@@ -66,6 +66,7 @@ export default function CalendarScreen() {
                 style={styles.eventCard}
                 onPress={() => {
                   // Navigate to outfit details
+                  setModalVisible(false);
                   router.push({
                     pathname: "/wardrobe/view/outfits/[outfitId]",
                     params: { outfitId: event.outfit_id },
