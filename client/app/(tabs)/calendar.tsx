@@ -36,14 +36,14 @@ export default function CalendarScreen() {
     try {
       const { data, error } = await supabase
         .from("calendar_events")
-        .select(`*, outfit (*)`) // selecting the outfit for that event as well
+        .select(`*, outfits (*)`) // selecting the outfit for that event as well
         .gte("start_timestamp", `${date}T00:00:00`) // Start of day
         .lte("end_timestamp", `${date}T23:59:59`); // End of day
 
       // if data, get all the outfits
       let fetchedOutfits = [];
       if (data) {
-        fetchedOutfits = data.flatMap((event) => event.outfit || []);
+        fetchedOutfits = data.flatMap((event) => event.outfits || []);
         // fetch image urls for each outfit
         if (!session) return;
         fetchedOutfits = await addImageUrls(fetchedOutfits, session);

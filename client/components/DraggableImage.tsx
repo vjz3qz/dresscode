@@ -83,7 +83,11 @@ const DraggableImage = forwardRef<DraggableImageRef, DraggableImageProps>(
     return (
       <GestureDetector gesture={combinedGesture}>
         <Animated.View style={[styles(initialSize).box, animatedStyle]}>
-          <Image source={{ uri: imageUri }} style={styles(initialSize).image} />
+          <Image
+            source={{ uri: imageUri }}
+            style={styles(initialSize).image}
+            resizeMode="contain"
+          />
         </Animated.View>
       </GestureDetector>
     );
