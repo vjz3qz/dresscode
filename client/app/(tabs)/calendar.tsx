@@ -9,8 +9,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { supabase } from "@/utils/Supabase";
-import type { CalendarEvent } from "@/types";
+import type { CalendarEvent, Outfit } from "@/types";
 import Modal from "@/ui/Modal";
+import { Image } from "expo-image";
+import { useSession } from "@/contexts/SessionContext";
+import { addImageUrls } from "@/api/FetchImageUrl";
 
 interface Day {
   year: number;
@@ -21,9 +24,14 @@ interface Day {
 }
 
 export default function CalendarScreen() {
+  const { session } = useSession();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Day | null>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [calendarEventsToOutfits, setCalendarEventsToOutfits] = useState<
+    Record<number, number>
+  >({});
   const [loading, setLoading] = useState(false);
 
   const fetchCalendarEvents = async (date: string) => {
@@ -34,6 +42,24 @@ export default function CalendarScreen() {
         .select(`*, outfits (*)`)
         .gte("start_timestamp", `${date}T00:00:00`) // Start of day
         .lte("end_timestamp", `${date}T23:59:59`); // End of day
+
+      // if data, get all the outfits
+      let fetchedOutfits = [];
+      if (data) {
+        fetchedOutfits = data.flatMap((event) => event.outfits || []);
+        // fetch image urls for each outfit
+        if (!session) return;
+        fetchedOutfits = await addImageUrls(fetchedOutfits, session);
+        setOutfits(fetchedOutfits);
+        setCalendarEventsToOutfits(
+          data.reduce((acc, event) => {
+            acc[event.id] = event.outfit_id;
+            return acc;
+          }, {} as Record<number, number>)
+        );
+        console.log("calendarEventsToOutfits", calendarEventsToOutfits);
+        console.log("outfits", outfits);
+      }
 
       if (error) throw error;
       setCalendarEvents(data || []);
@@ -77,6 +103,15 @@ export default function CalendarScreen() {
                   {event.event_title || "Planned Outfit"}
                 </Text>
                 <Text style={styles.eventType}>{event.event_type}</Text>
+
+                <Image
+                  source={{
+                    uri:
+                      outfits[calendarEventsToOutfits[event.id || 0]]
+                        ?.image_url || "",
+                  }}
+                  style={styles.image}
+                />
               </TouchableOpacity>
             ))
           ) : (
@@ -176,5 +211,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     marginTop: 5,
+  },
+  image: {
+    width: "10%",
+    height: "10%",
   },
 });
