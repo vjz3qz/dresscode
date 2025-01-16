@@ -32,7 +32,8 @@ export default function CalendarScreen() {
       const { data, error } = await supabase
         .from("calendar_events")
         .select(`*, outfits (*)`)
-        .eq("start_timestamp", date);
+        .gte("start_timestamp", `${date}T00:00:00`) // Start of day
+        .lte("end_timestamp", `${date}T23:59:59`); // End of day
 
       if (error) throw error;
       setCalendarEvents(data || []);
@@ -49,6 +50,7 @@ export default function CalendarScreen() {
     setModalVisible(true);
   };
 
+  console.log(calendarEvents);
   return (
     <SafeAreaView style={styles.safeArea}>
       <CalendarList style={styles.calendar} onDayPress={handleDayPress} />
