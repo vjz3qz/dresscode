@@ -31,8 +31,6 @@ function RootLayoutContent() {
     }
   }, [loaded]);
 
-  console.log("loading", loading);
-  console.log("session", session);
   if (loading || !loaded) {
     // loading page: add dresscode logo
     return (
