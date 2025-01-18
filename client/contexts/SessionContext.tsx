@@ -46,9 +46,10 @@ export const SessionProvider = ({
         }
       } catch (error) {
         console.error("Session fetch error:", error);
+      } finally {
+        setLoading(false);
+        return false;
       }
-      setLoading(false);
-      return false;
     };
 
     // Initial fetch
@@ -81,7 +82,7 @@ export const SessionProvider = ({
   // Fetch Profile Data
   const fetchProfile = async (session: Session) => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
         .select("username, avatar_url")
