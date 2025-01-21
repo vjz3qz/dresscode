@@ -52,7 +52,6 @@ export const SessionProvider = ({
       }
     };
 
-    // Initial fetch
     fetchAndSetSession();
 
     const retryInterval = setInterval(async () => {
