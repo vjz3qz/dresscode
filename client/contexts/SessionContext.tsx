@@ -35,33 +35,28 @@ export const SessionProvider = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchAndSetSession = async () => {
       try {
+        setLoading(true);
         const fetchedSession = await fetchSession();
+        if (!isMounted) return; // in case the component unmounted
         setSession(fetchedSession ?? null);
+
         if (fetchedSession) {
           await fetchProfile(fetchedSession);
-          setLoading(false);
-          return true;
         }
       } catch (error) {
         console.error("Session fetch error:", error);
       } finally {
-        setLoading(false);
-        return false;
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchAndSetSession();
-
-    const retryInterval = setInterval(async () => {
-      if (!session) {
-        const found = await fetchAndSetSession();
-        if (found) {
-          clearInterval(retryInterval);
-        }
-      }
-    }, 5000);
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -73,8 +68,8 @@ export const SessionProvider = ({
     );
 
     return () => {
+      isMounted = false;
       authListener?.subscription?.unsubscribe();
-      clearInterval(retryInterval);
     };
   }, []);
 
