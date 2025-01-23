@@ -34,12 +34,16 @@ export default function CalendarScreen() {
   const fetchCalendarEvents = async (date: string) => {
     setLoading(true);
     try {
+      const todayStart = `${date}T00:00:00.000Z`; // Start of day in UTC
+      const todayEnd = `${date}T23:59:59.999Z`; // End of day in UTC
+
       const { data, error } = await supabase
         .from("calendar_events")
         .select(`*, outfits (*)`) // selecting the outfit for that event as well
-        .gte("start_timestamp", `${date}T00:00:00`) // Start of day
-        .lte("end_timestamp", `${date}T23:59:59`); // End of day
+        .gte("start_timestamp", todayStart) // Include start of the day
+        .lte("start_timestamp", todayEnd); // Include the end of the day
 
+      // or end time stamp is within today as well
       // if data, get all the outfits
       let fetchedOutfits = [];
       if (data) {
