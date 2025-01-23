@@ -6,22 +6,49 @@ import {
   Text,
   SafeAreaView,
 } from "react-native";
-import { Outfit } from "@/types";
-import { router } from "expo-router";
+import { CalendarEvent, Outfit } from "@/types";
+import { router, useLocalSearchParams } from "expo-router";
 import Feed from "@/components/Feeds/Feed";
 import { theme } from "@/theme";
+import { useSession } from "@/contexts/SessionContext";
+import { saveCalendarEvent } from "@/api/SaveCalendarEvent";
 
-export default function OutfitsFeedScreen({
-  fromCalendar,
-  selectedDate,
-}: {
-  fromCalendar: string;
-  selectedDate: string;
-}) {
-  const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
+export default function OutfitsFeedScreen() {
+  const {
+    fromCalendar,
+    selectedDate,
+  }: {
+    fromCalendar: string;
+    selectedDate: string;
+  } = useLocalSearchParams();
 
-  function onSelect(selectedOutfits: Outfit[]) {
-    setSelectedOutfits(selectedOutfits);
+  const { session } = useSession();
+
+  async function onSelect(object: Outfit) {
+    if (fromCalendar !== "true") {
+      console.log("fromCalendar", fromCalendar);
+      console.error("Invalid navigation"); // for now
+      return;
+    }
+    // create cal event
+    const outfitId: number = object.id ?? -1;
+    if (outfitId === -1) {
+      console.error("Invalid outfit id");
+      return;
+    }
+    const userId: string = session?.user.id ?? "";
+    if (userId === "") {
+      console.error("Invalid user id");
+      return;
+    }
+    const calendarEvent: CalendarEvent = {
+      user_id: userId,
+      outfit_id: outfitId,
+      all_day: true, // always all day for now
+      start_timestamp: selectedDate,
+      // end_timestamp: selectedDate,
+    };
+    await saveCalendarEvent(calendarEvent);
   }
 
   return (
@@ -36,8 +63,9 @@ export default function OutfitsFeedScreen({
       <View style={styles.feedContainer}>
         <Feed
           tableName="outfits"
-          onClick={(object: any, index: number) => {
-            console.log("object", object);
+          onClick={(object: Outfit) => {
+            onSelect(object);
+            router.dismiss();
           }}
         />
       </View>
