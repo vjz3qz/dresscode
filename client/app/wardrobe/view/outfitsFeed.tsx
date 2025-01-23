@@ -50,19 +50,12 @@ export default function OutfitsFeedScreen({
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity onPress={save} style={styles.iconButton}>
-          <Text style={styles.buttonText}>Save</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.dismiss()}>
+          <Text style={styles.closeIcon}>✕</Text>
         </TouchableOpacity>
-      </View> */}
-      <View style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.dismiss()}>
-            <Text style={styles.closeIcon}>✕</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Outfit canvas</Text>
-          <View style={{ width: 30 }} />
-        </View>
+        <Text style={styles.headerTitle}>Outfit canvas</Text>
+        <View style={{ width: 30 }} />
       </View>
       <View style={styles.feedContainer}>
         <Feed
@@ -83,9 +76,12 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: 16,
-    paddingTop: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    backgroundColor: "#f8f8f8",
   },
   iconButton: {
     backgroundColor: "#333",
