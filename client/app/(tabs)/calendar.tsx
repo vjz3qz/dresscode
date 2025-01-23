@@ -40,10 +40,12 @@ export default function CalendarScreen() {
       const { data, error } = await supabase
         .from("calendar_events")
         .select(`*, outfits (*)`) // selecting the outfit for that event as well
-        .gte("start_timestamp", todayStart) // Include start of the day
-        .lte("start_timestamp", todayEnd); // Include the end of the day
+        .or(
+          `and(start_timestamp.gte.${todayStart},start_timestamp.lte.${todayEnd}),` + // Events starting within the day
+            `and(end_timestamp.gte.${todayStart},end_timestamp.lte.${todayEnd}),` + // Events ending within the day
+            `and(all_day.eq.true,start_timestamp.gte.${todayStart},start_timestamp.lte.${todayEnd},end_timestamp.is.null)` // All-day events
+        );
 
-      // or end time stamp is within today as well
       // if data, get all the outfits
       let fetchedOutfits = [];
       if (data) {
