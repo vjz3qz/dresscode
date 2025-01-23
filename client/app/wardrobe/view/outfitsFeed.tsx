@@ -1,18 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
   View,
   Text,
   SafeAreaView,
-  TextInput,
-  ScrollView,
 } from "react-native";
-import { Look, Outfit } from "@/types";
-import SelectFeed from "@/components/Feeds/SelectFeed";
+import { Outfit } from "@/types";
 import { router } from "expo-router";
-import { saveLook } from "@/api/SaveLook";
-import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
 import Feed from "@/components/Feeds/Feed";
 import { theme } from "@/theme";
 
@@ -24,28 +19,9 @@ export default function OutfitsFeedScreen({
   selectedDate: string;
 }) {
   const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
-  const [metadata, setMetadata] = useState({
-    name: "New Look",
-    description: "A new look",
-  });
-  const sheetRef = useRef<BottomSheetMethods>(null);
 
   function onSelect(selectedOutfits: Outfit[]) {
     setSelectedOutfits(selectedOutfits);
-  }
-
-  async function save() {
-    const newLook: Look = {
-      name: metadata.name,
-      description: metadata.description,
-    };
-    await saveLook(newLook, selectedOutfits);
-    router.dismiss();
-  }
-
-  function toggleView() {
-    // setShowMetadataForm(!showMetadataForm);() => sheetRef.current?.open()
-    sheetRef.current?.open();
   }
 
   return (
