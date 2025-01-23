@@ -65,7 +65,6 @@ export default function CalendarScreen() {
     setModalVisible(true);
   };
 
-  console.log(calendarEvents);
   return (
     <SafeAreaView style={styles.safeArea}>
       <CalendarList style={styles.calendar} onDayPress={handleDayPress} />
