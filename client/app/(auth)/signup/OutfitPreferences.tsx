@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Button, TextInput } from "react-native";
+import { View, Text, Button, TextInput, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
 export default function OutfitPreferences() {
@@ -15,9 +15,12 @@ export default function OutfitPreferences() {
   };
 
   return (
-    <View>
-      <Text>What occasions do you mostly need outfits for?</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>
+        What occasions do you mostly need outfits for?
+      </Text>
       <TextInput
+        style={styles.input}
         value={preferences}
         onChangeText={setPreferences}
         placeholder="Enter your outfit preferences"
@@ -26,3 +29,25 @@ export default function OutfitPreferences() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#EAE6E5",
+  },
+  label: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+});

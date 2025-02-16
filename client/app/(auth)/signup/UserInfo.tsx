@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Button, TextInput } from "react-native";
+import { View, Text, Button, TextInput, StyleSheet } from "react-native";
 import { router } from "expo-router";
 
 export default function UserInfo() {
@@ -15,15 +15,17 @@ export default function UserInfo() {
   };
 
   return (
-    <View>
-      <Text>What is your gender?</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>What is your gender?</Text>
       <TextInput
+        style={styles.input}
         value={gender}
         onChangeText={setGender}
         placeholder="Enter your gender"
       />
-      <Text>How old are you?</Text>
+      <Text style={styles.label}>How old are you?</Text>
       <TextInput
+        style={styles.input}
         value={age}
         onChangeText={setAge}
         placeholder="Enter your age"
@@ -32,3 +34,25 @@ export default function UserInfo() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#EAE6E5",
+  },
+  label: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+});
