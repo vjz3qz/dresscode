@@ -37,22 +37,45 @@ export const SessionProvider = ({
   useEffect(() => {
     let isMounted = true;
 
+    const checkUserCreationTimeAndFetchProfile = async (session: Session) => {
+      try {
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+        if (error) {
+          console.error("Error fetching user:", error);
+          return;
+        }
+
+        if (user) {
+          const createdAt = new Date(user.created_at);
+          const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+
+          if (createdAt >= oneMinuteAgo) {
+            console.log("User was created in the last one minute.");
+          } else {
+            console.log("User was not created in the last one minute.");
+            await fetchProfile(session);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking user creation time:", error);
+      }
+    };
+
     const fetchAndSetSession = async () => {
       try {
         setLoading(true);
-        const fetchedSession = await fetchSession();
-        if (!isMounted) return; // in case the component unmounted
-        setSession(fetchedSession ?? null);
+        const session = await fetchSession();
+        if (!isMounted) return;
 
-        if (fetchedSession) {
-          await fetchProfile(fetchedSession);
-        }
+        setSession(session ?? null);
+        if (session) await fetchProfile(session);
       } catch (error) {
         console.error("Session fetch error:", error);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
 
@@ -60,10 +83,9 @@ export const SessionProvider = ({
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return;
         setSession(session);
-        if (session) {
-          await fetchProfile(session);
-        }
+        if (session) await fetchProfile(session);
       }
     );
 
