@@ -18,7 +18,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
-  const { session, loading } = useSession(); // Add loading here
+  const { session, loading, profileNotFound } = useSession(); // Add loading here
 
   const [loaded] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
@@ -59,6 +59,8 @@ function RootLayoutContent() {
     // On web, static rendering will stop here as the user is not authenticated
     // in the headless Node process that the pages are rendered in.
     return <Redirect href="/(auth)" />;
+  } else if (!profileNotFound) {
+    return <Redirect href="/(auth)/signup/UserInfo" />;
   }
 
   return (
