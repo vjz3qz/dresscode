@@ -4,11 +4,10 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Slot, Slot, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import Auth from "@/components/Auth";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React from "react";
 import { SessionProvider, useSession } from "@/contexts/SessionContext"; // Import your session context
@@ -92,7 +91,21 @@ function RootLayoutContent() {
           <Stack.Screen name="+not-found" />
         </Stack>
       ) : (
-        <Auth />
+        <Stack>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="(auth)/signup/UserInfo"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="(auth)/signup/FavoriteBrands"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="(auth)/signup/OutfitPreferences"
+            options={{ headerShown: false }}
+          />
+        </Stack>
       )}
     </ThemeProvider>
   );
@@ -101,7 +114,7 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <SessionProvider>
-      <RootLayoutContent />
+      <Slot />
     </SessionProvider>
   );
 }
