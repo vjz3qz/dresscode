@@ -52,8 +52,8 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
-    else if (!session)
-      Alert.alert("Please check your inbox for email verification!");
+    // else if (!session)
+    //   Alert.alert("Please check your inbox for email verification!");
     router.push("/(auth)/signup/UserInfo");
     setLoading(false);
   }
@@ -68,7 +68,7 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
-    else if (!session) Alert.alert("Please check your phone for the OTP!");
+    // else if (!session) Alert.alert("Please check your phone for the OTP!");
     setLoading(false);
   }
 
