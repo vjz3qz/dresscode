@@ -11,6 +11,7 @@ type SessionContextType = {
   setUsername: React.Dispatch<React.SetStateAction<string>>;
   setAvatarUrl: React.Dispatch<React.SetStateAction<string>>;
   loading: boolean;
+  profileNotFound: boolean;
 };
 
 // Initialize the context with default values
@@ -33,36 +34,10 @@ export const SessionProvider = ({
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const [profileNotFound, setProfileNotFound] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-
-    const checkUserCreationTimeAndFetchProfile = async (session: Session) => {
-      try {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
-        if (error) {
-          console.error("Error fetching user:", error);
-          return;
-        }
-
-        if (user) {
-          const createdAt = new Date(user.created_at);
-          const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-
-          if (createdAt >= oneMinuteAgo) {
-            console.log("User was created in the last one minute.");
-          } else {
-            console.log("User was not created in the last one minute.");
-            await fetchProfile(session);
-          }
-        }
-      } catch (error) {
-        console.error("Error checking user creation time:", error);
-      }
-    };
 
     const fetchAndSetSession = async () => {
       try {
@@ -98,18 +73,23 @@ export const SessionProvider = ({
   // Fetch Profile Data
   const fetchProfile = async (session: Session) => {
     try {
-      // setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
         .select("username, avatar_url")
         .eq("id", session.user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === "PGRST116") {
+          // Profile not found case
+          setProfileNotFound(true);
+        } else throw error;
+      }
 
       if (data) {
         setUsername(data.username);
         setAvatarUrl(data.avatar_url);
+        setProfileNotFound(false);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -128,6 +108,7 @@ export const SessionProvider = ({
         avatarUrl,
         setAvatarUrl,
         loading,
+        profileNotFound,
       }}
     >
       {children}
