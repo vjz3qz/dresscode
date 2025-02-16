@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
@@ -21,7 +21,7 @@ function RootLayoutContent() {
   const { session, loading } = useSession(); // Add loading here
 
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   useEffect(() => {
@@ -42,7 +42,7 @@ function RootLayoutContent() {
         }}
       >
         <Image
-          source={require("../assets/images/logo.png")}
+          source={require("../../assets/images/logo.png")}
           style={{
             width: 390,
             height: 575,
@@ -53,60 +53,50 @@ function RootLayoutContent() {
     );
   }
 
+  // Only require authentication within the (app) group's layout as users
+  // need to be able to access the (auth) group and sign in again.
+  if (!(session && session.user)) {
+    // On web, static rendering will stop here as the user is not authenticated
+    // in the headless Node process that the pages are rendered in.
+    return <Redirect href="/(auth)" />;
+  }
+
   return (
     <ThemeProvider value={DefaultTheme}>
       <StatusBar barStyle="dark-content" />
       {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
-      {session && session.user ? (
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="wardrobe/new/item"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="wardrobe/new/outfit"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="wardrobe/new/look"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="wardrobe/view/looks/[lookId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="wardrobe/view/items/[itemId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="wardrobe/view/outfits/[outfitId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="wardrobe/view/outfitsFeed"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      ) : (
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(auth)/signup/UserInfo"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="(auth)/signup/FavoriteBrands"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="(auth)/signup/OutfitPreferences"
-            options={{ headerShown: false }}
-          />
-        </Stack>
-      )}
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="wardrobe/new/item"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="wardrobe/new/outfit"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="wardrobe/new/look"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="wardrobe/view/looks/[lookId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="wardrobe/view/items/[itemId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="wardrobe/view/outfits/[outfitId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="wardrobe/view/outfitsFeed"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="+not-found" />
+      </Stack>
     </ThemeProvider>
   );
 }

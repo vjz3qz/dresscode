@@ -10,7 +10,7 @@ export default function FavoriteBrands() {
   const handleNext = () => {
     // Navigate to the next page using router
     router.push({
-      pathname: "/auth/signup/OutfitPreferences",
+      pathname: "/(auth)/signup/OutfitPreferences",
       params: { gender, age, brands },
     });
   };

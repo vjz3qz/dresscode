@@ -9,7 +9,7 @@ export default function UserInfo() {
   const handleNext = () => {
     // Navigate to the next page using router
     router.push({
-      pathname: "/auth/signup/FavoriteBrands",
+      pathname: "/(auth)/signup/FavoriteBrands",
       params: { gender, age },
     });
   };

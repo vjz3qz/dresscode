@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Button, TextInput } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 export default function OutfitPreferences() {
   const { gender, age, brands } = useLocalSearchParams();
@@ -10,6 +10,8 @@ export default function OutfitPreferences() {
     // Handle the final submission of user data
     console.log({ gender, age, brands, preferences });
     // You can navigate to a confirmation page or home
+    // create the profile in supabase
+    router.push("/(app)/(tabs)");
   };
 
   return (
