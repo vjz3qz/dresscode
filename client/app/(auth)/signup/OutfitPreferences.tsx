@@ -3,6 +3,8 @@ import { View, Text, Button, StyleSheet } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 import { router, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { Profile } from "@/types";
+import { createProfile } from "@/api/CreateProfile";
 
 export default function OutfitPreferences() {
   const { gender, age, brands } = useLocalSearchParams();
@@ -16,8 +18,17 @@ export default function OutfitPreferences() {
     { label: "Business", value: "business" },
   ];
 
-  const handleSubmit = () => {
-    console.log({ gender, age, brands, preferences });
+  const handleSubmit = async () => {
+    // create profile
+    const profile: Profile = {
+      gender: gender as string,
+      age: age as string,
+      brands: Array.isArray(brands) ? brands : [brands].filter(Boolean),
+      preferences,
+    };
+
+    await createProfile(profile);
+
     router.push("/(app)/(tabs)");
   };
 

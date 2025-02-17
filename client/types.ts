@@ -6,6 +6,15 @@ export type ShoppingCard = {
   price: string;
   image: any;
 };
+
+export type Profile = {
+  id?: string;
+  gender: string;
+  age: string;
+  brands: string[];
+  preferences: string[];
+};
+
 export type Item = {
   id?: number;
   created_at?: string;
