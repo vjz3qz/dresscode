@@ -18,7 +18,7 @@ export default function OutfitsFeed() {
     if (fromCalendar === "true") {
       // Navigate to event creation with outfit
       router.push({
-        pathname: "new/calendarEvent",
+        pathname: "/new/calendarEvent",
         params: {
           outfitId: outfit.id,
           outfitImage: outfit.image_url,
