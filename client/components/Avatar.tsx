@@ -5,15 +5,25 @@ import * as ImagePicker from "expo-image-picker";
 import React from "react";
 
 interface Props {
-  size: number;
+  size?: number;
   url: string | null;
-  onUpload: (filePath: string) => void;
+  onUpload?: (filePath: string) => void;
+  circle?: boolean; // New prop to toggle between square and circle
 }
 
-export default function Avatar({ url, size = 150, onUpload }: Props) {
+export default function Avatar({
+  url,
+  size = 150,
+  onUpload,
+  circle = false,
+}: Props) {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const avatarSize = { height: size, width: size };
+  const avatarSize = {
+    height: size,
+    width: size,
+    borderRadius: circle ? size / 2 : 5,
+  };
 
   useEffect(() => {
     if (url) downloadImage(url);
@@ -59,17 +69,16 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
       }
 
       const image = result.assets[0];
-      console.log("Got image", image);
 
       if (!image.uri) {
-        throw new Error("No image uri!"); // Realistically, this should never happen, but just in case...
+        throw new Error("No image URI found!"); // Realistically, this should never happen, but just in case...
       }
 
       const arraybuffer = await fetch(image.uri).then((res) =>
         res.arrayBuffer()
       );
 
-      const fileExt = image.uri?.split(".").pop()?.toLowerCase() ?? "jpeg";
+      const fileExt = image.uri.split(".").pop()?.toLowerCase() ?? "jpeg";
       const path = `${Date.now()}.${fileExt}`;
       const { data, error: uploadError } = await supabase.storage
         .from("images")
@@ -80,7 +89,7 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
       if (uploadError) {
         throw uploadError;
       }
-      onUpload(data.path);
+      onUpload?.(data.path);
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
@@ -103,20 +112,21 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
       ) : (
         <View style={[avatarSize, styles.avatar, styles.noImage]} />
       )}
-      <View>
-        <Button
-          title={uploading ? "Uploading ..." : "Upload"}
-          onPress={uploadAvatar}
-          disabled={uploading}
-        />
-      </View>
+      {onUpload && (
+        <View>
+          <Button
+            title={uploading ? "Uploading ..." : "Upload"}
+            onPress={uploadAvatar}
+            disabled={uploading}
+          />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   avatar: {
-    borderRadius: 5,
     overflow: "hidden",
     maxWidth: "100%",
   },
@@ -129,6 +139,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: "rgb(200, 200, 200)",
-    borderRadius: 5,
   },
 });
