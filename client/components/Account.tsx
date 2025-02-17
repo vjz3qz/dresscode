@@ -107,10 +107,7 @@ export default function Account() {
     />
   ) : (
     <View style={styles.container}>
-      <Image
-        source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
-        style={styles.avatar}
-      />
+      <Avatar size={80} url={avatarUrl} circle />
       <Text style={styles.nameText}>{username || "Name"}</Text>
       <Text style={styles.usernameText}>@{username || "name"}</Text>
 
@@ -165,13 +162,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 100,
     backgroundColor: "#FFFFFF",
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#EAE6E5",
-    marginBottom: 10,
   },
   nameText: {
     fontSize: 20,
