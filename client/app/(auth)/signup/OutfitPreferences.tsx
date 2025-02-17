@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 import { router, useLocalSearchParams } from "expo-router";
@@ -40,6 +41,10 @@ export default function OutfitPreferences() {
   ];
 
   const handleSubmit = async () => {
+    if (preferences.length === 0) {
+      Alert.alert("preferences cannot be empty!");
+      return;
+    }
     const profile: Profile = {
       gender: gender as string,
       age: age as string,

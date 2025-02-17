@@ -7,6 +7,7 @@ import {
   Keyboard,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { router } from "expo-router";
@@ -35,6 +36,14 @@ export default function UserInfo() {
   ];
 
   const handleNext = () => {
+    if (gender === "") {
+      Alert.alert("gender cannot be empty!");
+      return;
+    }
+    if (age === "") {
+      Alert.alert("age cannot be empty!");
+      return;
+    }
     router.push({
       pathname: "/(auth)/signup/FavoriteBrands",
       params: { gender, age },

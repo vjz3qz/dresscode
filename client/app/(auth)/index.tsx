@@ -68,6 +68,14 @@ export default function Auth() {
   }
 
   async function signUpWithEmail() {
+    if (email === "") {
+      Alert.alert("email cannot be empty!");
+      return;
+    }
+    if (password === "") {
+      Alert.alert("password cannot be empty!");
+      return;
+    }
     setLoading(true);
     const {
       data: { session },

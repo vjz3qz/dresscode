@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 import { router, useLocalSearchParams } from "expo-router";
@@ -38,6 +39,10 @@ export default function FavoriteBrands() {
   ];
 
   const handleNext = () => {
+    if (brands.length === 0) {
+      Alert.alert("brands cannot be empty!");
+      return;
+    }
     router.push({
       pathname: "/(auth)/signup/OutfitPreferences",
       params: { gender, age, brands: brands.join(",") },
