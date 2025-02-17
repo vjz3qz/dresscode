@@ -187,6 +187,11 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={{ width: 30 }} />
+        <Text style={styles.headerTitle}>Your Outfit Calendar</Text>
+        <View style={{ width: 30 }} />
+      </View>
       <Agenda
         items={items}
         loadItemsForMonth={loadItemsForMonth}
@@ -213,6 +218,18 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1, // Ensure SafeAreaView takes the full screen
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "black",
   },
   modalText: {
     fontSize: 18,
