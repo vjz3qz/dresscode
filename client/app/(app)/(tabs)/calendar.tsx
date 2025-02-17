@@ -14,6 +14,7 @@ import Modal from "@/ui/Modal";
 import { Image } from "expo-image";
 import { useSession } from "@/contexts/SessionContext";
 import { addImageUrls } from "@/api/FetchImageUrl";
+import { Session } from "@supabase/supabase-js";
 
 interface Day {
   year: number;
@@ -31,7 +32,7 @@ export default function CalendarScreen() {
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchCalendarEvents = async (date: string) => {
+  const fetchCalendarEvents = async (date: string, session: Session) => {
     setLoading(true);
     try {
       const todayStart = `${date}T00:00:00.000Z`; // Start of day in UTC
@@ -40,6 +41,7 @@ export default function CalendarScreen() {
       const { data, error } = await supabase
         .from("calendar_events")
         .select(`*, outfits (*)`) // selecting the outfit for that event as well
+        .eq("user_id", session.user.id)
         .or(
           `and(start_timestamp.gte.${todayStart},start_timestamp.lte.${todayEnd}),` + // Events starting within the day
             `and(end_timestamp.gte.${todayStart},end_timestamp.lte.${todayEnd}),` + // Events ending within the day
@@ -66,8 +68,9 @@ export default function CalendarScreen() {
   };
 
   const handleDayPress = async (day: Day) => {
+    if (!session) return;
     setSelectedDay(day);
-    await fetchCalendarEvents(day.dateString);
+    await fetchCalendarEvents(day.dateString, session);
     setModalVisible(true);
   };
 
