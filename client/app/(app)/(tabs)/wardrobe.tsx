@@ -11,8 +11,8 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { Href, router } from "expo-router";
-import { Item, Look, TableTypes } from "@/types";
+import { type Href, router } from "expo-router";
+import type { Look, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
 import { Ionicons } from "@expo/vector-icons";
 import Feed from "@/components/Feeds/Feed";
@@ -45,19 +45,25 @@ export default function WardrobeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Image
-            source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
-            style={styles.avatar}
-          />
-          <Text style={styles.nameText}>{username || "Name"}</Text>
-          <Text style={styles.usernameText}>@{username || "name"}</Text>
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
+              style={styles.avatar}
+            />
+            <View style={{ flexDirection: "row" }}>
+              <TouchableOpacity style={styles.circleButton}>
+                <Ionicons name="bookmark-outline" size={24} color="#333" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.circleButton}>
+                <Ionicons name="analytics-outline" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.nameText}>{username || "Name"}</Text>
+            <Text style={styles.usernameText}>@{username || "name"}</Text>
+          </View>
         </View>
-        <TouchableOpacity style={styles.circleButton}>
-          <Ionicons name="bookmark-outline" size={24} color="#333" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.circleButton}>
-          <Ionicons name="grid-outline" size={24} color="#333" />
-        </TouchableOpacity>
       </View>
 
       {/* Tabs */}
@@ -121,19 +127,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 48,
     paddingTop: 20,
+    paddingBottom: 24,
+    marginHorizontal: 20,
+    backgroundColor: "white",
+    borderRadius: 16,
   },
   headerContent: {
-    alignItems: "center",
+    width: "100%",
   },
-
+  avatarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
     backgroundColor: "#EAE6E5",
     marginBottom: 10,
+  },
+  textContainer: {
+    alignItems: "center",
   },
   nameText: {
     fontSize: 18,
@@ -148,7 +166,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#EAE6E5",
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 10,
