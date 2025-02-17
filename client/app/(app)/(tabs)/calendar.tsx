@@ -28,30 +28,42 @@ export default function CalendarScreen() {
   const [items, setItems] = useState<AgendaItems>({});
   const [loading, setLoading] = useState(false);
 
-  const loadItems = async (day: { dateString: string }) => {
+  const loadItemsForMonth = async (day: { dateString: string }) => {
     if (!session) return;
 
     try {
       setLoading(true);
-      const startOfMonth = new Date(day.dateString);
-      startOfMonth.setDate(1);
-      const endOfMonth = new Date(startOfMonth);
-      endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-      endOfMonth.setDate(0);
 
+      const currentDate = new Date(day.dateString);
+
+      // Calculate start and end dates for last month, current month, and next month
+      const startOfLastMonth = new Date(currentDate);
+      startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1, 1);
+
+      const endOfNextMonth = new Date(currentDate);
+      endOfNextMonth.setMonth(endOfNextMonth.getMonth() + 1, 0);
+
+      // Fetch data for the 3-month range
       const { data, error } = await supabase
         .from("calendar_events")
-        .select(`*, outfits (*)`) // selecting the outfit for that event as well
+        .select(`*, outfits (*)`)
         .eq("user_id", session.user.id)
-        .gte("start_timestamp", startOfMonth.toISOString())
-        .lte("end_timestamp", endOfMonth.toISOString());
+        .gte("start_timestamp", startOfLastMonth.toISOString())
+        .lte("end_timestamp", endOfNextMonth.toISOString());
 
       if (error) throw error;
 
-      // Group events by date
       const newItems: AgendaItems = {};
-      if (data) {
-        // Add image URLs to outfits
+
+      // Populate all days in the 3-month range with empty arrays initially
+      let iterDate = new Date(startOfLastMonth);
+      while (iterDate <= endOfNextMonth) {
+        const dateStr = iterDate.toISOString().split("T")[0];
+        newItems[dateStr] = []; // Ensure every day is initialized
+        iterDate.setDate(iterDate.getDate() + 1);
+      }
+
+      if (data.length > 0) {
         const eventsWithUrls = await Promise.all(
           data.map(async (event) => {
             if (event.outfits) {
@@ -65,12 +77,9 @@ export default function CalendarScreen() {
           })
         );
 
-        // Group events by date
+        // Assign events to the correct days
         eventsWithUrls.forEach((event) => {
           const dateStr = event.start_timestamp.split("T")[0];
-          if (!newItems[dateStr]) {
-            newItems[dateStr] = [];
-          }
           newItems[dateStr].push(event);
         });
       }
@@ -148,7 +157,7 @@ export default function CalendarScreen() {
     <SafeAreaView style={styles.container}>
       <Agenda
         items={items}
-        loadItemsForMonth={loadItems}
+        loadItemsForMonth={loadItemsForMonth}
         selected={new Date().toISOString().split("T")[0]}
         renderItem={renderItem}
         renderEmptyDate={renderEmptyDate}
