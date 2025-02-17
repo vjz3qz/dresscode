@@ -1,5 +1,5 @@
 import UploadButton from "@/ui/UploadButton";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -18,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Feed from "@/components/Feeds/Feed";
 import LookFeed from "@/components/Feeds/LookFeed";
 import Avatar from "@/components/Avatar";
+import Modal from "@/ui/Modal";
+import { getClosetWrapped } from "@/api/getClosetWrapped";
 
 const { height } = Dimensions.get("window");
 
@@ -30,6 +32,25 @@ const tabs: { name: string; tableName: keyof TableTypes }[] = [
 export default function WardrobeScreen() {
   const { username, avatarUrl } = useSession();
   const [tabIndex, setTabIndex] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [wrappedText, setWrappedText] = useState<string>(
+    "Generating your closet wrapped..."
+  );
+
+  useEffect(() => {
+    const fetchClosetWrapped = async () => {
+      if (!modalVisible) return;
+      try {
+        const fetchedWrappedText: string = await getClosetWrapped();
+        setWrappedText(fetchedWrappedText);
+      } catch (error: any) {
+        console.error("Error fetching wrapped:", error.message);
+        setWrappedText("");
+      }
+    };
+
+    fetchClosetWrapped();
+  }, [modalVisible]);
 
   const handleTabClick = useCallback((index: number) => setTabIndex(index), []);
 
@@ -52,7 +73,10 @@ export default function WardrobeScreen() {
               <TouchableOpacity style={styles.circleButton}>
                 <Ionicons name="bookmark-outline" size={24} color="#333" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.circleButton}>
+              <TouchableOpacity
+                style={styles.circleButton}
+                onPress={() => setModalVisible(true)}
+              >
                 <Ionicons name="analytics-outline" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -113,6 +137,13 @@ export default function WardrobeScreen() {
           tableName={tabs[tabIndex].tableName as keyof TableTypes}
         />
       )}
+      <Modal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        transparent
+      >
+        <Text>{wrappedText}</Text>
+      </Modal>
 
       {/* Upload Button */}
       <UploadButton onPress={onPlusButtonClick} />
