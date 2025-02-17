@@ -13,7 +13,7 @@ export async function fetchOutfits(): Promise<Outfit[]> {
   return data as Outfit[];
 }
 
-export async function fetchOutfitById(OutfitId: string): Promise<Outfit> {
+export async function fetchOutfitById(OutfitId: number): Promise<Outfit> {
   const { data, error } = await supabase
     .from("outfits")
     .select("*")

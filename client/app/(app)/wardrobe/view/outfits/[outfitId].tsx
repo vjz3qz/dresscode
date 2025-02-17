@@ -31,7 +31,7 @@ export default function OutfitView() {
       setLoading(true);
       try {
         let fetchedOutfit = await fetchOutfitById(
-          Array.isArray(outfitId) ? outfitId[0] : outfitId
+          Number(Array.isArray(outfitId) ? outfitId[0] : outfitId)
         );
         // get outfit image url
         if (!fetchedOutfit.s3_key) return;
