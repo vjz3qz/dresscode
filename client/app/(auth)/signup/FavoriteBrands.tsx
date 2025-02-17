@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
-import { router } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { Button } from "@rneui/themed";
 
 export default function FavoriteBrands() {
   const { gender, age } = useLocalSearchParams();
@@ -15,6 +15,9 @@ export default function FavoriteBrands() {
     { label: "Zara", value: "zara" },
     { label: "H&M", value: "hm" },
     { label: "Gucci", value: "gucci" },
+    { label: "Uniqlo", value: "uniqlo" },
+    { label: "Levi's", value: "levis" },
+    { label: "Gap", value: "gap" },
   ];
 
   const handleNext = () => {
@@ -25,26 +28,32 @@ export default function FavoriteBrands() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>What are your favorite fashion brands?</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Your Favorite Brands</Text>
+      <Text style={styles.subtitle}>Select the brands you love to wear</Text>
       <MultiSelect
         style={styles.dropdown}
         data={brandOptions}
         labelField="label"
         valueField="value"
-        placeholder={"Select your favorite brands"}
+        placeholder="Select your favorite brands"
         value={brands}
-        onChange={(items: string[]) => setBrands(items)}
+        onChange={(items) => setBrands(items)}
         selectedStyle={styles.selectedStyle}
         renderItem={(item, selected) => (
           <View style={styles.itemContainer}>
-            <Text>{item.label}</Text>
+            <Text style={styles.itemText}>{item.label}</Text>
             {selected && <AntDesign name="check" size={16} color="green" />}
           </View>
         )}
       />
-      <Button title="Next" onPress={handleNext} />
-    </View>
+      <Button
+        title="Next"
+        onPress={handleNext}
+        buttonStyle={styles.button}
+        containerStyle={styles.buttonContainer}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -52,22 +61,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     padding: 20,
     backgroundColor: "#EAE6E5",
   },
-  label: {
-    fontSize: 18,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
     marginBottom: 10,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 30,
+    textAlign: "center",
   },
   dropdown: {
-    width: "100%",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingHorizontal: 10,
     marginBottom: 20,
-    backgroundColor: "#fff",
   },
   selectedStyle: {
     borderRadius: 5,
@@ -80,5 +93,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 10,
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#333",
+    borderRadius: 25,
+    paddingVertical: 12,
+  },
+  buttonContainer: {
+    marginTop: 20,
   },
 });

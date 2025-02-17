@@ -1,8 +1,19 @@
 import React, { useState } from "react";
-import { Alert, StyleSheet, View, AppState, Text, Image } from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  View,
+  AppState,
+  Text,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { supabase } from "@/utils/Supabase";
 import { Button, Input } from "@rneui/themed";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -38,7 +49,7 @@ export default function Auth() {
 
     if (error) Alert.alert(error.message);
     setLoading(false);
-    router.replace("/(app)/(tabs)");
+    if (!error) router.replace("/(app)/(tabs)");
   }
 
   async function signUpWithEmail() {
@@ -89,151 +100,143 @@ export default function Auth() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign in to</Text>
-      <Image
-        source={require("@/assets/images/title.png")}
-        style={styles.brandImage}
-      />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image
+          source={require("@/assets/images/title.png")}
+          style={styles.brandImage}
+        />
+        <Text style={styles.subtitle}>Your Personal Style Assistant</Text>
 
-      {emailAuth ? (
-        <>
-          <Input
-            label="Email"
-            leftIcon={{ type: "font-awesome", name: "envelope" }}
-            onChangeText={(text) => setEmail(text)}
-            value={email}
-            placeholder="Enter your email"
-            autoCapitalize={"none"}
-            containerStyle={styles.inputContainer}
-          />
-          <Input
-            label="Password"
-            leftIcon={{ type: "font-awesome", name: "lock" }}
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={true}
-            placeholder="Enter your password"
-            autoCapitalize={"none"}
-            containerStyle={styles.inputContainer}
-          />
-          <Button
-            title="Sign In"
-            disabled={loading}
-            onPress={() => signInWithEmail()}
-            buttonStyle={styles.signInButton}
-            containerStyle={styles.buttonContainer}
-          />
-          <Button
-            title="Sign Up"
-            disabled={loading}
-            onPress={() => signUpWithEmail()}
-            buttonStyle={styles.signInButton}
-            containerStyle={styles.buttonContainer}
-          />
-          <Text style={styles.forgotPassword}>Forgot password?</Text>
-        </>
-      ) : (
-        <>{/* Additional phone authentication fields if needed */}</>
-      )}
-      <Button
-        title="Sign in with Google"
-        disabled={loading}
-        buttonStyle={styles.socialButton}
-        icon={{ name: "google", type: "font-awesome", color: "white" }}
-      />
-      <Button
-        title="Sign in with Phone"
-        disabled={loading}
-        buttonStyle={styles.socialButton}
-        icon={{ name: "phone", type: "font-awesome", color: "white" }}
-        containerStyle={{ marginTop: 10 }}
-      />
-    </View>
+        <Input
+          leftIcon={<Ionicons name="mail-outline" size={24} color="#333" />}
+          onChangeText={setEmail}
+          value={email}
+          placeholder="Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          containerStyle={styles.inputContainer}
+        />
+        <Input
+          leftIcon={
+            <Ionicons name="lock-closed-outline" size={24} color="#333" />
+          }
+          onChangeText={setPassword}
+          value={password}
+          secureTextEntry
+          placeholder="Password"
+          autoCapitalize="none"
+          containerStyle={styles.inputContainer}
+        />
+
+        <Button
+          title="Sign In"
+          loading={loading}
+          onPress={signInWithEmail}
+          buttonStyle={styles.button}
+          containerStyle={styles.buttonContainer}
+        />
+        <Button
+          title="Sign Up"
+          loading={loading}
+          onPress={signUpWithEmail}
+          buttonStyle={[styles.button, styles.signUpButton]}
+          containerStyle={styles.buttonContainer}
+        />
+
+        <Text style={styles.orText}>or</Text>
+
+        <Button
+          title="Sign in with Google"
+          icon={
+            <Ionicons
+              name="logo-google"
+              size={24}
+              color="white"
+              style={styles.socialIcon}
+            />
+          }
+          buttonStyle={[styles.button, styles.googleButton]}
+          containerStyle={styles.buttonContainer}
+        />
+        <Button
+          title="Sign in with Apple"
+          icon={
+            <Ionicons
+              name="logo-apple"
+              size={24}
+              color="white"
+              style={styles.socialIcon}
+            />
+          }
+          buttonStyle={[styles.button, styles.appleButton]}
+          containerStyle={styles.buttonContainer}
+        />
+
+        <Text style={styles.forgotPassword}>Forgot password?</Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#EAE6E5",
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#EAE6E5",
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
   brandImage: {
-    width: 250, // Adjust width to fit your design
-    height: 60, // Adjust height based on image aspect ratio
+    width: 200,
+    height: 50,
     resizeMode: "contain",
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 30,
   },
   inputContainer: {
     width: "100%",
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  signInButton: {
+  button: {
     backgroundColor: "#333",
-    borderRadius: 5,
+    borderRadius: 25,
+    paddingVertical: 12,
   },
   buttonContainer: {
     width: "100%",
-    marginBottom: 10,
+    marginBottom: 15,
+  },
+  signUpButton: {
+    backgroundColor: "#4A90E2",
+  },
+  orText: {
+    fontSize: 16,
+    color: "#666",
+    marginVertical: 15,
+  },
+  googleButton: {
+    backgroundColor: "#DB4437",
+  },
+  appleButton: {
+    backgroundColor: "#000",
+  },
+  socialIcon: {
+    marginRight: 10,
   },
   forgotPassword: {
-    color: "gray",
-    marginTop: 10,
-    marginBottom: 30,
+    color: "#4A90E2",
+    marginTop: 15,
     textDecorationLine: "underline",
   },
-  socialButton: {
-    backgroundColor: "#333",
-    borderRadius: 5,
-    width: "100%",
-    paddingVertical: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
 });
-
-// (
-//   <>
-//     <View style={[styles.verticallySpaced, styles.mt20]}>
-//       <Input
-//         label="Phone"
-//         leftIcon={{ type: "font-awesome", name: "phone" }}
-//         onChangeText={(text) => setPhone(text)}
-//         value={phone}
-//         placeholder="+1234567890"
-//         autoCapitalize={"none"}
-//       />
-//     </View>
-//     <View style={styles.verticallySpaced}>
-//       <Button
-//         title="Sign up with Phone"
-//         disabled={loading}
-//         onPress={() => signUpWithPhone()}
-//       />
-//     </View>
-//     <View style={styles.verticallySpaced}>
-//       <Input
-//         label="OTP"
-//         leftIcon={{ type: "font-awesome", name: "key" }}
-//         onChangeText={(text) => setOtp(text)}
-//         value={otp}
-//         placeholder="Enter OTP"
-//         autoCapitalize={"none"}
-//       />
-//     </View>
-//     <View style={styles.verticallySpaced}>
-//       <Button
-//         title="Verify OTP"
-//         disabled={loading}
-//         onPress={() => verifyOtp()}
-//       />
-//     </View>
-//   </>
-// )

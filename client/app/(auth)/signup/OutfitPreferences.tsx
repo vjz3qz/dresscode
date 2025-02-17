@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 import { router, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
-import { Profile } from "@/types";
+import { Button } from "@rneui/themed";
+import type { Profile } from "@/types";
 import { createProfile } from "@/api/CreateProfile";
 
 export default function OutfitPreferences() {
@@ -16,10 +17,12 @@ export default function OutfitPreferences() {
     { label: "Sportswear", value: "sportswear" },
     { label: "Party", value: "party" },
     { label: "Business", value: "business" },
+    { label: "Vintage", value: "vintage" },
+    { label: "Streetwear", value: "streetwear" },
+    { label: "Bohemian", value: "bohemian" },
   ];
 
   const handleSubmit = async () => {
-    // create profile
     const profile: Profile = {
       gender: gender as string,
       age: age as string,
@@ -28,13 +31,13 @@ export default function OutfitPreferences() {
     };
 
     await createProfile(profile);
-
     router.push("/(app)/(tabs)");
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Your Style Preferences</Text>
+      <Text style={styles.subtitle}>
         What occasions do you mostly need outfits for?
       </Text>
       <MultiSelect
@@ -42,19 +45,24 @@ export default function OutfitPreferences() {
         data={preferenceOptions}
         labelField="label"
         valueField="value"
-        placeholder={"Select your outfit preferences"}
+        placeholder="Select your outfit preferences"
         value={preferences}
         onChange={(items) => setPreferences(items)}
         selectedStyle={styles.selectedStyle}
         renderItem={(item, selected) => (
           <View style={styles.itemContainer}>
-            <Text>{item.label}</Text>
+            <Text style={styles.itemText}>{item.label}</Text>
             {selected && <AntDesign name="check" size={16} color="green" />}
           </View>
         )}
       />
-      <Button title="Submit" onPress={handleSubmit} />
-    </View>
+      <Button
+        title="Complete Profile"
+        onPress={handleSubmit}
+        buttonStyle={styles.button}
+        containerStyle={styles.buttonContainer}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -62,22 +70,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     padding: 20,
     backgroundColor: "#EAE6E5",
   },
-  label: {
-    fontSize: 18,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
     marginBottom: 10,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 30,
+    textAlign: "center",
   },
   dropdown: {
-    width: "100%",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingHorizontal: 10,
     marginBottom: 20,
-    backgroundColor: "#fff",
   },
   selectedStyle: {
     borderRadius: 5,
@@ -90,5 +102,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 10,
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#333",
+    borderRadius: 25,
+    paddingVertical: 12,
+  },
+  buttonContainer: {
+    marginTop: 20,
   },
 });
