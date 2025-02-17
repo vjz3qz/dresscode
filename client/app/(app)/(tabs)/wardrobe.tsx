@@ -17,6 +17,7 @@ import { useSession } from "@/contexts/SessionContext";
 import { Ionicons } from "@expo/vector-icons";
 import Feed from "@/components/Feeds/Feed";
 import LookFeed from "@/components/Feeds/LookFeed";
+import Avatar from "@/components/Avatar";
 
 const { height } = Dimensions.get("window");
 
@@ -46,10 +47,7 @@ export default function WardrobeScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
-              style={styles.avatar}
-            />
+            <Avatar size={80} url={avatarUrl} circle />
             <View style={{ flexDirection: "row" }}>
               <TouchableOpacity style={styles.circleButton}>
                 <Ionicons name="bookmark-outline" size={24} color="#333" />
