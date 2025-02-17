@@ -39,10 +39,23 @@ export default function EventScreen() {
     const loadEvent = async () => {
       setLoading(true);
       try {
-        let fetchedCalendarEvent = await fetchCalendarEventById(
+        let fetchedCalendarEvent: CalendarEvent = await fetchCalendarEventById(
           Array.isArray(calendarEventId) ? calendarEventId[0] : calendarEventId
         );
         setCalendarEvent(fetchedCalendarEvent);
+        const fetchedStartDate = new Date(fetchedCalendarEvent.start_timestamp);
+        setStartDate(fetchedStartDate);
+        if (fetchedCalendarEvent.all_day) {
+          setIsAllDay(true);
+        } else {
+          const fetchedEndDate = new Date(
+            fetchedCalendarEvent.end_timestamp ?? ""
+          );
+          setEndDate(fetchedEndDate);
+        }
+        setTitle(fetchedCalendarEvent.event_title ?? "");
+        setNotes(fetchedCalendarEvent.notes ?? "");
+        setLocation(fetchedCalendarEvent.location ?? "");
         const outfitId = fetchedCalendarEvent.outfit_id;
 
         let fetchedOutfit = await fetchOutfitById(outfitId);
