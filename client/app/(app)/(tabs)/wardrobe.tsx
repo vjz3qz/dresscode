@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Dimensions,
   Image,
+  TouchableOpacity,
 } from "react-native";
 import { Href, router } from "expo-router";
 import { Item, Look, TableTypes } from "@/types";
@@ -43,12 +44,20 @@ export default function WardrobeScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
       <View style={styles.header}>
-        <Image
-          source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
-          style={styles.avatar}
-        />
-        <Text style={styles.nameText}>{username || "Name"}</Text>
-        <Text style={styles.usernameText}>@{username || "name"}</Text>
+        <View style={styles.headerContent}>
+          <Image
+            source={{ uri: avatarUrl || "https://via.placeholder.com/80" }}
+            style={styles.avatar}
+          />
+          <Text style={styles.nameText}>{username || "Name"}</Text>
+          <Text style={styles.usernameText}>@{username || "name"}</Text>
+        </View>
+        <TouchableOpacity style={styles.circleButton}>
+          <Ionicons name="bookmark-outline" size={24} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.circleButton}>
+          <Ionicons name="grid-outline" size={24} color="#333" />
+        </TouchableOpacity>
       </View>
 
       {/* Tabs */}
@@ -109,9 +118,48 @@ export default function WardrobeScreen() {
 
 const styles = StyleSheet.create({
   header: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingTop: 20,
+  },
+  headerContent: {
+    alignItems: "center",
+  },
+
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#EAE6E5",
+    marginBottom: 10,
+  },
+  nameText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  usernameText: {
+    fontSize: 14,
+    color: "#888",
+  },
+  circleButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   searchContainer: {
     flexDirection: "row",
@@ -152,22 +200,5 @@ const styles = StyleSheet.create({
   },
   activeText: {
     color: "#0f0f0f",
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#EAE6E5",
-    marginBottom: 10,
-  },
-  nameText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 10,
-  },
-  usernameText: {
-    fontSize: 16,
-    color: "#888",
-    marginBottom: 20,
   },
 });
