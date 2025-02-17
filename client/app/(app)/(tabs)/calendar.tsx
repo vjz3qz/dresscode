@@ -1,217 +1,239 @@
 import { router } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { Calendar, CalendarList } from "react-native-calendars";
+import React, { useState } from "react";
+import { Agenda } from "react-native-calendars";
 import {
   SafeAreaView,
   View,
   StyleSheet,
   Text,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { supabase } from "@/utils/Supabase";
-import type { CalendarEvent, Outfit } from "@/types";
-import Modal from "@/ui/Modal";
+import type { CalendarEvent } from "@/types";
 import { Image } from "expo-image";
 import { useSession } from "@/contexts/SessionContext";
 import { addImageUrls } from "@/api/FetchImageUrl";
-import { Session } from "@supabase/supabase-js";
+import { format } from "date-fns";
+export type ExtendedCalendarEvent = CalendarEvent & {
+  outfits?: any; // Adjust the type if you have a more specific definition
+};
 
-interface Day {
-  year: number;
-  month: number;
-  day: number;
-  timestamp: number;
-  dateString: string;
+interface AgendaItems {
+  [key: string]: ExtendedCalendarEvent[];
 }
 
 export default function CalendarScreen() {
   const { session } = useSession();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<Day | null>(null);
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [items, setItems] = useState<AgendaItems>({});
   const [loading, setLoading] = useState(false);
 
-  const fetchCalendarEvents = async (date: string, session: Session) => {
-    setLoading(true);
+  const loadItems = async (day: { dateString: string }) => {
+    if (!session) return;
+
     try {
-      const todayStart = `${date}T00:00:00.000Z`; // Start of day in UTC
-      const todayEnd = `${date}T23:59:59.999Z`; // End of day in UTC
+      setLoading(true);
+      const startOfMonth = new Date(day.dateString);
+      startOfMonth.setDate(1);
+      const endOfMonth = new Date(startOfMonth);
+      endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+      endOfMonth.setDate(0);
 
       const { data, error } = await supabase
         .from("calendar_events")
         .select(`*, outfits (*)`) // selecting the outfit for that event as well
         .eq("user_id", session.user.id)
-        .or(
-          `and(start_timestamp.gte.${todayStart},start_timestamp.lte.${todayEnd}),` + // Events starting within the day
-            `and(end_timestamp.gte.${todayStart},end_timestamp.lte.${todayEnd}),` + // Events ending within the day
-            `and(all_day.eq.true,start_timestamp.gte.${todayStart},start_timestamp.lte.${todayEnd},end_timestamp.is.null)` // All-day events
-        );
-
-      // if data, get all the outfits
-      let fetchedOutfits = [];
-      if (data) {
-        fetchedOutfits = data.flatMap((event) => event.outfits || []);
-        // fetch image urls for each outfit
-        if (!session) return;
-        fetchedOutfits = await addImageUrls(fetchedOutfits, session);
-        setOutfits(fetchedOutfits);
-      }
+        .gte("start_timestamp", startOfMonth.toISOString())
+        .lte("end_timestamp", endOfMonth.toISOString());
 
       if (error) throw error;
-      setCalendarEvents(data || []);
+
+      // Group events by date
+      const newItems: AgendaItems = {};
+      if (data) {
+        // Add image URLs to outfits
+        const eventsWithUrls = await Promise.all(
+          data.map(async (event) => {
+            if (event.outfits) {
+              const outfitsWithUrls = await addImageUrls(
+                [event.outfits],
+                session
+              );
+              return { ...event, outfits: outfitsWithUrls[0] };
+            }
+            return event;
+          })
+        );
+
+        // Group events by date
+        eventsWithUrls.forEach((event) => {
+          const dateStr = event.start_timestamp.split("T")[0];
+          if (!newItems[dateStr]) {
+            newItems[dateStr] = [];
+          }
+          newItems[dateStr].push(event);
+        });
+      }
+
+      setItems((prev) => ({ ...prev, ...newItems }));
     } catch (error) {
-      console.error("Error fetching calendar events:", error);
+      console.error("Error loading items:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDayPress = async (day: Day) => {
-    if (!session) return;
-    setSelectedDay(day);
-    await fetchCalendarEvents(day.dateString, session);
-    setModalVisible(true);
+  const renderItem = (item: ExtendedCalendarEvent) => {
+    return (
+      <TouchableOpacity
+        style={styles.eventCard}
+        onPress={() => {
+          router.push({
+            pathname: "/wardrobe/view/outfits/[outfitId]",
+            params: { outfitId: item.outfit_id },
+          });
+        }}
+      >
+        <View style={styles.eventContent}>
+          <View style={styles.eventInfo}>
+            <Text style={styles.eventTitle}>
+              {item.event_title || "Planned Outfit"}
+            </Text>
+            <Text style={styles.eventTime}>
+              {item.all_day
+                ? "All Day"
+                : `${format(
+                    new Date(item.start_timestamp),
+                    "h:mm a"
+                  )} - ${format(new Date(item.end_timestamp ?? ""), "h:mm a")}`}
+            </Text>
+            {item.location && (
+              <Text style={styles.eventLocation}>{item.location}</Text>
+            )}
+          </View>
+          {item.outfits?.image_url && (
+            <Image
+              source={{ uri: item.outfits.image_url }}
+              style={styles.outfitImage}
+              contentFit="cover"
+            />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderEmptyDate = () => {
+    return (
+      <View style={styles.emptyDate}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            router.push({
+              pathname: "/wardrobe/view/outfitsFeed",
+              params: {
+                fromCalendar: "true",
+                selectedDate: new Date().toISOString().split("T")[0],
+              },
+            });
+          }}
+        >
+          <Text style={styles.addButtonText}>Plan Outfit</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <CalendarList style={styles.calendar} onDayPress={handleDayPress} />
-      <Modal visible={modalVisible} onClose={() => setModalVisible(false)}>
-        <View style={styles.buttonContainer}>
-          {loading ? (
-            <Text>Loading...</Text>
-          ) : calendarEvents.length > 0 ? (
-            // Display calendar events if they exist
-            calendarEvents.map((event) => (
-              <TouchableOpacity
-                key={event.id}
-                style={styles.eventCard}
-                onPress={() => {
-                  // Navigate to outfit details
-                  setModalVisible(false);
-                  router.push({
-                    pathname: "/wardrobe/view/outfits/[outfitId]",
-                    params: { outfitId: event.outfit_id },
-                  });
-                }}
-              >
-                <Text style={styles.eventTitle}>
-                  {event.event_title || "Planned Outfit"}
-                </Text>
-                <Text style={styles.eventType}>{event.event_type}</Text>
-
-                <Image
-                  source={{
-                    uri:
-                      outfits.find((outfit) => outfit.id === event.outfit_id)
-                        ?.image_url || "",
-                  }}
-                  style={styles.image}
-                  contentFit="cover"
-                />
-              </TouchableOpacity>
-            ))
-          ) : (
-            // Show regular buttons if no events exist
-            <>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  router.push({
-                    pathname: "/wardrobe/view/outfitsFeed",
-                    params: {
-                      fromCalendar: "true",
-                      selectedDate: selectedDay?.dateString,
-                    },
-                  });
-                }}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Pick Outfit from Wardrobe</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  router.push({
-                    pathname: "/wardrobe/new/outfit",
-                    params: {
-                      fromCalendar: "true",
-                      selectedDate: selectedDay?.dateString,
-                    },
-                  });
-                }}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Create New Outfit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => console.log("ootd upload")}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Upload OOTD</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => console.log("discover new outfits")}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Discover New Outfits</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </Modal>
+    <SafeAreaView style={styles.container}>
+      <Agenda
+        items={items}
+        loadItemsForMonth={loadItems}
+        selected={new Date().toISOString().split("T")[0]}
+        renderItem={renderItem}
+        renderEmptyDate={renderEmptyDate}
+        showClosingKnob={true}
+        pastScrollRange={2}
+        futureScrollRange={2}
+        theme={{
+          agendaDayTextColor: "#666",
+          agendaDayNumColor: "#666",
+          agendaTodayColor: "#688FE5",
+          agendaKnobColor: "#688FE5",
+          selectedDayBackgroundColor: "#688FE5",
+          dotColor: "#688FE5",
+          todayTextColor: "#688FE5",
+        }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1, // Ensure SafeAreaView takes the full screen
-  },
-  calendar: {},
-  modalText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: "rgba(104, 143, 229, 0.5)",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    alignItems: "center",
-    borderRadius: 20,
-    width: 250, // Fixed width for all buttons
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
   eventCard: {
-    backgroundColor: "rgba(104, 143, 229, 0.5)",
+    backgroundColor: "#fff",
+    borderRadius: 12,
     padding: 15,
-    marginVertical: 5,
-    borderRadius: 10,
-    width: "90%",
+    marginRight: 15,
+    marginVertical: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  eventContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  eventInfo: {
+    flex: 1,
+    marginRight: 10,
   },
   eventTitle: {
-    color: "white",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
   },
-  eventType: {
-    color: "white",
+  eventTime: {
     fontSize: 14,
-    marginTop: 5,
+    color: "#666",
+    marginBottom: 4,
   },
-  image: {
-    width: 200,
-    height: 200,
+  eventLocation: {
+    fontSize: 14,
+    color: "#666",
+  },
+  outfitImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+  },
+  emptyDate: {
+    height: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addButton: {
+    backgroundColor: "rgba(104, 143, 229, 0.1)",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  addButtonText: {
+    color: "#688FE5",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
