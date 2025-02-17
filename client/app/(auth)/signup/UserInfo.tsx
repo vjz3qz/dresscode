@@ -86,10 +86,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dropdown: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    height: 40,
+    backgroundColor: "#EAE6E5",
+    paddingHorizontal: 4,
     marginBottom: 20,
+    borderBottomWidth: 0.5,
+    borderColor: "#333",
+    marginHorizontal: 10,
   },
   inputContainer: {
     marginBottom: 20,
