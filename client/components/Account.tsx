@@ -12,13 +12,14 @@ import {
 } from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { Input } from "@rneui/themed";
+import Avatar from "@/components/Avatar";
 
 export default function Account() {
   const { session, username, setUsername, avatarUrl, setAvatarUrl, loading } =
     useSession();
-  const [updateProfilePage, setUpdateProfilePage] = useState(false);
+  const [updateProfilePageOpen, setUpdateProfilePageOpen] = useState(false);
 
-  function UpdateProfile({
+  function UpdateProfilePage({
     username,
     setUsername,
     avatarUrl,
@@ -49,9 +50,19 @@ export default function Account() {
             disabled={loading}
           />
         </View>
+        <View>
+          <Avatar
+            size={200}
+            url={avatarUrl}
+            onUpload={(url: string) => {
+              setAvatarUrl(url);
+              handleUpdateProfile({ username, avatar_url: url });
+            }}
+          />
+        </View>
         <TouchableOpacity
           style={[styles.cancelButton, styles.mt20]}
-          onPress={() => setUpdateProfilePage(false)}
+          onPress={() => setUpdateProfilePageOpen(false)}
         >
           <Text style={styles.cancelText}>Cancel</Text>
         </TouchableOpacity>
@@ -88,8 +99,8 @@ export default function Account() {
     }
   }
 
-  return updateProfilePage ? (
-    <UpdateProfile
+  return updateProfilePageOpen ? (
+    <UpdateProfilePage
       username={username}
       setUsername={setUsername}
       avatarUrl={avatarUrl}
@@ -106,7 +117,7 @@ export default function Account() {
       {/* Buttons */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => setUpdateProfilePage(true)}
+        onPress={() => setUpdateProfilePageOpen(true)}
       >
         <Text style={styles.buttonText}>Edit your profile</Text>
       </TouchableOpacity>
