@@ -1,20 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  View,
   Text,
-  TextInput,
   StyleSheet,
   SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Animated,
+  Easing,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { router } from "expo-router";
 import { Button, Input } from "@rneui/themed";
+import { useKeyboardAvoidingView } from "@/hooks/useKeyboardAvoidingView";
 
 export default function UserInfo() {
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
+  const keyboardHeight = useKeyboardAvoidingView();
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]); // Added fadeAnim to dependencies
 
   const genderOptions = [
     { label: "Male", value: "male" },
@@ -30,38 +42,42 @@ export default function UserInfo() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-      >
-        <Text style={styles.title}>Tell Us About Yourself</Text>
-        <Text style={styles.label}>What is your gender?</Text>
-        <Dropdown
-          style={styles.dropdown}
-          data={genderOptions}
-          labelField="label"
-          valueField="value"
-          placeholder="Select gender"
-          value={gender}
-          onChange={(item) => setGender(item.value)}
-        />
-        <Text style={styles.label}>How old are you?</Text>
-        <Input
-          value={age}
-          onChangeText={setAge}
-          placeholder="Enter your age"
-          keyboardType="numeric"
-          containerStyle={styles.inputContainer}
-        />
-        <Button
-          title="Next"
-          onPress={handleNext}
-          buttonStyle={styles.button}
-          containerStyle={styles.buttonContainer}
-        />
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <Animated.View
+          style={[
+            styles.content,
+            { paddingBottom: keyboardHeight, opacity: fadeAnim },
+          ]}
+        >
+          <Text style={styles.title}>Tell Us About Yourself</Text>
+          <Text style={styles.label}>What is your gender?</Text>
+          <Dropdown
+            style={styles.dropdown}
+            data={genderOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Select gender"
+            value={gender}
+            onChange={(item) => setGender(item.value)}
+          />
+          <Text style={styles.label}>How old are you?</Text>
+          <Input
+            value={age}
+            onChangeText={setAge}
+            placeholder="Enter your age"
+            keyboardType="numeric"
+            containerStyle={styles.inputContainer}
+          />
+          <Button
+            title="Next"
+            onPress={handleNext}
+            buttonStyle={styles.button}
+            containerStyle={styles.buttonContainer}
+          />
+        </Animated.View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -70,7 +86,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#EAE6E5",
   },
-  keyboardAvoidingView: {
+  content: {
     flex: 1,
     justifyContent: "center",
     padding: 20,

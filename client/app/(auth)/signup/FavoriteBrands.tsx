@@ -1,5 +1,12 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  Animated,
+  Easing,
+} from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 import { router, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
@@ -8,6 +15,16 @@ import { Button } from "@rneui/themed";
 export default function FavoriteBrands() {
   const { gender, age } = useLocalSearchParams();
   const [brands, setBrands] = useState<string[]>([]);
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]); // Added fadeAnim to dependencies
 
   const brandOptions = [
     { label: "Nike", value: "nike" },
@@ -29,7 +46,7 @@ export default function FavoriteBrands() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.keyboardAvoidingView}>
+      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         <Text style={styles.title}>Your Favorite Brands</Text>
         <Text style={styles.subtitle}>Select the brands you love to wear</Text>
         <MultiSelect
@@ -54,7 +71,7 @@ export default function FavoriteBrands() {
           buttonStyle={styles.button}
           containerStyle={styles.buttonContainer}
         />
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -62,11 +79,9 @@ export default function FavoriteBrands() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    padding: 20,
     backgroundColor: "#EAE6E5",
   },
-  keyboardAvoidingView: {
+  content: {
     flex: 1,
     justifyContent: "center",
     padding: 20,

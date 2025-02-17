@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   StyleSheet,
@@ -6,14 +6,18 @@ import {
   AppState,
   Text,
   Image,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
+  Animated,
+  Easing,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { supabase } from "@/utils/Supabase";
 import { Button, Input } from "@rneui/themed";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useKeyboardAvoidingView } from "@/hooks/useKeyboardAvoidingView";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -39,6 +43,17 @@ export default function Auth() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const keyboardHeight = useKeyboardAvoidingView();
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]); // Added fadeAnim to dependencies
 
   async function signInWithEmail() {
     setLoading(true);
@@ -100,85 +115,90 @@ export default function Auth() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Image
-          source={require("@/assets/images/title.png")}
-          style={styles.brandImage}
-        />
-        <Text style={styles.subtitle}>Your Personal Style Assistant</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContainer,
+            { paddingBottom: keyboardHeight },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <Image
+            source={require("@/assets/images/title.png")}
+            style={styles.brandImage}
+          />
+          <Text style={styles.subtitle}>Your Personal Style Assistant</Text>
 
-        <Input
-          leftIcon={<Ionicons name="mail-outline" size={24} color="#333" />}
-          onChangeText={setEmail}
-          value={email}
-          placeholder="Email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          containerStyle={styles.inputContainer}
-        />
-        <Input
-          leftIcon={
-            <Ionicons name="lock-closed-outline" size={24} color="#333" />
-          }
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry
-          placeholder="Password"
-          autoCapitalize="none"
-          containerStyle={styles.inputContainer}
-        />
+          <Input
+            leftIcon={<Ionicons name="mail-outline" size={24} color="#333" />}
+            onChangeText={setEmail}
+            value={email}
+            placeholder="Email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            containerStyle={styles.inputContainer}
+          />
+          <Input
+            leftIcon={
+              <Ionicons name="lock-closed-outline" size={24} color="#333" />
+            }
+            onChangeText={setPassword}
+            value={password}
+            secureTextEntry
+            placeholder="Password"
+            autoCapitalize="none"
+            containerStyle={styles.inputContainer}
+          />
 
-        <Button
-          title="Sign In"
-          loading={loading}
-          onPress={signInWithEmail}
-          buttonStyle={styles.button}
-          containerStyle={styles.buttonContainer}
-        />
-        <Button
-          title="Sign Up"
-          loading={loading}
-          onPress={signUpWithEmail}
-          buttonStyle={[styles.button, styles.signUpButton]}
-          containerStyle={styles.buttonContainer}
-        />
+          <Button
+            title="Sign In"
+            loading={loading}
+            onPress={signInWithEmail}
+            buttonStyle={styles.button}
+            containerStyle={styles.buttonContainer}
+          />
+          <Button
+            title="Sign Up"
+            loading={loading}
+            onPress={signUpWithEmail}
+            buttonStyle={[styles.button, styles.signUpButton]}
+            containerStyle={styles.buttonContainer}
+          />
 
-        <Text style={styles.orText}>or</Text>
+          <Text style={styles.orText}>or</Text>
 
-        <Button
-          title="Sign in with Google"
-          icon={
-            <Ionicons
-              name="logo-google"
-              size={24}
-              color="white"
-              style={styles.socialIcon}
-            />
-          }
-          buttonStyle={[styles.button, styles.googleButton]}
-          containerStyle={styles.buttonContainer}
-        />
-        <Button
-          title="Sign in with Apple"
-          icon={
-            <Ionicons
-              name="logo-apple"
-              size={24}
-              color="white"
-              style={styles.socialIcon}
-            />
-          }
-          buttonStyle={[styles.button, styles.appleButton]}
-          containerStyle={styles.buttonContainer}
-        />
+          <Button
+            title="Sign in with Google"
+            icon={
+              <Ionicons
+                name="logo-google"
+                size={24}
+                color="white"
+                style={styles.socialIcon}
+              />
+            }
+            buttonStyle={[styles.button, styles.googleButton]}
+            containerStyle={styles.buttonContainer}
+          />
+          <Button
+            title="Sign in with Apple"
+            icon={
+              <Ionicons
+                name="logo-apple"
+                size={24}
+                color="white"
+                style={styles.socialIcon}
+              />
+            }
+            buttonStyle={[styles.button, styles.appleButton]}
+            containerStyle={styles.buttonContainer}
+          />
 
-        <Text style={styles.forgotPassword}>Forgot password?</Text>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <Text style={styles.forgotPassword}>Forgot password?</Text>
+        </ScrollView>
+      </Animated.View>
+    </TouchableWithoutFeedback>
   );
 }
 
