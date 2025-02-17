@@ -97,6 +97,10 @@ function RootLayoutContent() {
           name="wardrobe/view/outfitsFeed"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="calendar/create-event"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

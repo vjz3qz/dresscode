@@ -99,6 +99,7 @@ export type CalendarEvent = {
   event_title?: string; // Optional event name/description
   recurrence?: string; // Optional, for recurring outfits (e.g., "weekly", "monthly")
   notes?: string; // Any additional notes about the outfit/event
+  location?: string;
 };
 
 // CREATE TABLE calendar_events (

@@ -6,50 +6,30 @@ import {
   Text,
   SafeAreaView,
 } from "react-native";
-import { CalendarEvent, Outfit } from "@/types";
+import { Outfit } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import Feed from "@/components/Feeds/Feed";
 import { theme } from "@/theme";
-import { useSession } from "@/contexts/SessionContext";
-import { saveCalendarEvent } from "@/api/SaveCalendarEvent";
 
-export default function OutfitsFeedScreen() {
-  const {
-    fromCalendar,
-    selectedDate,
-  }: {
-    fromCalendar: string;
-    selectedDate: string;
-  } = useLocalSearchParams();
+export default function OutfitsFeed() {
+  const { fromCalendar, selectedDate } = useLocalSearchParams();
 
-  const { session } = useSession();
-
-  async function onSelect(object: Outfit) {
-    if (fromCalendar !== "true") {
-      console.log("fromCalendar", fromCalendar);
-      console.error("Invalid navigation"); // for now
-      return;
+  const handleOutfitClick = (outfit: Outfit) => {
+    if (fromCalendar === "true") {
+      // Navigate to event creation with outfit
+      router.push({
+        pathname: "/calendar/create-event",
+        params: {
+          outfitId: outfit.id,
+          outfitImage: outfit.image_url,
+          selectedDate,
+        },
+      });
+    } else {
+      // Normal outfit view navigation
+      router.push(`/wardrobe/view/outfits/${outfit.id}`);
     }
-    // create cal event
-    const outfitId: number = object.id ?? -1;
-    if (outfitId === -1) {
-      console.error("Invalid outfit id");
-      return;
-    }
-    const userId: string = session?.user.id ?? "";
-    if (userId === "") {
-      console.error("Invalid user id");
-      return;
-    }
-    const calendarEvent: CalendarEvent = {
-      user_id: userId,
-      outfit_id: outfitId,
-      all_day: true, // always all day for now
-      start_timestamp: selectedDate,
-      // end_timestamp: selectedDate,
-    };
-    await saveCalendarEvent(calendarEvent);
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,13 +41,7 @@ export default function OutfitsFeedScreen() {
         <View style={{ width: 30 }} />
       </View>
       <View style={styles.feedContainer}>
-        <Feed
-          tableName="outfits"
-          onClick={(object: Outfit) => {
-            onSelect(object);
-            router.dismiss();
-          }}
-        />
+        <Feed onClick={handleOutfitClick} tableName="outfits" />
       </View>
     </SafeAreaView>
   );
