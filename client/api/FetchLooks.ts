@@ -4,8 +4,11 @@ import { addImageUrls } from "@/api/FetchImageUrl";
 import { Session } from "@supabase/supabase-js";
 
 // Function to fetch looks from the Supabase table
-export async function fetchLooks(): Promise<Look[]> {
-  const { data, error } = await supabase.from("looks").select("*");
+export async function fetchLooks(session: Session): Promise<Look[]> {
+  const { data, error } = await supabase
+    .from("looks")
+    .select("*")
+    .eq("user_id", session.user.id);
 
   if (error) {
     console.error("Error fetching looks:", error);

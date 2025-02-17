@@ -56,7 +56,7 @@ export default function LookFeed({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const fetchedLooks = await fetchLooks();
+        const fetchedLooks = await fetchLooks(session);
         const fetchedLooksWithOutfits = await loadLooksWithOutfits(
           fetchedLooks,
           session
