@@ -29,30 +29,32 @@ export default function FavoriteBrands() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Your Favorite Brands</Text>
-      <Text style={styles.subtitle}>Select the brands you love to wear</Text>
-      <MultiSelect
-        style={styles.dropdown}
-        data={brandOptions}
-        labelField="label"
-        valueField="value"
-        placeholder="Select your favorite brands"
-        value={brands}
-        onChange={(items) => setBrands(items)}
-        selectedStyle={styles.selectedStyle}
-        renderItem={(item, selected) => (
-          <View style={styles.itemContainer}>
-            <Text style={styles.itemText}>{item.label}</Text>
-            {selected && <AntDesign name="check" size={16} color="green" />}
-          </View>
-        )}
-      />
-      <Button
-        title="Next"
-        onPress={handleNext}
-        buttonStyle={styles.button}
-        containerStyle={styles.buttonContainer}
-      />
+      <View style={styles.keyboardAvoidingView}>
+        <Text style={styles.title}>Your Favorite Brands</Text>
+        <Text style={styles.subtitle}>Select the brands you love to wear</Text>
+        <MultiSelect
+          style={styles.dropdown}
+          data={brandOptions}
+          labelField="label"
+          valueField="value"
+          placeholder="Select your favorite brands"
+          value={brands}
+          onChange={(items) => setBrands(items)}
+          selectedStyle={styles.selectedStyle}
+          renderItem={(item, selected) => (
+            <View style={styles.itemContainer}>
+              <Text style={styles.itemText}>{item.label}</Text>
+              {selected && <AntDesign name="check" size={16} color="green" />}
+            </View>
+          )}
+        />
+        <Button
+          title="Next"
+          onPress={handleNext}
+          buttonStyle={styles.button}
+          containerStyle={styles.buttonContainer}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -63,6 +65,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
     backgroundColor: "#EAE6E5",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
   },
   title: {
     fontSize: 24,
