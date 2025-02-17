@@ -33,9 +33,9 @@ export default function WardrobeScreen() {
 
   function onPlusButtonClick() {
     const paths = {
-      items: "/wardrobe/new/item",
-      outfits: "/wardrobe/new/outfit",
-      looks: "/wardrobe/new/look",
+      items: "/new/wardrobe/item",
+      outfits: "/new/wardrobe/outfit",
+      looks: "/new/wardrobe/look",
     };
     router.push(paths[tabs[tabIndex].tableName] as Href);
   }
@@ -86,7 +86,7 @@ export default function WardrobeScreen() {
       {tabIndex === 2 ? (
         <LookFeed
           onLookClick={(look: Look, index: number) => {
-            if (look.id) router.push(`/wardrobe/view/looks/${look.id}` as Href);
+            if (look.id) router.push(`/view/wardrobe/looks/${look.id}` as Href);
           }}
           tableName={tabs[tabIndex].tableName as keyof TableTypes}
         />
@@ -94,7 +94,7 @@ export default function WardrobeScreen() {
         <Feed
           onClick={(item: any, index: number) =>
             router.push(
-              `/wardrobe/view/${tabs[tabIndex].tableName}/${item.id}` as Href
+              `/view/wardrobe/${tabs[tabIndex].tableName}/${item.id}` as Href
             )
           }
           tableName={tabs[tabIndex].tableName as keyof TableTypes}

@@ -70,35 +70,39 @@ function RootLayoutContent() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="wardrobe/new/item"
+          name="new/wardrobe/item"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="wardrobe/new/outfit"
+          name="new/wardrobe/outfit"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="wardrobe/new/look"
+          name="new/wardrobe/look"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="wardrobe/view/looks/[lookId]"
+          name="new/calendarEvent"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="wardrobe/view/items/[itemId]"
+          name="view/wardrobe/looks/[lookId]"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="wardrobe/view/outfits/[outfitId]"
+          name="view/wardrobe/items/[itemId]"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="wardrobe/view/outfitsFeed"
+          name="view/wardrobe/outfits/[outfitId]"
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="calendar/create-event"
+          name="view/wardrobe/outfitsFeed"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/[calendarEventId]"
           options={{ headerShown: false }}
         />
         <Stack.Screen name="+not-found" />

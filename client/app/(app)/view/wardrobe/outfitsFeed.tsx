@@ -18,7 +18,7 @@ export default function OutfitsFeed() {
     if (fromCalendar === "true") {
       // Navigate to event creation with outfit
       router.push({
-        pathname: "/calendar/create-event",
+        pathname: "new/calendarEvent",
         params: {
           outfitId: outfit.id,
           outfitImage: outfit.image_url,
@@ -26,7 +26,7 @@ export default function OutfitsFeed() {
       });
     } else {
       // Normal outfit view navigation
-      router.push(`/wardrobe/view/outfits/${outfit.id}`);
+      router.push(`/view/wardrobe/outfits/${outfit.id}`);
     }
   };
 

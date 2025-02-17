@@ -39,7 +39,7 @@ export default function CalendarScreen() {
               onPress={() => {
                 setModalVisible(false);
                 router.push({
-                  pathname: "/wardrobe/view/outfitsFeed",
+                  pathname: "/view/wardrobe/outfitsFeed",
                   params: {
                     fromCalendar: "true",
                   },
@@ -53,7 +53,7 @@ export default function CalendarScreen() {
               onPress={() => {
                 setModalVisible(false);
                 router.push({
-                  pathname: "/wardrobe/new/outfit",
+                  pathname: "/new/wardrobe/outfit",
                   params: {
                     fromCalendar: "true",
                   },
@@ -151,7 +151,7 @@ export default function CalendarScreen() {
         style={styles.eventCard}
         onPress={() => {
           router.push({
-            pathname: "/wardrobe/view/outfits/[outfitId]",
+            pathname: "/view/wardrobe/outfits/[outfitId]",
             params: { outfitId: item.outfit_id },
           });
         }}
