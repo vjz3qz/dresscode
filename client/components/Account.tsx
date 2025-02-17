@@ -50,10 +50,10 @@ export default function Account() {
           />
         </View>
         <TouchableOpacity
-          style={[styles.verticallySpaced, styles.mt20]}
+          style={[styles.cancelButton, styles.mt20]}
           onPress={() => setUpdateProfilePage(false)}
         >
-          <Text style={{ color: "#007AFF" }}>Cancel</Text>
+          <Text style={styles.cancelText}>Cancel</Text>
         </TouchableOpacity>
       </View>
     );
@@ -134,13 +134,17 @@ export default function Account() {
 
 const styles = StyleSheet.create({
   updateContainer: {
-    marginTop: 40,
-    padding: 12,
+    padding: 20,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: "stretch",
+    marginBottom: 15,
   },
   mt20: {
     marginTop: 20,
@@ -192,5 +196,17 @@ const styles = StyleSheet.create({
   navIcon: {
     fontSize: 24,
     color: "#333",
+  },
+  updateButton: {
+    backgroundColor: "#007AFF",
+    borderRadius: 5,
+    paddingVertical: 10,
+  },
+  cancelButton: {
+    alignItems: "center",
+  },
+  cancelText: {
+    color: "#007AFF",
+    fontSize: 16,
   },
 });
