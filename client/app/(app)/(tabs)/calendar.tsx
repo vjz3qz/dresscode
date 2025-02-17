@@ -145,37 +145,41 @@ export default function CalendarScreen() {
     }
   };
 
-  const renderItem = (item: ExtendedCalendarEvent) => {
+  const renderItem = (calendarEvent: ExtendedCalendarEvent) => {
+    if (!calendarEvent) return <></>;
     return (
       <TouchableOpacity
         style={styles.eventCard}
         onPress={() => {
           router.push({
-            pathname: "/view/wardrobe/outfits/[outfitId]",
-            params: { outfitId: item.outfit_id },
+            pathname: "/view/[calendarEventId]",
+            params: { calendarEventId: calendarEvent.id ?? "" },
           });
         }}
       >
         <View style={styles.eventContent}>
           <View style={styles.eventInfo}>
             <Text style={styles.eventTitle}>
-              {item.event_title || "Planned Outfit"}
+              {calendarEvent.event_title || "Planned Outfit"}
             </Text>
             <Text style={styles.eventTime}>
-              {item.all_day
+              {calendarEvent.all_day
                 ? "All Day"
                 : `${format(
-                    new Date(item.start_timestamp),
+                    new Date(calendarEvent.start_timestamp),
                     "h:mm a"
-                  )} - ${format(new Date(item.end_timestamp ?? ""), "h:mm a")}`}
+                  )} - ${format(
+                    new Date(calendarEvent.end_timestamp ?? ""),
+                    "h:mm a"
+                  )}`}
             </Text>
-            {item.location && (
-              <Text style={styles.eventLocation}>{item.location}</Text>
+            {calendarEvent.location && (
+              <Text style={styles.eventLocation}>{calendarEvent.location}</Text>
             )}
           </View>
-          {item.outfits?.image_url && (
+          {calendarEvent.outfits?.image_url && (
             <Image
-              source={{ uri: item.outfits.image_url }}
+              source={{ uri: calendarEvent.outfits.image_url }}
               style={styles.outfitImage}
               contentFit="cover"
             />
