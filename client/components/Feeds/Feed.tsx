@@ -41,7 +41,7 @@ export default function Feed({
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `image_urls_${tableName}`;
+      const cacheKey = `image_urls_${tableName}_${session.user.id}`;
       const cachedData = await AsyncStorage.getItem(cacheKey);
 
       if (cachedData && !isRefreshing) {
