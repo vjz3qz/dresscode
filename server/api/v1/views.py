@@ -10,7 +10,6 @@ import time
 import uuid
 
 from core.celery_worker import celery
-from core.image_segmentation import process_image_s3, upload_file_obj_to_s3
 from utils.dependencies import validate_token
 
 router = APIRouter()
@@ -85,6 +84,19 @@ async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict 
             results[filename] = ''  # Handle error case by setting an empty string or error message
 
     return JSONResponse(content=results)
+
+
+@router.get("/closet-wrapped")
+async def closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict = Depends(validate_token)):
+    """_summary_
+
+    Args:
+        outfit_ids (List[int], optional): _description_. Defaults to Query(...).
+    """
+    # call celery
+    user_id = token_payload.get("sub")
+    task = celery.send_task("tasks.closet_wrapped", args=[user_id, outfit_ids])
+    return return_task(task)
 
 
 def return_task(task):

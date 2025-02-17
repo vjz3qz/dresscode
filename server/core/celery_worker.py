@@ -4,7 +4,9 @@ import os
 import threading
 from celery import Celery
 from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3, get_image_url_s3
-from data.db_operations import add_item
+from data.db_operations import get_outfits
+from core.chat_model import OpenAIChatClient
+
 
 CHECK_EMAIL_LOCK = threading.Lock()
 
@@ -20,6 +22,8 @@ else:
         broker=f"rediss://{REDIS_HOSTNAME}:{REDIS_PORT}/0?ssl_cert_reqs=CERT_REQUIRED",
         backend=f"rediss://{REDIS_HOSTNAME}:{REDIS_PORT}/0?ssl_cert_reqs=CERT_REQUIRED",
     )
+
+client = OpenAIChatClient()
 
 @celery.task(name="tasks.upload")
 def upload_task(file_content, file_name, file_content_type):
@@ -45,6 +49,20 @@ def get_image_url_task(key):
         str: The URL of the image.
     """
     return get_image_url_s3(key)
+
+@celery.task(name="tasks.closet_wrapped")
+def closet_wrapped(user_id, outfit_ids):
+    # fetch outfit urls
+    outfits = get_outfits(user_id, outfit_ids)
+    url_fetches = [get_image_url_s3(outfit["s3_key"]) for outfit in outfits]
+    urls = [ url_fetch["url"] for url_fetch in url_fetches if "error" not in url_fetch]
+    # feed to chat
+    image_response = client.send_image_query(
+        """You are given a recap of the outfits worn by an individual over the last week. 
+        give a quirky/extravagant/gen Z one liner about the outfits the person wore this past week. 
+        This should be upbeat, and not negative.""",
+        urls)
+    return image_response
 
 
 

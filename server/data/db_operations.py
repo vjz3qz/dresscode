@@ -10,3 +10,8 @@ def add_item(name, type, key):
     supabase.table("items").insert(
         {"name": name, "type": type, "s3_key": key}
     ).execute()
+
+def get_outfits(user_id, outfit_ids):
+    response = supabase.table("outfits").select("*").eq("user_id", user_id).in_("id", outfit_ids).execute()
+    data = response.data
+    return data
