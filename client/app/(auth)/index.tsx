@@ -56,6 +56,14 @@ export default function Auth() {
   }, [fadeAnim]); // Added fadeAnim to dependencies
 
   async function signInWithEmail() {
+    if (email === "") {
+      Alert.alert("email cannot be empty!");
+      return;
+    }
+    if (password === "") {
+      Alert.alert("password cannot be empty!");
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
