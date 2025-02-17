@@ -12,7 +12,7 @@ import Feed from "@/components/Feeds/Feed";
 import { theme } from "@/theme";
 
 export default function OutfitsFeed() {
-  const { fromCalendar, selectedDate } = useLocalSearchParams();
+  const { fromCalendar } = useLocalSearchParams();
 
   const handleOutfitClick = (outfit: Outfit) => {
     if (fromCalendar === "true") {
@@ -22,7 +22,6 @@ export default function OutfitsFeed() {
         params: {
           outfitId: outfit.id,
           outfitImage: outfit.image_url,
-          selectedDate,
         },
       });
     } else {

@@ -15,6 +15,8 @@ import { Image } from "expo-image";
 import { useSession } from "@/contexts/SessionContext";
 import { addImageUrls } from "@/api/FetchImageUrl";
 import { format } from "date-fns";
+import UploadButton from "@/ui/UploadButton";
+import Modal from "@/ui/Modal";
 export type ExtendedCalendarEvent = CalendarEvent & {
   outfits?: any; // Adjust the type if you have a more specific definition
 };
@@ -22,11 +24,62 @@ export type ExtendedCalendarEvent = CalendarEvent & {
 interface AgendaItems {
   [key: string]: ExtendedCalendarEvent[];
 }
-
 export default function CalendarScreen() {
   const { session } = useSession();
   const [items, setItems] = useState<AgendaItems>({});
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  function AddModal() {
+    return (
+      <Modal visible={modalVisible} onClose={() => setModalVisible(false)}>
+        <View style={styles.buttonContainer}>
+          <>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(false);
+                router.push({
+                  pathname: "/wardrobe/view/outfitsFeed",
+                  params: {
+                    fromCalendar: "true",
+                  },
+                });
+              }}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Pick Outfit from Wardrobe</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(false);
+                router.push({
+                  pathname: "/wardrobe/new/outfit",
+                  params: {
+                    fromCalendar: "true",
+                  },
+                });
+              }}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Create New Outfit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => console.log("ootd upload")}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Upload OOTD</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => console.log("discover new outfits")}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Discover New Outfits</Text>
+            </TouchableOpacity>
+          </>
+        </View>
+      </Modal>
+    );
+  }
 
   const loadItemsForMonth = async (day: { dateString: string }) => {
     if (!session) return;
@@ -132,27 +185,6 @@ export default function CalendarScreen() {
     );
   };
 
-  const renderEmptyDate = () => {
-    return (
-      <View style={styles.emptyDate}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            router.push({
-              pathname: "/wardrobe/view/outfitsFeed",
-              params: {
-                fromCalendar: "true",
-                selectedDate: new Date().toISOString().split("T")[0],
-              },
-            });
-          }}
-        >
-          <Text style={styles.addButtonText}>Plan Outfit</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Agenda
@@ -160,10 +192,7 @@ export default function CalendarScreen() {
         loadItemsForMonth={loadItemsForMonth}
         selected={new Date().toISOString().split("T")[0]}
         renderItem={renderItem}
-        renderEmptyDate={renderEmptyDate}
         showClosingKnob={true}
-        pastScrollRange={2}
-        futureScrollRange={2}
         theme={{
           agendaDayTextColor: "#666",
           agendaDayNumColor: "#666",
@@ -174,11 +203,40 @@ export default function CalendarScreen() {
           todayTextColor: "#688FE5",
         }}
       />
+      {modalVisible && <AddModal />}
+      {/* Upload Button */}
+      <UploadButton onPress={() => setModalVisible(!modalVisible)} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1, // Ensure SafeAreaView takes the full screen
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  button: {
+    backgroundColor: "rgba(104, 143, 229, 0.5)",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginVertical: 10,
+    alignItems: "center",
+    borderRadius: 20,
+    width: 250, // Fixed width for all buttons
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",

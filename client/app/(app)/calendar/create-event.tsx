@@ -21,15 +21,11 @@ import { fetchImageUrl } from "@/api/FetchImageUrl";
 
 export default function CreateEventScreen() {
   const { session } = useSession();
-  const { outfitId, selectedDate } = useLocalSearchParams();
+  const { outfitId } = useLocalSearchParams();
   const [title, setTitle] = useState("");
   const [isAllDay, setIsAllDay] = useState(false);
-  const [startDate, setStartDate] = useState(
-    selectedDate ? new Date(selectedDate as string) : new Date()
-  );
-  const [endDate, setEndDate] = useState(
-    selectedDate ? new Date(selectedDate as string) : new Date()
-  );
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [outfit, setOutfit] = useState<Outfit | null>(null);
