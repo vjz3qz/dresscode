@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { supabase } from "@/utils/Supabase";
 import type { CalendarEvent } from "@/types";
@@ -17,6 +18,7 @@ import { addImageUrls } from "@/api/FetchImageUrl";
 import { format } from "date-fns";
 import UploadButton from "@/ui/UploadButton";
 import Modal from "@/ui/Modal";
+import { Ionicons } from "@expo/vector-icons"; // Import refresh icon
 export type ExtendedCalendarEvent = CalendarEvent & {
   outfits?: any; // Adjust the type if you have a more specific definition
 };
@@ -24,11 +26,13 @@ export type ExtendedCalendarEvent = CalendarEvent & {
 interface AgendaItems {
   [key: string]: ExtendedCalendarEvent[];
 }
+
 export default function CalendarScreen() {
   const { session } = useSession();
   const [items, setItems] = useState<AgendaItems>({});
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // State for refresh
 
   function AddModal() {
     return (
@@ -142,7 +146,14 @@ export default function CalendarScreen() {
       console.error("Error loading items:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const refreshItems = async () => {
+    setRefreshing(true);
+    const today = new Date().toISOString().split("T")[0];
+    await loadItemsForMonth({ dateString: today });
   };
 
   const renderItem = (calendarEvent: ExtendedCalendarEvent) => {
@@ -191,11 +202,19 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header with Refresh Button */}
       <View style={styles.header}>
         <View style={{ width: 30 }} />
         <Text style={styles.headerTitle}>Your Outfit Calendar</Text>
-        <View style={{ width: 30 }} />
+        <TouchableOpacity onPress={refreshItems} style={styles.refreshButton}>
+          {refreshing ? (
+            <ActivityIndicator size="small" color="#688FE5" />
+          ) : (
+            <Ionicons name="refresh" size={24} color="#688FE5" />
+          )}
+        </TouchableOpacity>
       </View>
+
       <Agenda
         items={items}
         loadItemsForMonth={loadItemsForMonth}
@@ -220,9 +239,6 @@ export default function CalendarScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1, // Ensure SafeAreaView takes the full screen
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -234,6 +250,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "black",
+  },
+  refreshButton: {
+    padding: 5,
   },
   modalText: {
     fontSize: 18,
@@ -307,21 +326,5 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 8,
-  },
-  emptyDate: {
-    height: 100,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addButton: {
-    backgroundColor: "rgba(104, 143, 229, 0.1)",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  addButtonText: {
-    color: "#688FE5",
-    fontSize: 14,
-    fontWeight: "600",
   },
 });
