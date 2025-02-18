@@ -11,6 +11,7 @@ import Avatar from "@/components/Avatar";
 import { router } from "expo-router";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView as ScrollViewRN } from "react-native";
 
 interface Post {
   id: string;
@@ -24,6 +25,59 @@ interface Post {
   likes: number;
   comments: number;
   timestamp: string;
+}
+
+interface SuggestedUser {
+  id: string;
+  username: string;
+  avatarUrl?: string;
+}
+
+function FollowSuggestions() {
+  const suggestedUsers: SuggestedUser[] = [
+    {
+      id: "6",
+      username: "fashionista",
+      avatarUrl: "https://via.placeholder.com/40",
+    },
+    {
+      id: "7",
+      username: "styleguru",
+      avatarUrl: "https://via.placeholder.com/40",
+    },
+    {
+      id: "8",
+      username: "trendsetterxo",
+      avatarUrl: "https://via.placeholder.com/40",
+    },
+    {
+      id: "9",
+      username: "chic_styles",
+      avatarUrl: "https://via.placeholder.com/40",
+    },
+    {
+      id: "10",
+      username: "fashion_forward",
+      avatarUrl: "https://via.placeholder.com/40",
+    },
+  ];
+
+  return (
+    <View style={styles.suggestionsContainer}>
+      <Text style={styles.suggestionsTitle}>Suggested for you</Text>
+      <ScrollViewRN horizontal showsHorizontalScrollIndicator={false}>
+        {suggestedUsers.map((user) => (
+          <TouchableOpacity key={user.id} style={styles.suggestionItem}>
+            <Avatar size={60} url={user.avatarUrl ?? null} />
+            <Text style={styles.suggestionUsername}>{user.username}</Text>
+            <TouchableOpacity style={styles.followButton}>
+              <Text style={styles.followButtonText}>Follow</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
+      </ScrollViewRN>
+    </View>
+  );
 }
 
 export default function FeedScreen() {
@@ -68,6 +122,8 @@ export default function FeedScreen() {
           <Ionicons name="people-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
+
+      <FollowSuggestions />
 
       <ScrollView>
         {posts.map((post) => (
@@ -205,5 +261,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
     marginTop: 4,
+  },
+  suggestionsContainer: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  suggestionsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    paddingHorizontal: 16,
+  },
+  suggestionItem: {
+    alignItems: "center",
+    marginRight: 16,
+    width: 80,
+  },
+  suggestionUsername: {
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  followButton: {
+    backgroundColor: "#0095f6",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  followButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });
