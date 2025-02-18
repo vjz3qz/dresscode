@@ -13,7 +13,7 @@ import Gallery from "react-native-awesome-gallery";
 import { addImageUrls } from "@/api/FetchImageUrl";
 import { useLocalSearchParams } from "expo-router";
 import { Item, Look, Outfit } from "@/types";
-import Feed from "@/components/Feeds/Feed";
+import GridView from "@/components/GridViews/GridView";
 import { fetchLookById, fetchOutfitsByLook } from "@/api/FetchLooks";
 import { useSession } from "@/contexts/SessionContext";
 import { Icon } from "@rneui/themed";
@@ -126,7 +126,7 @@ export default function LookView() {
         </TouchableOpacity>
       </View>
 
-      <Feed
+      <GridView
         onClick={(item: Item, index: number) => {
           setSelectedImageIndex(index);
         }}

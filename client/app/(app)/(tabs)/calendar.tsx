@@ -43,7 +43,7 @@ export default function CalendarScreen() {
               onPress={() => {
                 setModalVisible(false);
                 router.push({
-                  pathname: "/view/wardrobe/outfitsFeed",
+                  pathname: "/view/wardrobe/outfitsGridView",
                   params: {
                     fromCalendar: "true",
                   },

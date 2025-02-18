@@ -5,30 +5,39 @@ import {
   View,
   Text,
   SafeAreaView,
+  Switch,
 } from "react-native";
 import { Outfit } from "@/types";
-import { router, useLocalSearchParams } from "expo-router";
-import Feed from "@/components/Feeds/Feed";
+import { router } from "expo-router";
+import GridView from "@/components/GridViews/GridView";
 import { theme } from "@/theme";
 
-export default function OutfitsFeed() {
-  const { fromCalendar } = useLocalSearchParams();
+export default function OutfitsGridViewScreen({
+  fromCalendar,
+  selectedDate,
+}: {
+  fromCalendar: string;
+  selectedDate: string;
+}) {
+  const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
 
-  const handleOutfitClick = (outfit: Outfit) => {
-    if (fromCalendar === "true") {
-      // Navigate to event creation with outfit
-      router.push({
-        pathname: "/new/calendarEvent",
-        params: {
-          outfitId: outfit.id,
-          outfitImage: outfit.image_url,
-        },
-      });
+  function onSelect(selectedOutfit: Outfit) {
+    if (isMultiSelect) {
+      setSelectedOutfits((prev) =>
+        prev.some((outfit) => outfit.id === selectedOutfit.id)
+          ? prev.filter((outfit) => outfit.id !== selectedOutfit.id)
+          : [...prev, selectedOutfit]
+      );
     } else {
-      // Normal outfit view navigation
-      router.push(`/view/wardrobe/outfits/${outfit.id}`);
+      setSelectedOutfits([selectedOutfit]);
     }
-  };
+  }
+
+  async function save() {
+    // Save the selected outfits to the calendar
+    // if
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,10 +46,30 @@ export default function OutfitsFeed() {
           <Text style={styles.closeIcon}>✕</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Outfit canvas</Text>
-        <View style={{ width: 30 }} />
+        <Switch
+          value={isMultiSelect}
+          onValueChange={(value) => {
+            setIsMultiSelect(value);
+            setSelectedOutfits([]);
+          }}
+          thumbColor={isMultiSelect ? theme.colors.primary : "#ccc"}
+          trackColor={{ false: "#e0e0e0", true: theme.colors.secondary }}
+        />
       </View>
       <View style={styles.feedContainer}>
-        <Feed onClick={handleOutfitClick} tableName="outfits" />
+        <GridView
+          tableName="outfits"
+          onClick={(object: Outfit) => {
+            console.log("Selected object", object);
+            onSelect(object);
+          }}
+        />
+      </View>
+      <View style={styles.metadataContainer}>
+        <Text style={styles.label}>
+          {isMultiSelect ? "Selected Outfits:" : "Selected Outfit:"}
+        </Text>
+        <Text>{selectedOutfits.map((outfit) => outfit.name).join(", ")}</Text>
       </View>
     </SafeAreaView>
   );

@@ -98,7 +98,7 @@ function RootLayoutContent() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="view/wardrobe/outfitsFeed"
+          name="view/wardrobe/outfitsGridView"
           options={{ headerShown: false }}
         />
         <Stack.Screen

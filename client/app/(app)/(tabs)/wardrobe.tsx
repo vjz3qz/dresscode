@@ -15,8 +15,8 @@ import { type Href, router } from "expo-router";
 import type { Look, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
 import { Ionicons } from "@expo/vector-icons";
-import Feed from "@/components/Feeds/Feed";
-import LookFeed from "@/components/Feeds/LookFeed";
+import GridView from "@/components/GridViews/GridView";
+import LookGridView from "@/components/GridViews/LookGridView";
 import Avatar from "@/components/Avatar";
 import Modal from "@/ui/Modal";
 import { getClosetWrapped } from "@/api/getClosetWrapped";
@@ -119,16 +119,16 @@ export default function WardrobeScreen() {
         <Ionicons name="mic-outline" size={20} color="#6b7280" />
       </View>
 
-      {/* Feeds */}
+      {/* GridViews */}
       {tabIndex === 2 ? (
-        <LookFeed
+        <LookGridView
           onLookClick={(look: Look, index: number) => {
             if (look.id) router.push(`/view/wardrobe/looks/${look.id}` as Href);
           }}
           tableName={tabs[tabIndex].tableName as keyof TableTypes}
         />
       ) : (
-        <Feed
+        <GridView
           onClick={(item: any, index: number) =>
             router.push(
               `/view/wardrobe/${tabs[tabIndex].tableName}/${item.id}` as Href

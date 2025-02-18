@@ -17,7 +17,7 @@ import { useSession } from "@/contexts/SessionContext";
 
 const { height } = Dimensions.get("window");
 
-export default function LookFeed({
+export default function LookGridView({
   onLookClick,
   tableName,
 }: {

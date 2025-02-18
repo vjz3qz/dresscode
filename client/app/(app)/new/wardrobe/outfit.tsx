@@ -7,7 +7,7 @@ import { StyleSheet } from "react-native";
 import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
-import Feed from "@/components/Feeds/Feed";
+import GridView from "@/components/GridViews/GridView";
 import { router, useLocalSearchParams } from "expo-router";
 import { saveOutfit } from "@/api/SaveOutfit";
 
@@ -125,7 +125,7 @@ export default function NewOutfitScreen() {
           borderTopRightRadius: 20,
         }}
       >
-        <Feed
+        <GridView
           onClick={(item: Item) => {
             item.x = Math.random() * 200;
             item.y = Math.random() * 200;

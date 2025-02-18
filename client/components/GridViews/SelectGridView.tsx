@@ -1,56 +1,54 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
   Text,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   Dimensions,
   ScrollView,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
-import { TableTypes } from "@/types";
+import { Outfit, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
 
 const { height, width } = Dimensions.get("window");
 
-export default function Feed({
-  onClick,
+export default function SelectGridView({
   tableName,
-  rawData,
+  onSelect,
 }: {
-  onClick: (object: any, index: number) => void;
   tableName: keyof TableTypes;
-  rawData?: any[];
+  onSelect: (selectedOutfits: Outfit[]) => void;
 }) {
   const { session } = useSession();
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Outfit[]>([]);
+  const [selectedOutfits, setSelectedOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null);
 
-  // Set a cache expiry time in milliseconds (e.g., 1 hour)
-  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour
+  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
   const REFRESH_COOLDOWN = 10000; // Cooldown time in milliseconds (e.g., 10 seconds)
 
-  const fetchAndCacheData = useCallback(
+  const fetchAndCacheOutfits = useCallback(
     async (isRefreshing = false) => {
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `image_urls_${tableName}_${session.user.id}`;
+      const cacheKey = `outfits_${tableName}`;
       const cachedData = await AsyncStorage.getItem(cacheKey);
 
       if (cachedData && !isRefreshing) {
         const parsedData = JSON.parse(cachedData);
-        const { timestamp, objects } = parsedData;
+        const { timestamp, items: cachedItems } = parsedData;
 
         // Check if cached data is still valid
         if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
-          setData(objects);
+          setData(cachedItems);
           setLoading(false);
           setRefreshing(false);
           return;
@@ -59,13 +57,13 @@ export default function Feed({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const objects = await fetchAllImageUrls(tableName, session);
-        setData(objects);
+        const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
+        setData(items);
 
         // Cache the data with a new timestamp
         AsyncStorage.setItem(
           cacheKey,
-          JSON.stringify({ timestamp: Date.now(), objects })
+          JSON.stringify({ timestamp: Date.now(), items })
         );
       } catch (error: any) {
         console.error("Error fetching items:", error.message);
@@ -78,19 +76,13 @@ export default function Feed({
     [tableName, session]
   );
 
-  // Update feed when tableName or rawData changes, debounce refetching
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (rawData) {
-        setData(rawData);
-        setLoading(false);
-      } else {
-        fetchAndCacheData();
-      }
-    }, 300); // 300ms debounce to avoid excessive refetching
+      fetchAndCacheOutfits();
+    }, 300); // Debounce fetch by 300ms to avoid excessive refetching
 
-    return () => clearTimeout(timer); // Clear timeout on unmount
-  }, [tableName, rawData, fetchAndCacheData]);
+    return () => clearTimeout(timer);
+  }, [tableName, fetchAndCacheOutfits]);
 
   const onRefresh = useCallback(() => {
     const now = Date.now();
@@ -103,8 +95,20 @@ export default function Feed({
 
     setRefreshing(true);
     setLastRefreshTime(now); // Update the last refresh time
-    fetchAndCacheData(true);
-  }, [fetchAndCacheData, lastRefreshTime]);
+    fetchAndCacheOutfits(true);
+  }, [fetchAndCacheOutfits, lastRefreshTime]);
+
+  const toggleSelection = (item: Outfit) => {
+    const isSelected = selectedOutfits.some(
+      (selected) => selected.id === item.id
+    );
+    const newSelectedOutfits = isSelected
+      ? selectedOutfits.filter((selected) => selected.id !== item.id)
+      : [...selectedOutfits, item];
+
+    setSelectedOutfits(newSelectedOutfits);
+    onSelect(newSelectedOutfits);
+  };
 
   if (loading) {
     return (
@@ -115,35 +119,51 @@ export default function Feed({
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {data.length === 0 ? (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>
-            No {tableName} found. Add some {tableName}!
-          </Text>
-        </View>
-      ) : (
-        data.map((item, index) => (
-          <TouchableWithoutFeedback
-            key={item.id}
-            onPress={() => onClick(data[index], index)}
-          >
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: item.image_url }} style={styles.image} />
-            </View>
-          </TouchableWithoutFeedback>
-        ))
-      )}
-    </ScrollView>
+    <>
+      <Text style={styles.titleText}>Select {tableName}</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {data.length === 0 ? (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>
+              No {tableName} found. Add some {tableName}!
+            </Text>
+          </View>
+        ) : (
+          data.map((item) => {
+            const isSelected = selectedOutfits.some(
+              (selected) => selected.id === item.id
+            );
+            return (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => toggleSelection(item)}
+                style={[
+                  styles.imageContainer,
+                  isSelected && styles.selectedImageContainer,
+                ]}
+              >
+                <Image source={{ uri: item.image_url }} style={styles.image} />
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  titleText: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "black",
+  },
   scrollContainer: {
     flexGrow: 1,
     flexDirection: "row",
@@ -161,6 +181,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  selectedImageContainer: {
+    borderColor: "gray",
   },
   image: {
     width: "100%",

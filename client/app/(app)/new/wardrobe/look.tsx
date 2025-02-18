@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Look, Outfit } from "@/types";
-import SelectFeed from "@/components/Feeds/SelectFeed";
+import SelectGridView from "@/components/GridViews/SelectGridView";
 import { router } from "expo-router";
 import { saveLook } from "@/api/SaveLook";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
@@ -51,7 +51,7 @@ export default function NewLookScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.feedContainer}>
-        <SelectFeed tableName="outfits" onSelect={onSelect} />
+        <SelectGridView tableName="outfits" onSelect={onSelect} />
       </View>
       <BottomSheet
         ref={sheetRef}
