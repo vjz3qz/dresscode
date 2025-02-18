@@ -9,17 +9,15 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/Avatar";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView as ScrollViewRN } from "react-native";
+import { fetchSuggestedProfiles } from "@/api/fetchProfiles";
+import { Profile } from "@/types";
 
 interface Post {
   id: string;
-  user: {
-    id: string;
-    username: string;
-    avatarUrl?: string;
-  };
+  user: Profile;
   imageUrl: string;
   caption: string;
   likes: number;
@@ -27,48 +25,23 @@ interface Post {
   timestamp: string;
 }
 
-interface SuggestedUser {
-  id: string;
-  username: string;
-  avatarUrl?: string;
-}
-
 function FollowSuggestions() {
-  const suggestedUsers: SuggestedUser[] = [
-    {
-      id: "6",
-      username: "fashionista",
-      avatarUrl: "https://via.placeholder.com/40",
-    },
-    {
-      id: "7",
-      username: "styleguru",
-      avatarUrl: "https://via.placeholder.com/40",
-    },
-    {
-      id: "8",
-      username: "trendsetterxo",
-      avatarUrl: "https://via.placeholder.com/40",
-    },
-    {
-      id: "9",
-      username: "chic_styles",
-      avatarUrl: "https://via.placeholder.com/40",
-    },
-    {
-      id: "10",
-      username: "fashion_forward",
-      avatarUrl: "https://via.placeholder.com/40",
-    },
-  ];
+  const [suggestedUsers, setSuggestedUsers] = useState<Profile[]>([]);
 
+  useEffect(() => {
+    async function getSuggestedUsers() {
+      const fetchedProfiles: Profile[] = await fetchSuggestedProfiles();
+      setSuggestedUsers(fetchedProfiles);
+    }
+    getSuggestedUsers();
+  }, []);
   return (
     <View style={styles.suggestionsContainer}>
       <Text style={styles.suggestionsTitle}>Suggested for you</Text>
       <ScrollViewRN horizontal showsHorizontalScrollIndicator={false}>
         {suggestedUsers.map((user) => (
           <TouchableOpacity key={user.id} style={styles.suggestionItem}>
-            <Avatar size={60} url={user.avatarUrl ?? null} />
+            <Avatar size={60} url={user.avatar_url ?? null} />
             <Text style={styles.suggestionUsername}>{user.username}</Text>
             <TouchableOpacity style={styles.followButton}>
               <Text style={styles.followButtonText}>Follow</Text>
@@ -88,7 +61,11 @@ export default function FeedScreen() {
       user: {
         id: "1",
         username: "whering",
-        avatarUrl: "https://via.placeholder.com/40",
+        avatar_url: "https://via.placeholder.com/40",
+        gender: "Other",
+        age: 12,
+        preferences: [],
+        brands: [],
       },
       imageUrl: "https://via.placeholder.com/400",
       caption: "Today's outfit! 🌟 #ootd #fashion",
@@ -130,7 +107,7 @@ export default function FeedScreen() {
           <View key={post.id} style={styles.post}>
             <View style={styles.postHeader}>
               <View style={styles.userInfo}>
-                <Avatar size={40} url={post.user.avatarUrl ?? null} />
+                <Avatar size={40} url={post.user.avatar_url ?? null} />
                 <Text style={styles.username}>{post.user.username}</Text>
               </View>
               <TouchableOpacity>
