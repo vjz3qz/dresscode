@@ -47,7 +47,7 @@ export default function OutfitPreferences() {
     }
     const profile: Profile = {
       gender: gender as string,
-      age: age as string,
+      age: Number(age),
       brands: Array.isArray(brands) ? brands : [brands].filter(Boolean),
       preferences,
     };
