@@ -21,10 +21,12 @@ export default function GridView({
   onClick,
   tableName,
   rawData,
+  profileId,
 }: {
   onClick: (object: any, index: number) => void;
   tableName: keyof TableTypes;
   rawData?: any[];
+  profileId?: string;
 }) {
   const { session } = useSession();
   const [data, setData] = useState<any[]>([]);
@@ -41,7 +43,7 @@ export default function GridView({
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `image_urls_${tableName}_${session.user.id}`;
+      const cacheKey = `image_urls_${tableName}_${session.user.id}_${profileId}`;
       const cachedData = await AsyncStorage.getItem(cacheKey);
 
       if (cachedData && !isRefreshing) {
@@ -59,7 +61,7 @@ export default function GridView({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const objects = await fetchAllImageUrls(tableName);
+        const objects = await fetchAllImageUrls(tableName, profileId);
         setData(objects);
 
         // Cache the data with a new timestamp

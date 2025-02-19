@@ -63,7 +63,8 @@ export async function fetchImageUrls(imageNames: string[]) {
 }
 
 export async function fetchAllImageUrls<T extends keyof TableTypes>(
-  tableName: T
+  tableName: T,
+  userId?: string
 ) {
   const session = await fetchSession();
   if (!session) {
@@ -73,7 +74,7 @@ export async function fetchAllImageUrls<T extends keyof TableTypes>(
   let { data, error } = await supabase
     .from(tableName)
     .select("*")
-    .eq("user_id", session.user.id);
+    .eq("user_id", userId ? userId : session.user.id);
   if (error) {
     // console.error("Error fetching items:", error.message);
     return [];

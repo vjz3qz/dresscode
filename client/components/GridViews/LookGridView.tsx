@@ -20,9 +20,11 @@ const { height } = Dimensions.get("window");
 export default function LookGridView({
   onLookClick,
   tableName,
+  profileId,
 }: {
   onLookClick: (look: Look, index: number) => void;
   tableName: keyof TableTypes;
+  profileId?: string;
 }) {
   const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
@@ -38,7 +40,7 @@ export default function LookGridView({
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `looks_${tableName}_${session.user.id}`;
+      const cacheKey = `looks_${tableName}_${session.user.id}_${profileId}`;
       const cachedLooks = await AsyncStorage.getItem(cacheKey);
 
       if (cachedLooks && !isRefreshing) {
@@ -56,7 +58,7 @@ export default function LookGridView({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const fetchedLooks = await fetchLooks();
+        const fetchedLooks = await fetchLooks(profileId);
         const fetchedLooksWithOutfits = await loadLooksWithOutfits(
           fetchedLooks
         );
