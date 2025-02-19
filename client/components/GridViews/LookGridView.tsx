@@ -56,10 +56,9 @@ export default function LookGridView({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const fetchedLooks = await fetchLooks(session);
+        const fetchedLooks = await fetchLooks();
         const fetchedLooksWithOutfits = await loadLooksWithOutfits(
-          fetchedLooks,
-          session
+          fetchedLooks
         );
 
         setLooks(fetchedLooksWithOutfits);

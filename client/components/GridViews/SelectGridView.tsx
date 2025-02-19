@@ -57,7 +57,7 @@ export default function SelectGridView({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const items = (await fetchAllImageUrls(tableName, session)) as Outfit[];
+        const items = (await fetchAllImageUrls(tableName)) as Outfit[];
         setData(items);
 
         // Cache the data with a new timestamp

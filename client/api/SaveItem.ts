@@ -9,7 +9,7 @@ export async function saveItem(item: Item, screenshotUri: string) {
     if (!session) {
       throw new Error("No active session");
     }
-    const s3Key = await uploadImageUri(screenshotUri, session);
+    const s3Key = await uploadImageUri(screenshotUri);
 
     // Add the S3 key to the outfit metadata and save the outfit to Supabase
     item.s3_key = s3Key;

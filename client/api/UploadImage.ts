@@ -1,3 +1,4 @@
+import { fetchSession } from "@/utils/FetchSession";
 import { Session } from "@supabase/supabase-js";
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
@@ -25,8 +26,12 @@ async function convertUriToFormData(uri: string): Promise<FormData> {
   return formData;
 }
 
-export async function uploadImageUri(uri: string, session: Session) {
+export async function uploadImageUri(uri: string) {
   const formData = await convertUriToFormData(uri);
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
 
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const response = await axios.post(`${BACKEND_URL}/upload`, formData, {

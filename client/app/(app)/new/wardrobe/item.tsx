@@ -21,7 +21,7 @@ export default function WardrobeScreen() {
       try {
         if (session) {
           let fetchedImageUrl = "";
-          fetchedImageUrl = await fetchImageUrl(imageName, session);
+          fetchedImageUrl = await fetchImageUrl(imageName);
           setImageUrl(fetchedImageUrl);
         }
       } catch (error) {

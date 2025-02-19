@@ -1,12 +1,18 @@
 import { TableTypes } from "@/types";
 import { axiosParamSerializer } from "@/utils/AxiosParamSerializer";
+import { fetchSession } from "@/utils/FetchSession";
 import { supabase } from "@/utils/Supabase";
 import { Session } from "@supabase/supabase-js";
 import axios from "axios";
 
-export async function fetchImageUrl(key: string, session: Session) {
+export async function fetchImageUrl(key: string) {
   if (!key) {
     return;
+  }
+
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
   }
 
   try {
@@ -26,9 +32,14 @@ export async function fetchImageUrl(key: string, session: Session) {
   }
 }
 
-export async function fetchImageUrls(imageNames: string[], session: Session) {
+export async function fetchImageUrls(imageNames: string[]) {
   if (!imageNames || imageNames.length === 0) {
     return {};
+  }
+
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
   }
 
   try {
@@ -52,9 +63,13 @@ export async function fetchImageUrls(imageNames: string[], session: Session) {
 }
 
 export async function fetchAllImageUrls<T extends keyof TableTypes>(
-  tableName: T,
-  session: Session
+  tableName: T
 ) {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
+
   let { data, error } = await supabase
     .from(tableName)
     .select("*")
@@ -68,13 +83,13 @@ export async function fetchAllImageUrls<T extends keyof TableTypes>(
     return [];
   }
 
-  let objects: TableTypes[T][] = await addImageUrls(data as any, session); // Wait for the URLs to be added
+  let objects: TableTypes[T][] = await addImageUrls(data as any); // Wait for the URLs to be added
   return objects;
 }
 
-export async function addImageUrls(data: any[], session: Session) {
+export async function addImageUrls(data: any[]) {
   const imageNames = data.map((item) => item["s3_key"]).filter(Boolean);
-  const imageUrls = await fetchImageUrls(imageNames, session);
+  const imageUrls = await fetchImageUrls(imageNames);
 
   let objects: any[] = [];
   for (let i = 0; i < data.length; i++) {

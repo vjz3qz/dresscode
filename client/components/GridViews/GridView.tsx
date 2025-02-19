@@ -59,7 +59,7 @@ export default function GridView({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
-        const objects = await fetchAllImageUrls(tableName, session);
+        const objects = await fetchAllImageUrls(tableName);
         setData(objects);
 
         // Cache the data with a new timestamp
