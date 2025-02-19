@@ -17,9 +17,11 @@ export async function getClosetWrapped(userId?: string): Promise<string> {
     const outfitIds = data?.map((object) => object.id);
 
     if (error) {
-      console.error("Error fetching outfits:", error);
+      console.error("Error fetching outfits for closet wrapped:", error);
       return ""; // Return an empty string on error
     }
+
+    if (outfitIds?.length === 0) return "no outfits!";
 
     // hit wrapped
 
