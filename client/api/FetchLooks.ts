@@ -23,7 +23,7 @@ export async function fetchLooks(userId?: string): Promise<Look[]> {
   return data as Look[];
 }
 
-export async function fetchLookById(LookId: string): Promise<Look> {
+export async function fetchLookById(lookId: string): Promise<Look> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -31,7 +31,7 @@ export async function fetchLookById(LookId: string): Promise<Look> {
   const { data, error } = await supabase
     .from("looks")
     .select("*")
-    .eq("id", LookId);
+    .eq("id", lookId);
 
   if (error) {
     console.error("Error fetching look by ID:", error);
@@ -42,7 +42,7 @@ export async function fetchLookById(LookId: string): Promise<Look> {
 }
 
 // Function to fetch outfits by look ID
-export async function fetchOutfitsByLook(LookId: string): Promise<Outfit[]> {
+export async function fetchOutfitsByLook(lookId: string): Promise<Outfit[]> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -50,7 +50,7 @@ export async function fetchOutfitsByLook(LookId: string): Promise<Outfit[]> {
   const { data, error } = await supabase
     .from("looks_outfits")
     .select("outfit_id")
-    .eq("look_id", LookId);
+    .eq("look_id", lookId);
 
   if (error) {
     console.error("Error fetching outfits by look:", error);

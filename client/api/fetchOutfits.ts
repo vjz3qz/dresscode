@@ -21,7 +21,7 @@ export async function fetchOutfits(userId?: string): Promise<Outfit[]> {
   return data as Outfit[];
 }
 
-export async function fetchOutfitById(OutfitId: number): Promise<Outfit> {
+export async function fetchOutfitById(outfitId: number): Promise<Outfit> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -29,7 +29,7 @@ export async function fetchOutfitById(OutfitId: number): Promise<Outfit> {
   const { data, error } = await supabase
     .from("outfits")
     .select("*")
-    .eq("id", OutfitId);
+    .eq("id", outfitId);
 
   if (error) {
     console.error("Error fetching outfit by ID:", error);
