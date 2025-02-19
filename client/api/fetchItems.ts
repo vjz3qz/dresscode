@@ -3,7 +3,7 @@ import { fetchSession } from "@/utils/FetchSession";
 import { supabase } from "@/utils/Supabase";
 
 // Function to fetch items from the Supabase table
-export async function fetchItems(userId: string): Promise<Item[]> {
+export async function fetchItems(userId?: string): Promise<Item[]> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
