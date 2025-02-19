@@ -14,6 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView as ScrollViewRN } from "react-native";
 import { fetchSuggestedProfiles } from "@/api/fetchProfiles";
 import { Profile } from "@/types";
+import { handleFollow, handleUnfollow } from "@/api/handleFollows";
+import { useSession } from "@/contexts/SessionContext";
 
 interface Post {
   id: string;
@@ -27,6 +29,7 @@ interface Post {
 
 function FollowSuggestions() {
   const [suggestedUsers, setSuggestedUsers] = useState<Profile[]>([]);
+  const { session } = useSession();
 
   useEffect(() => {
     async function getSuggestedUsers() {
@@ -43,8 +46,22 @@ function FollowSuggestions() {
           <TouchableOpacity key={user.id} style={styles.suggestionItem}>
             <Avatar size={60} url={user.avatar_url ?? null} />
             <Text style={styles.suggestionUsername}>{user.username}</Text>
-            <TouchableOpacity style={styles.followButton}>
+            <TouchableOpacity
+              style={styles.followButton}
+              onPress={() =>
+                handleFollow(session?.user?.id ?? "", user.id ?? "")
+              }
+            >
               <Text style={styles.followButtonText}>Follow</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.unfollowButton}
+              onPress={() =>
+                handleUnfollow(session?.user?.id ?? "", user.id ?? "")
+              }
+            >
+              <Text style={styles.unfollowButtonText}>Unfollow</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         ))}
@@ -263,12 +280,22 @@ const styles = StyleSheet.create({
   },
   followButton: {
     backgroundColor: "#0095f6",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 4,
   },
   followButtonText: {
     color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  unfollowButton: {
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  unfollowButtonText: {
     fontSize: 12,
     fontWeight: "600",
   },
