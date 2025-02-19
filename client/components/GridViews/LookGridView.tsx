@@ -38,7 +38,7 @@ export default function LookGridView({
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `looks_${tableName}`;
+      const cacheKey = `looks_${tableName}_${session.user.id}`;
       const cachedLooks = await AsyncStorage.getItem(cacheKey);
 
       if (cachedLooks && !isRefreshing) {

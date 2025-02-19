@@ -39,7 +39,7 @@ export default function SelectGridView({
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `outfits_${tableName}`;
+      const cacheKey = `outfits_${tableName}_${session.user.id}`;
       const cachedData = await AsyncStorage.getItem(cacheKey);
 
       if (cachedData && !isRefreshing) {
