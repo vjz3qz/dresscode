@@ -2,13 +2,18 @@ import { Look, Outfit } from "@/types";
 import { supabase } from "@/utils/Supabase";
 import { addImageUrls } from "@/api/FetchImageUrl";
 import { Session } from "@supabase/supabase-js";
+import { fetchSession } from "@/utils/FetchSession";
 
 // Function to fetch looks from the Supabase table
-export async function fetchLooks(session: Session): Promise<Look[]> {
+export async function fetchLooks(userId?: string): Promise<Look[]> {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   const { data, error } = await supabase
     .from("looks")
     .select("*")
-    .eq("user_id", session.user.id);
+    .eq("user_id", userId ? userId : session.user.id);
 
   if (error) {
     console.error("Error fetching looks:", error);
