@@ -4,13 +4,16 @@ import axios from "axios";
 import { axiosParamSerializer } from "@/utils/AxiosParamSerializer";
 
 // Function to fetch outfits from the Supabase table
-export async function getClosetWrapped(): Promise<string> {
+export async function getClosetWrapped(userId?: string): Promise<string> {
   try {
     const session = await fetchSession();
     if (!session) {
       throw new Error("No active session");
     }
-    const { data, error } = await supabase.from("outfits").select("id");
+    const { data, error } = await supabase
+      .from("outfits")
+      .select("id")
+      .eq("user_id", userId ? userId : session.user.id);
     const outfitIds = data?.map((object) => object.id);
 
     if (error) {
