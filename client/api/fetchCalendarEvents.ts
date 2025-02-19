@@ -1,8 +1,13 @@
 import { CalendarEvent } from "@/types";
+import { fetchSession } from "@/utils/FetchSession";
 import { supabase } from "@/utils/Supabase";
 
 // Function to fetch calendarEvents from the Supabase table
 export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   const { data, error } = await supabase.from("calendarEvents").select("*");
 
   if (error) {
@@ -16,6 +21,10 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
 export async function fetchCalendarEventById(
   calendarEventId: string
 ): Promise<CalendarEvent> {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   const { data, error } = await supabase
     .from("calendar_events")
     .select("*")

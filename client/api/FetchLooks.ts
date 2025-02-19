@@ -24,6 +24,10 @@ export async function fetchLooks(userId?: string): Promise<Look[]> {
 }
 
 export async function fetchLookById(LookId: string): Promise<Look> {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   const { data, error } = await supabase
     .from("looks")
     .select("*")
@@ -39,6 +43,10 @@ export async function fetchLookById(LookId: string): Promise<Look> {
 
 // Function to fetch outfits by look ID
 export async function fetchOutfitsByLook(LookId: string): Promise<Outfit[]> {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   const { data, error } = await supabase
     .from("looks_outfits")
     .select("outfit_id")
@@ -65,13 +73,12 @@ export async function fetchOutfitsByLook(LookId: string): Promise<Outfit[]> {
 }
 
 export async function loadLooksWithOutfits(
-  fetchedLooks: Look[],
-  session: Session
+  fetchedLooks: Look[]
 ): Promise<Look[]> {
   try {
     for (const look of fetchedLooks) {
       const outfits = await fetchOutfitsByLook((look.id || "").toString());
-      const outfitsWithImages = await addImageUrls(outfits, session);
+      const outfitsWithImages = await addImageUrls(outfits);
       look.outfits = outfitsWithImages;
     }
 

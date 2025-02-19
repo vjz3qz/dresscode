@@ -1,8 +1,13 @@
 import { Look, Outfit } from "@/types";
 import { supabase } from "@/utils/Supabase";
 import { uploadImageUri } from "@/api/UploadImage";
+import { fetchSession } from "@/utils/FetchSession";
 
 export async function saveLook(look: Look, outfits: Outfit[]) {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   try {
     // const s3Key = await uploadImageUri(screenshotUri);
 
@@ -28,6 +33,10 @@ export async function saveLook(look: Look, outfits: Outfit[]) {
 }
 
 async function addOutfitsToLook(lookId: string, outfits: Outfit[]) {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   try {
     const lookOutfits = outfits.map((outfit) => ({
       look_id: lookId,

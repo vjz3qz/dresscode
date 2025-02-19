@@ -22,6 +22,10 @@ export async function fetchOutfits(userId?: string): Promise<Outfit[]> {
 }
 
 export async function fetchOutfitById(OutfitId: number): Promise<Outfit> {
+  const session = await fetchSession();
+  if (!session) {
+    throw new Error("No active session");
+  }
   const { data, error } = await supabase
     .from("outfits")
     .select("*")
