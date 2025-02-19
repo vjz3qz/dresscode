@@ -32,7 +32,7 @@ export async function fetchItemById(ItemId: string): Promise<Item> {
     .eq("id", ItemId);
 
   if (error) {
-    console.error("Error fetching look by ID:", error);
+    console.error("Error fetching item by ID:", error);
     return {} as Item;
   }
 

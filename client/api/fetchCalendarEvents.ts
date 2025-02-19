@@ -31,7 +31,7 @@ export async function fetchCalendarEventById(
     .eq("id", calendarEventId);
 
   if (error) {
-    console.error("Error fetching look by ID:", error);
+    console.error("Error fetching calendar event by ID:", error);
     return {} as CalendarEvent;
   }
 

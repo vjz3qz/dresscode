@@ -14,7 +14,7 @@ export async function fetchSuggestedProfiles(): Promise<Profile[]> {
       .neq("id", session.user.id);
 
     if (error) {
-      console.error("Error fetching look by ID:", error);
+      console.error("Error fetching suggested profiles:", error);
       return [] as Profile[];
     }
 
@@ -38,7 +38,7 @@ export async function fetchProfileById(profileId: string): Promise<Profile> {
       .eq("id", profileId);
 
     if (error) {
-      console.error("Error fetching look by ID:", error);
+      console.error("Error fetching profile by ID:", error);
       return {} as Profile;
     }
 
