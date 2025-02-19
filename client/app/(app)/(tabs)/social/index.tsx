@@ -29,15 +29,33 @@ interface Post {
 
 function FollowSuggestions() {
   const [suggestedUsers, setSuggestedUsers] = useState<Profile[]>([]);
+  const [following, setFollowing] = useState<{ [key: string]: boolean }>({});
   const { session } = useSession();
 
   useEffect(() => {
     async function getSuggestedUsers() {
       const fetchedProfiles: Profile[] = await fetchSuggestedProfiles();
       setSuggestedUsers(fetchedProfiles);
+
+      // Initialize following state
+      const initialFollowingState: { [key: string]: boolean } = {};
+      fetchedProfiles.forEach((user) => {
+        initialFollowingState[user.id ?? ""] = false; // Assume not following initially
+      });
+      setFollowing(initialFollowingState);
     }
     getSuggestedUsers();
   }, []);
+
+  const toggleFollow = async (userId: string) => {
+    if (following[userId]) {
+      await handleUnfollow(session?.user?.id ?? "", userId);
+    } else {
+      await handleFollow(session?.user?.id ?? "", userId);
+    }
+    setFollowing((prev) => ({ ...prev, [userId]: !prev[userId] }));
+  };
+
   return (
     <View style={styles.suggestionsContainer}>
       <Text style={styles.suggestionsTitle}>Suggested for you</Text>
@@ -46,22 +64,24 @@ function FollowSuggestions() {
           <TouchableOpacity key={user.id} style={styles.suggestionItem}>
             <Avatar size={60} url={user.avatar_url ?? null} />
             <Text style={styles.suggestionUsername}>{user.username}</Text>
-            <TouchableOpacity
-              style={styles.followButton}
-              onPress={() =>
-                handleFollow(session?.user?.id ?? "", user.id ?? "")
-              }
-            >
-              <Text style={styles.followButtonText}>Follow</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.unfollowButton}
-              onPress={() =>
-                handleUnfollow(session?.user?.id ?? "", user.id ?? "")
+              style={
+                following[user.id ?? ""]
+                  ? styles.unfollowButton
+                  : styles.followButton
               }
+              onPress={() => toggleFollow(user.id ?? "")}
             >
-              <Text style={styles.unfollowButtonText}>Unfollow</Text>
+              <Text
+                style={
+                  following[user.id ?? ""]
+                    ? styles.unfollowButtonText
+                    : styles.followButtonText
+                }
+              >
+                {following[user.id ?? ""] ? "Unfollow" : "Follow"}
+              </Text>
             </TouchableOpacity>
           </TouchableOpacity>
         ))}
