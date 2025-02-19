@@ -124,10 +124,7 @@ export default function CalendarScreen() {
         const eventsWithUrls = await Promise.all(
           data.map(async (event) => {
             if (event.outfits) {
-              const outfitsWithUrls = await addImageUrls(
-                [event.outfits],
-                session
-              );
+              const outfitsWithUrls = await addImageUrls([event.outfits]);
               return { ...event, outfits: outfitsWithUrls[0] };
             }
             return event;
@@ -163,7 +160,7 @@ export default function CalendarScreen() {
         style={styles.eventCard}
         onPress={() => {
           router.push({
-            pathname: "/view/[calendarEventId]",
+            pathname: "/view/calendarEvents/[calendarEventId]",
             params: { calendarEventId: calendarEvent.id ?? "" },
           });
         }}
