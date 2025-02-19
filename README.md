@@ -10,3 +10,5 @@ add metadata to all items
 split account/edit page, and make routes
 better ux for upload flows
 closet wrapped page better ux
+
+supabase offline dev

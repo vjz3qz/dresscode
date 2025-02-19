@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,30 +14,33 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/Avatar";
 import React from "react";
-
-interface User {
-  id: string;
-  username: string;
-  displayName: string;
-  avatarUrl?: string;
-}
+import { Profile } from "@/types";
+import {
+  fetchFollowerProfiles,
+  fetchFollowingProfiles,
+} from "@/api/fetchFollows";
+import { useSession } from "@/contexts/SessionContext";
 
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<"following" | "followers">(
     "following"
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [followers, setFollowers] = useState<Profile[]>([]);
+  const [following, setFollowing] = useState<Profile[]>([]);
+  const { session } = useSession();
 
-  // Dummy data - replace with real data from your API
-  const following: User[] = [
-    { id: "1", username: "whering", displayName: "Whering" },
-    { id: "2", username: "tracyguarino", displayName: "Tracy" },
-    { id: "3", username: "biancaofficial", displayName: "Bianca" },
-    { id: "4", username: "twinelle", displayName: "Danielle" },
-    { id: "5", username: "13thswiftie", displayName: "Sofia" },
-  ];
-
-  const followers: User[] = [];
+  useEffect(() => {
+    // Fetch followers and following data from Supabase or any other source
+    async function fetchData() {
+      if (!session || !session.user.id) return;
+      const followersData = await fetchFollowerProfiles(session.user.id);
+      setFollowers(followersData);
+      const followingData = await fetchFollowingProfiles(session.user.id);
+      setFollowing(followingData);
+    }
+    fetchData();
+  }, []);
 
   const handleUnfollow = (userId: string) => {
     // Implement unfollow logic
@@ -144,15 +147,15 @@ export default function CommunityScreen() {
           {(activeTab === "following" ? following : followers).map((user) => (
             <View key={user.id} style={styles.userItem}>
               <View style={styles.userInfo}>
-                <Avatar size={50} url={user.avatarUrl ?? null} />
+                <Avatar size={50} url={user.avatar_url ?? null} />
                 <View style={styles.userTextContainer}>
-                  <Text style={styles.userName}>{user.displayName}</Text>
+                  <Text style={styles.userName}>{user.display_name}</Text>
                   <Text style={styles.userHandle}>{user.username}</Text>
                 </View>
               </View>
               <TouchableOpacity
                 style={styles.unfollowButton}
-                onPress={() => handleUnfollow(user.id)}
+                onPress={() => handleUnfollow(user.id ?? "")}
               >
                 <Text style={styles.unfollowButtonText}>Unfollow</Text>
               </TouchableOpacity>
