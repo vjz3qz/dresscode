@@ -61,7 +61,16 @@ function FollowSuggestions() {
       <Text style={styles.suggestionsTitle}>Suggested for you</Text>
       <ScrollViewRN horizontal showsHorizontalScrollIndicator={false}>
         {suggestedUsers.map((user) => (
-          <TouchableOpacity key={user.id} style={styles.suggestionItem}>
+          <TouchableOpacity
+            key={user.id}
+            style={styles.suggestionItem}
+            onPress={() => {
+              router.push({
+                pathname: "/view/profiles/[profileId]",
+                params: { profileId: user.id ?? "" },
+              });
+            }}
+          >
             <Avatar size={60} url={user.avatar_url ?? null} />
             <Text style={styles.suggestionUsername}>{user.username}</Text>
 
@@ -147,7 +156,7 @@ export default function FeedScreen() {
                 style={styles.userInfo}
                 onPress={() => {
                   router.push({
-                    pathname: "/view/[profileId]",
+                    pathname: "/view/profiles/[profileId]",
                     params: { profileId: post.user.id ?? "" },
                   });
                 }}
