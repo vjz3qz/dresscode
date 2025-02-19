@@ -143,10 +143,18 @@ export default function FeedScreen() {
         {posts.map((post) => (
           <View key={post.id} style={styles.post}>
             <View style={styles.postHeader}>
-              <View style={styles.userInfo}>
+              <TouchableOpacity
+                style={styles.userInfo}
+                onPress={() => {
+                  router.push({
+                    pathname: "/view/[profileId]",
+                    params: { profileId: post.user.id ?? "" },
+                  });
+                }}
+              >
                 <Avatar size={40} url={post.user.avatar_url ?? null} />
                 <Text style={styles.username}>{post.user.username}</Text>
-              </View>
+              </TouchableOpacity>
               <TouchableOpacity>
                 <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
               </TouchableOpacity>

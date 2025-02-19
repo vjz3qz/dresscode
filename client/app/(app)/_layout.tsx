@@ -105,6 +105,10 @@ function RootLayoutContent() {
           name="view/[calendarEventId]"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="view/[profileId]"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
