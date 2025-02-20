@@ -29,3 +29,45 @@ export async function createProfile(profile: Profile) {
     console.error("Error saving profile:", error);
   }
 }
+
+export async function handleUpdateProfile({
+  username,
+  display_name,
+  avatar_url,
+  gender,
+  age,
+  brands,
+  preferences,
+}: {
+  username?: string;
+  display_name?: string;
+  avatar_url?: string;
+  gender?: string;
+  age?: number;
+  brands?: string[];
+  preferences?: string[];
+}) {
+  if (!username && !avatar_url && !display_name) return;
+  const session = await fetchSession();
+
+  if (!session?.user) throw new Error("No user on the session!");
+
+  const updates = {
+    id: session?.user.id,
+    username,
+    display_name,
+    avatar_url,
+    gender,
+    age,
+    brands,
+    preferences,
+    updated_at: new Date(),
+  };
+
+  const { error } = await supabase.from("profiles").upsert(updates);
+
+  if (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+}
