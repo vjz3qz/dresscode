@@ -52,7 +52,7 @@ export default function UserInfo() {
     };
 
     await createProfile(profile);
-    router.push("/(app)/(tabs)");
+    router.push("/(auth)/signup/UploadAvatar");
   };
 
   return (
