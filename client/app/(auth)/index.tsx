@@ -96,8 +96,8 @@ export default function Auth() {
     if (error) Alert.alert(error.message);
     // else if (!session)
     //   Alert.alert("Please check your inbox for email verification!");
-    router.push("/(auth)/signup/DemographicInfo");
     setLoading(false);
+    if (!error) router.push("/(auth)/signup/DemographicInfo");
   }
 
   async function signUpWithPhone() {
