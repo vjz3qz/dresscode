@@ -8,8 +8,10 @@ type SessionContextType = {
   setSession: React.Dispatch<React.SetStateAction<Session | null>>;
   username: string;
   avatarUrl: string;
+  displayName: string;
   setUsername: React.Dispatch<React.SetStateAction<string>>;
   setAvatarUrl: React.Dispatch<React.SetStateAction<string>>;
+  setDisplayName: React.Dispatch<React.SetStateAction<string>>;
   loading: boolean;
   profileNotFound: boolean;
 };
@@ -33,6 +35,7 @@ export const SessionProvider = ({
   const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(true);
   const [profileNotFound, setProfileNotFound] = useState(false);
 
@@ -75,7 +78,7 @@ export const SessionProvider = ({
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, avatar_url")
+        .select("username, avatar_url, display_name")
         .eq("id", session.user.id)
         .single();
 
@@ -89,6 +92,7 @@ export const SessionProvider = ({
       if (data) {
         setUsername(data.username);
         setAvatarUrl(data.avatar_url);
+        setDisplayName(data.display_name);
         setProfileNotFound(false);
       }
     } catch (error) {
@@ -107,6 +111,8 @@ export const SessionProvider = ({
         setUsername,
         avatarUrl,
         setAvatarUrl,
+        displayName,
+        setDisplayName,
         loading,
         profileNotFound,
       }}
