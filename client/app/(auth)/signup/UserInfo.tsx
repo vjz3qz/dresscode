@@ -9,14 +9,16 @@ import {
   Easing,
   Alert,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Button, Input } from "@rneui/themed";
 import { useKeyboardAvoidingView } from "@/hooks/useKeyboardAvoidingView";
+import { Profile } from "@/types";
+import { createProfile } from "@/api/CreateProfile";
 
 export default function UserInfo() {
-  const [gender, setGender] = useState("");
-  const [age, setAge] = useState("");
+  const { gender, age, brands, preferences } = useLocalSearchParams();
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const keyboardHeight = useKeyboardAvoidingView();
   const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -29,25 +31,28 @@ export default function UserInfo() {
     }).start();
   }, [fadeAnim]); // Added fadeAnim to dependencies
 
-  const genderOptions = [
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-    { label: "Other", value: "other" },
-  ];
+  const handleNext = async () => {
+    if (name === "") {
+      Alert.alert("name cannot be empty!");
+      return;
+    }
+    if (username === "") {
+      Alert.alert("username cannot be empty!");
+      return;
+    }
+    const profile: Profile = {
+      gender: gender as string,
+      age: Number(age),
+      brands: Array.isArray(brands) ? brands : [brands].filter(Boolean),
+      preferences: Array.isArray(preferences)
+        ? preferences
+        : [preferences].filter(Boolean),
+      display_name: name,
+      username,
+    };
 
-  const handleNext = () => {
-    if (gender === "") {
-      Alert.alert("gender cannot be empty!");
-      return;
-    }
-    if (age === "") {
-      Alert.alert("age cannot be empty!");
-      return;
-    }
-    router.push({
-      pathname: "/(auth)/signup/FavoriteBrands",
-      params: { gender, age },
-    });
+    await createProfile(profile);
+    router.push("/(app)/(tabs)");
   };
 
   return (
@@ -59,23 +64,19 @@ export default function UserInfo() {
             { paddingBottom: keyboardHeight, opacity: fadeAnim },
           ]}
         >
-          <Text style={styles.title}>Tell Us About Yourself</Text>
-          <Text style={styles.label}>What is your gender?</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={genderOptions}
-            labelField="label"
-            valueField="value"
-            placeholder="Select gender"
-            value={gender}
-            onChange={(item) => setGender(item.value)}
-          />
-          <Text style={styles.label}>How old are you?</Text>
+          <Text style={styles.title}>Finish up creating your profile</Text>
+          <Text style={styles.label}>What is your name?</Text>
           <Input
-            value={age}
-            onChangeText={setAge}
-            placeholder="Enter your age"
-            keyboardType="numeric"
+            value={name}
+            onChangeText={setName}
+            placeholder="Enter your name"
+            containerStyle={styles.inputContainer}
+          />
+          <Text style={styles.label}>What is your username?</Text>
+          <Input
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Enter your username"
             containerStyle={styles.inputContainer}
           />
           <Button
@@ -109,15 +110,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     marginBottom: 10,
-  },
-  dropdown: {
-    height: 40,
-    backgroundColor: "#EAE6E5",
-    paddingHorizontal: 4,
-    marginBottom: 20,
-    borderBottomWidth: 0.5,
-    borderColor: "#333",
-    marginHorizontal: 10,
   },
   inputContainer: {
     marginBottom: 20,

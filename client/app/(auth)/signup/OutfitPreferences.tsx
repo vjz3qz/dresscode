@@ -45,15 +45,15 @@ export default function OutfitPreferences() {
       Alert.alert("preferences cannot be empty!");
       return;
     }
-    const profile: Profile = {
-      gender: gender as string,
-      age: Number(age),
-      brands: Array.isArray(brands) ? brands : [brands].filter(Boolean),
-      preferences,
-    };
-
-    await createProfile(profile);
-    router.push("/(app)/(tabs)");
+    router.push({
+      pathname: "/(auth)/signup/UserInfo",
+      params: {
+        gender,
+        age,
+        brands: Array.isArray(brands) ? brands.join(",") : "",
+        preferences,
+      },
+    });
   };
 
   return (
