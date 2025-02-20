@@ -13,10 +13,18 @@ import {
 import { Session } from "@supabase/supabase-js";
 import { Input } from "@rneui/themed";
 import Avatar from "@/components/Avatar";
+import { handleUpdateProfile } from "@/api/CreateProfile";
 
 export default function Account() {
-  const { session, username, setUsername, avatarUrl, setAvatarUrl, loading } =
-    useSession();
+  const {
+    session,
+    username,
+    setUsername,
+    avatarUrl,
+    setAvatarUrl,
+    loading,
+    displayName,
+  } = useSession();
   const [updateProfilePageOpen, setUpdateProfilePageOpen] = useState(false);
 
   function UpdateProfilePage({
@@ -44,9 +52,7 @@ export default function Account() {
         <View style={[styles.verticallySpaced, styles.mt20]}>
           <Button
             title={loading ? "Loading ..." : "Update"}
-            onPress={() =>
-              handleUpdateProfile({ username, avatar_url: avatarUrl })
-            }
+            onPress={() => handleUpdateProfileCall({ username })}
             disabled={loading}
           />
         </View>
@@ -56,7 +62,7 @@ export default function Account() {
             url={avatarUrl}
             onUpload={(url: string) => {
               setAvatarUrl(url);
-              handleUpdateProfile({ username, avatar_url: url });
+              handleUpdateProfileCall({ avatar_url: url });
             }}
           />
         </View>
@@ -70,28 +76,34 @@ export default function Account() {
     );
   }
 
-  async function handleUpdateProfile({
+  async function handleUpdateProfileCall({
     username,
+    display_name,
     avatar_url,
+    gender,
+    age,
+    brands,
+    preferences,
   }: {
-    username: string;
-    avatar_url: string;
+    username?: string;
+    display_name?: string;
+    avatar_url?: string;
+    gender?: string;
+    age?: number;
+    brands?: string[];
+    preferences?: string[];
   }) {
+    if (!username && !avatar_url && !display_name) return;
     try {
-      if (!session?.user) throw new Error("No user on the session!");
-
-      const updates = {
-        id: session?.user.id,
+      handleUpdateProfile({
         username,
+        display_name,
         avatar_url,
-        updated_at: new Date(),
-      };
-
-      const { error } = await supabase.from("profiles").upsert(updates);
-
-      if (error) {
-        throw error;
-      }
+        gender,
+        age,
+        brands,
+        preferences,
+      });
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
@@ -108,7 +120,7 @@ export default function Account() {
   ) : (
     <View style={styles.container}>
       <Avatar size={80} url={avatarUrl} circle />
-      <Text style={styles.nameText}>{username || "Name"}</Text>
+      <Text style={styles.nameText}>{displayName || "Name"}</Text>
       <Text style={styles.usernameText}>@{username || "name"}</Text>
 
       {/* Buttons */}
