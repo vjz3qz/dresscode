@@ -30,7 +30,7 @@ const tabs: { name: string; tableName: keyof TableTypes }[] = [
 ];
 
 export default function WardrobeScreen() {
-  const { username, avatarUrl } = useSession();
+  const { username, avatarUrl, displayName } = useSession();
   const [tabIndex, setTabIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [wrappedText, setWrappedText] = useState<string>(
@@ -82,7 +82,7 @@ export default function WardrobeScreen() {
             </View>
           </View>
           <View style={styles.textContainer}>
-            <Text style={styles.nameText}>{username || "Name"}</Text>
+            <Text style={styles.nameText}>{displayName || "Name"}</Text>
             <Text style={styles.usernameText}>@{username || "name"}</Text>
           </View>
         </View>
