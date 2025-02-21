@@ -37,8 +37,7 @@ export default function OutfitView() {
         if (!fetchedOutfit.s3_key) return;
         if (!session) return;
         fetchedOutfit.image_url = await fetchImageUrl(
-          fetchedOutfit.s3_key || "",
-          session
+          fetchedOutfit.s3_key || ""
         );
         setOutfit(fetchedOutfit);
       } catch (error: any) {
