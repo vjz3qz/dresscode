@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   imageContainer: {
+    height: width / 3 - 10,
     width: width / 3 - 10,
     margin: 5,
     borderRadius: 10,

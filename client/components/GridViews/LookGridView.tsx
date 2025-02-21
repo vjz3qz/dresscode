@@ -15,7 +15,7 @@ import { Look, Outfit, TableTypes } from "@/types";
 import { fetchLooks, loadLooksWithOutfits } from "@/api/FetchLooks";
 import { useSession } from "@/contexts/SessionContext";
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 export default function LookGridView({
   onLookClick,
@@ -204,9 +204,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   lookContainer: {
-    width: "47%",
     marginHorizontal: "1.5%",
     height: height / 4.35,
+    width: width / 2.29,
     borderRadius: 10,
     overflow: "hidden",
     backgroundColor: "#fff",
