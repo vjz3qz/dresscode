@@ -12,6 +12,7 @@ import {
   TextInput,
 } from "react-native";
 import { Icon } from "@rneui/themed";
+import Entypo from "@expo/vector-icons/Entypo";
 import { useLocalSearchParams } from "expo-router";
 import { Item } from "@/types";
 import { fetchItemById } from "@/api/fetchItems";
@@ -170,6 +171,24 @@ export default function ItemView() {
               <View style={styles.divider} />
             </View>
           ))}
+          {session?.user.id === item?.user_id && (
+            <>
+              <Text>Public</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setItem(
+                    item ? { ...item, is_public: !item.is_public } : null
+                  );
+                }}
+              >
+                {item?.is_public ? (
+                  <Entypo name="lock-open" size={24} color="black" />
+                ) : (
+                  <Entypo name="lock" size={24} color="black" />
+                )}
+              </TouchableOpacity>
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </GestureHandlerRootView>
