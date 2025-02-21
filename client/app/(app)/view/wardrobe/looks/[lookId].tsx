@@ -50,10 +50,7 @@ export default function LookView() {
           Array.isArray(lookId) ? lookId[0] : lookId
         );
         if (!session) return;
-        const fetchedOutfitsWithImages = await addImageUrls(
-          fetchedOutfits,
-          session
-        );
+        const fetchedOutfitsWithImages = await addImageUrls(fetchedOutfits);
         setOutfits(fetchedOutfitsWithImages);
       } catch (error: any) {
         console.error("Error fetching outfits:", error.message);
