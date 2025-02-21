@@ -53,7 +53,8 @@ export default function GridView({
         // Check if cached data is still valid
         if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
           const filteredObjects = objects.filter(
-            (obj: Item | Outfit | Look) => obj.is_public === true
+            (obj: Item | Outfit | Look) =>
+              obj.is_public === true || obj.user_id === session.user.id
           );
 
           setData(filteredObjects);
@@ -67,7 +68,8 @@ export default function GridView({
       try {
         const objects = await fetchAllImageUrls(tableName, profileId);
         const filteredObjects = objects.filter(
-          (obj: Item | Outfit | Look) => obj.is_public === true
+          (obj: Item | Outfit | Look) =>
+            obj.is_public === true || obj.user_id === session.user.id
         );
         setData(filteredObjects);
 
@@ -92,7 +94,8 @@ export default function GridView({
     const timer = setTimeout(() => {
       if (rawData) {
         const filteredData = rawData.filter(
-          (obj: Item | Outfit | Look) => obj.is_public === true
+          (obj: Item | Outfit | Look) =>
+            obj.is_public === true || obj.user_id === session?.user.id
         );
         setData(filteredData);
         setLoading(false);

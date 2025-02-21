@@ -25,7 +25,7 @@ export type Item = {
   name: string;
   type: string;
   s3_key?: string;
-  user_id?: number;
+  user_id?: string;
   image_url?: string;
   x?: number;
   y?: number;
@@ -49,7 +49,7 @@ export type Outfit = {
   id?: number;
   created_at?: string;
   name: string;
-  user_id?: number;
+  user_id?: string;
   s3_key?: string;
   image_url?: string;
   description?: string;
@@ -76,7 +76,7 @@ export type Look = {
   created_at?: string;
   name: string;
   description: string;
-  user_id?: number;
+  user_id?: string;
   outfits?: Outfit[];
   theme?: string; // Overall theme for the look (e.g., "minimalist", "retro")
   tags?: string[]; // Tags for search/filter (e.g., ["summer vacation", "business trip"])

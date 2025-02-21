@@ -50,7 +50,8 @@ export default function LookGridView({
         // Check if cached data is still valid
         if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
           const filteredCachedLooksData = cachedLooksData.filter(
-            (obj: Look) => obj.is_public === true
+            (obj: Look) =>
+              obj.is_public === true || obj.user_id === session.user.id
           );
           setLooks(filteredCachedLooksData);
           setLoading(false);
@@ -67,7 +68,8 @@ export default function LookGridView({
         );
 
         const filteredFetchedLooksWithOutfits = fetchedLooksWithOutfits.filter(
-          (obj: Look) => obj.is_public === true
+          (obj: Look) =>
+            obj.is_public === true || obj.user_id === session.user.id
         );
         setLooks(filteredFetchedLooksWithOutfits);
 
