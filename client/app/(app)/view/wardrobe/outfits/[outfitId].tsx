@@ -21,6 +21,7 @@ import { supabase } from "@/utils/Supabase";
 import { router } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import { ScrollView } from "react-native-gesture-handler";
+import * as FileSystem from "expo-file-system";
 
 const { height, width } = Dimensions.get("window");
 
@@ -70,9 +71,27 @@ export default function OutfitView() {
 
   const handleShare = async () => {
     try {
-      await Share.share({
-        message: `Check out this outfit: ${outfit?.name || "Outfit"}`,
+      if (!outfit?.image_url) return;
+
+      // Define local path for storing image
+      const fileUri = `${FileSystem.cacheDirectory}shared-image.jpg`;
+
+      // Download image
+      const { uri } = await FileSystem.downloadAsync(outfit.image_url, fileUri);
+
+      // Share the image
+      const result = await Share.share({
+        message: `Check out this outfit from dresscode: ${
+          outfit?.name || "Outfit"
+        }`,
+        url: uri, // Share the locally stored image
       });
+
+      if (result.action === Share.sharedAction) {
+        console.log("Shared successfully");
+      } else if (result.action === Share.dismissedAction) {
+        console.log("Share dismissed");
+      }
     } catch (error: any) {
       console.error("Error sharing:", error.message);
     }

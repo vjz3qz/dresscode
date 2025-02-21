@@ -24,6 +24,7 @@ import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import { supabase } from "@/utils/Supabase";
+import * as FileSystem from "expo-file-system";
 
 const { width } = Dimensions.get("window");
 
@@ -74,15 +75,22 @@ export default function ItemView() {
 
   const handleShare = async () => {
     try {
+      if (!item?.image_url) return;
+
+      // Define local path for storing image
+      const fileUri = `${FileSystem.cacheDirectory}shared-image.jpg`;
+
+      // Download image
+      const { uri } = await FileSystem.downloadAsync(item.image_url, fileUri);
+
+      // Share the image
       const result = await Share.share({
-        message: `Check out this item: ${item?.name || "Item"}`,
+        message: `Check out this item from dresscode: ${item?.name || "Item"}`,
+        url: uri, // Share the locally stored image
       });
+
       if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          console.log("Shared with activity type:", result.activityType);
-        } else {
-          console.log("Shared successfully");
-        }
+        console.log("Shared successfully");
       } else if (result.action === Share.dismissedAction) {
         console.log("Share dismissed");
       }
