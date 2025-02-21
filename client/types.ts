@@ -16,6 +16,7 @@ export type Profile = {
   age: number;
   brands: string[];
   preferences: string[];
+  is_public?: boolean; // Visibility status of the profile (public or private)
 };
 
 export type Item = {
@@ -41,6 +42,7 @@ export type Item = {
   condition?: string; // Condition of the item (e.g., "new", "worn", "vintage")
   tags?: string[]; // Custom tags for search/filter (e.g., ["outdoors", "party"])
   fit?: string; // Fit description (e.g., "loose", "tight", "regular")
+  is_public?: boolean; // Visibility status of the item (public or private)
 };
 
 export type Outfit = {
