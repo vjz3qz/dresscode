@@ -49,7 +49,10 @@ export default function LookGridView({
 
         // Check if cached data is still valid
         if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
-          setLooks(cachedLooksData);
+          const filteredCachedLooksData = cachedLooksData.filter(
+            (obj: Look) => obj.is_public === true
+          );
+          setLooks(filteredCachedLooksData);
           setLoading(false);
           setRefreshing(false);
           return;
@@ -63,7 +66,10 @@ export default function LookGridView({
           fetchedLooks
         );
 
-        setLooks(fetchedLooksWithOutfits);
+        const filteredFetchedLooksWithOutfits = fetchedLooksWithOutfits.filter(
+          (obj: Look) => obj.is_public === true
+        );
+        setLooks(filteredFetchedLooksWithOutfits);
 
         // Cache the data with a new timestamp
         AsyncStorage.setItem(

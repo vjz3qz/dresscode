@@ -12,7 +12,7 @@ import {
 import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
-import { TableTypes } from "@/types";
+import { Item, Look, Outfit, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
 
 const { height, width } = Dimensions.get("window");
@@ -52,7 +52,11 @@ export default function GridView({
 
         // Check if cached data is still valid
         if (Date.now() - timestamp < CACHE_EXPIRY_TIME) {
-          setData(objects);
+          const filteredObjects = objects.filter(
+            (obj: Item | Outfit | Look) => obj.is_public === true
+          );
+
+          setData(filteredObjects);
           setLoading(false);
           setRefreshing(false);
           return;
@@ -62,7 +66,10 @@ export default function GridView({
       // Fetch new data if cache is expired or doesn't exist
       try {
         const objects = await fetchAllImageUrls(tableName, profileId);
-        setData(objects);
+        const filteredObjects = objects.filter(
+          (obj: Item | Outfit | Look) => obj.is_public === true
+        );
+        setData(filteredObjects);
 
         // Cache the data with a new timestamp
         AsyncStorage.setItem(
@@ -84,7 +91,10 @@ export default function GridView({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (rawData) {
-        setData(rawData);
+        const filteredData = rawData.filter(
+          (obj: Item | Outfit | Look) => obj.is_public === true
+        );
+        setData(filteredData);
         setLoading(false);
       } else {
         fetchAndCacheData();
