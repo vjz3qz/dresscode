@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,17 +9,92 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  // Added alias for horizontal scroll view
+  ScrollView as ScrollViewRN,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/Avatar";
-import React from "react";
 import { Profile } from "@/types";
 import {
   fetchFollowerProfiles,
   fetchFollowingProfiles,
 } from "@/api/fetchFollows";
+import { fetchSuggestedProfiles } from "@/api/fetchProfiles";
+import { handleFollow, handleUnfollow } from "@/api/handleFollows";
 import { useSession } from "@/contexts/SessionContext";
+
+function FollowSuggestions() {
+  const [suggestedUsers, setSuggestedUsers] = useState<Profile[]>([]);
+  const [following, setFollowing] = useState<{ [key: string]: boolean }>({});
+  const { session } = useSession();
+
+  useEffect(() => {
+    async function getSuggestedUsers() {
+      const fetchedProfiles: Profile[] = await fetchSuggestedProfiles();
+      setSuggestedUsers(fetchedProfiles);
+
+      // Initialize following state
+      const initialFollowingState: { [key: string]: boolean } = {};
+      fetchedProfiles.forEach((user) => {
+        initialFollowingState[user.id ?? ""] = false; // Assume not following initially
+      });
+      setFollowing(initialFollowingState);
+    }
+    getSuggestedUsers();
+  }, []);
+
+  const toggleFollow = async (userId: string) => {
+    if (following[userId]) {
+      await handleUnfollow(session?.user?.id ?? "", userId);
+    } else {
+      await handleFollow(session?.user?.id ?? "", userId);
+    }
+    setFollowing((prev) => ({ ...prev, [userId]: !prev[userId] }));
+  };
+  if (suggestedUsers.length === 0) return <></>;
+
+  return (
+    <View style={styles.suggestionsContainer}>
+      <Text style={styles.suggestionsTitle}>Suggested for you</Text>
+      <ScrollViewRN horizontal showsHorizontalScrollIndicator={false}>
+        {suggestedUsers.map((user) => (
+          <TouchableOpacity
+            key={user.id}
+            style={styles.suggestionItem}
+            onPress={() => {
+              router.push({
+                pathname: "/view/profiles/[profileId]",
+                params: { profileId: user.id ?? "" },
+              });
+            }}
+          >
+            <Avatar size={60} url={user.avatar_url ?? null} />
+            <Text style={styles.suggestionUsername}>{user.username}</Text>
+            <TouchableOpacity
+              style={
+                following[user.id ?? ""]
+                  ? styles.unfollowButton
+                  : styles.followButton
+              }
+              onPress={() => toggleFollow(user.id ?? "")}
+            >
+              <Text
+                style={
+                  following[user.id ?? ""]
+                    ? styles.unfollowButtonText
+                    : styles.followButtonText
+                }
+              >
+                {following[user.id ?? ""] ? "Unfollow" : "Follow"}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
+      </ScrollViewRN>
+    </View>
+  );
+}
 
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<"following" | "followers">(
@@ -31,7 +106,6 @@ export default function CommunityScreen() {
   const { session } = useSession();
 
   useEffect(() => {
-    // Fetch followers and following data from Supabase or any other source
     async function fetchData() {
       if (!session || !session.user.id) return;
       const followersData = await fetchFollowerProfiles(session.user.id);
@@ -40,25 +114,19 @@ export default function CommunityScreen() {
       setFollowing(followingData);
     }
     fetchData();
-  }, []);
-
-  const handleUnfollow = (userId: string) => {
-    // Implement unfollow logic
-    console.log("Unfollow user:", userId);
-  };
+  }, [session]);
 
   const handleSync = (type: "contacts" | "facebook") => {
-    // Implement sync logic
     console.log("Sync", type);
   };
 
   const handleInvite = () => {
-    // Implement invite logic
     console.log("Invite friends");
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="close" size={24} color="#000" />
@@ -67,6 +135,7 @@ export default function CommunityScreen() {
         <View style={{ width: 24 }} />
       </View>
 
+      {/* Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === "following" && styles.activeTab]}
@@ -82,6 +151,7 @@ export default function CommunityScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Search */}
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#666" />
         <TextInput
@@ -93,6 +163,7 @@ export default function CommunityScreen() {
         />
       </View>
 
+      {/* Main Content */}
       <ScrollView style={styles.content}>
         <View style={styles.syncSection}>
           <TouchableOpacity
@@ -155,13 +226,18 @@ export default function CommunityScreen() {
               </View>
               <TouchableOpacity
                 style={styles.unfollowButton}
-                onPress={() => handleUnfollow(user.id ?? "")}
+                onPress={() =>
+                  handleUnfollow(session?.user.id ?? "", user.id ?? "")
+                }
               >
                 <Text style={styles.unfollowButtonText}>Unfollow</Text>
               </TouchableOpacity>
             </View>
           ))}
         </View>
+
+        {/* Suggested Followers */}
+        <FollowSuggestions />
       </ScrollView>
     </SafeAreaView>
   );
@@ -183,6 +259,51 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
   },
+  // Follow suggestions styles
+  suggestionsContainer: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  suggestionsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    paddingHorizontal: 16,
+  },
+  suggestionItem: {
+    alignItems: "center",
+    marginRight: 16,
+    width: 80,
+  },
+  suggestionUsername: {
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  followButton: {
+    backgroundColor: "#0095f6",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  followButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  unfollowButton: {
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  unfollowButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  // Community page styles
   tabContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
@@ -261,7 +382,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    // backgroundColor: "#e9e5ff",
     backgroundColor: "rgba(104, 143, 229, 0.5)",
     marginHorizontal: 16,
     paddingVertical: 12,
@@ -296,15 +416,5 @@ const styles = StyleSheet.create({
   userHandle: {
     fontSize: 14,
     color: "#666",
-  },
-  unfollowButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 16,
-  },
-  unfollowButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
   },
 });
