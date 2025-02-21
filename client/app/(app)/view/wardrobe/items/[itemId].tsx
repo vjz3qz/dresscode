@@ -56,12 +56,9 @@ export default function ItemView() {
   }, []);
 
   async function handleSave() {
-    if (!item) return;
-    // remove null keys and image url and save to itemToSave
+    if (!item || session?.user.id !== item.user_id) return;
     let itemToSave = { ...item };
     delete (itemToSave as any).image_url;
-    // Save the item to the user's wardrobe
-    // update the item in the database
     const response = await supabase
       .from("items")
       .update({
@@ -72,7 +69,6 @@ export default function ItemView() {
     const { error, data } = response;
     if (error) {
       console.error("Error saving item:", error.message);
-      return;
     }
   }
 
@@ -102,6 +98,8 @@ export default function ItemView() {
       </View>
     );
   }
+
+  const isOwner = session?.user.id === item?.user_id;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -163,15 +161,17 @@ export default function ItemView() {
                 style={styles.detailTextInput}
                 value={item ? (item as any)[field.key] || "" : ""}
                 onChangeText={(text) =>
+                  isOwner &&
                   setItem(item ? { ...item, [field.key]: text } : null)
                 }
+                editable={isOwner}
                 placeholder={`Enter ${field.title.toLowerCase()}`}
                 placeholderTextColor="#b0b0b0"
               />
               <View style={styles.divider} />
             </View>
           ))}
-          {session?.user.id === item?.user_id && (
+          {isOwner && (
             <>
               <Text>Public</Text>
               <TouchableOpacity
