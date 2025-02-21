@@ -31,7 +31,7 @@ export async function handleFollow(
   }
   const { data, error } = await supabase
     .from("follows")
-    .upsert({ followingId, followerId })
+    .upsert({ following_id: followingId, follower_id: followerId })
     .single();
   if (error) {
     console.error("Error fetching follows:", error);
