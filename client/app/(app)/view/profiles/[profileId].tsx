@@ -44,7 +44,6 @@ export default function profilePage() {
         const fetchedProfile: Profile = await fetchProfileById(
           Array.isArray(profileId) ? profileId[0] : profileId
         );
-        console.log("fetched profile", fetchProfile);
         setProfile(fetchedProfile);
       } catch (error: any) {
         console.error("Error fetching profile by id:", error.message);
@@ -81,6 +80,7 @@ export default function profilePage() {
     };
     router.push(paths[tabs[tabIndex].tableName] as Href);
   }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
@@ -88,80 +88,96 @@ export default function profilePage() {
         <View style={styles.headerContent}>
           <View style={styles.avatarContainer}>
             <Avatar size={80} url={profile?.avatar_url ?? ""} circle />
-            <View style={{ flexDirection: "row" }}>
-              <TouchableOpacity style={styles.circleButton}>
-                <Ionicons name="bookmark-outline" size={24} color="#333" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.circleButton}
-                onPress={() => setModalVisible(true)}
-              >
-                <Ionicons name="analytics-outline" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
+            {profile?.is_public && (
+              <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity style={styles.circleButton}>
+                  <Ionicons name="bookmark-outline" size={24} color="#333" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.circleButton}
+                  onPress={() => setModalVisible(true)}
+                >
+                  <Ionicons name="analytics-outline" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
           <View style={styles.textContainer}>
             <Text style={styles.nameText}>
               {profile?.display_name || "Name"}
             </Text>
             <Text style={styles.usernameText}>
-              @{profile?.username || "name"}
+              @{profile?.username || "username"}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        {tabs.map((item, index) => (
-          <TouchableWithoutFeedback
-            key={item.name}
-            onPress={() => handleTabClick(index)}
-          >
-            <View
-              style={[styles.item, index === tabIndex && styles.activeItem]}
-            >
-              <Text
-                style={[styles.text, index === tabIndex && styles.activeText]}
-              >
-                {item.name}
-              </Text>
-            </View>
-          </TouchableWithoutFeedback>
-        ))}
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#6b7280" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          placeholderTextColor="#6b7280"
-        />
-        <Ionicons name="mic-outline" size={20} color="#6b7280" />
-      </View>
-
-      {/* GridViews */}
-      {tabIndex === 2 ? (
-        <LookGridView
-          onLookClick={(look: Look, index: number) => {
-            if (look.id) router.push(`/view/wardrobe/looks/${look.id}` as Href);
-          }}
-          tableName={tabs[tabIndex].tableName as keyof TableTypes}
-          profileId={Array.isArray(profileId) ? profileId[0] : profileId}
-        />
+      {/* Private Profile Handling */}
+      {!profile?.is_public ? (
+        <View style={styles.privateContainer}>
+          <Text style={styles.privateText}>This profile is private.</Text>
+        </View>
       ) : (
-        <GridView
-          onClick={(item: any, index: number) =>
-            router.push(
-              `/view/wardrobe/${tabs[tabIndex].tableName}/${item.id}` as Href
-            )
-          }
-          tableName={tabs[tabIndex].tableName as keyof TableTypes}
-          profileId={Array.isArray(profileId) ? profileId[0] : profileId}
-        />
+        <>
+          {/* Tabs */}
+          <View style={styles.tabsContainer}>
+            {tabs.map((item, index) => (
+              <TouchableWithoutFeedback
+                key={item.name}
+                onPress={() => handleTabClick(index)}
+              >
+                <View
+                  style={[styles.item, index === tabIndex && styles.activeItem]}
+                >
+                  <Text
+                    style={[
+                      styles.text,
+                      index === tabIndex && styles.activeText,
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
+            ))}
+          </View>
+
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#6b7280" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search..."
+              placeholderTextColor="#6b7280"
+            />
+            <Ionicons name="mic-outline" size={20} color="#6b7280" />
+          </View>
+
+          {/* GridViews */}
+          {tabIndex === 2 ? (
+            <LookGridView
+              onLookClick={(look: Look) => {
+                if (look.id)
+                  router.push(`/view/wardrobe/looks/${look.id}` as Href);
+              }}
+              tableName={tabs[tabIndex].tableName as keyof TableTypes}
+              profileId={Array.isArray(profileId) ? profileId[0] : profileId}
+            />
+          ) : (
+            <GridView
+              onClick={(item: any) =>
+                router.push(
+                  `/view/wardrobe/${tabs[tabIndex].tableName}/${item.id}` as Href
+                )
+              }
+              tableName={tabs[tabIndex].tableName as keyof TableTypes}
+              profileId={Array.isArray(profileId) ? profileId[0] : profileId}
+            />
+          )}
+        </>
       )}
+
       <Modal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -169,9 +185,6 @@ export default function profilePage() {
       >
         <Text>{wrappedText}</Text>
       </Modal>
-
-      {/* Upload Button */}
-      {/* <UploadButton onPress={onPlusButtonClick} /> */}
     </SafeAreaView>
   );
 }
@@ -272,5 +285,15 @@ const styles = StyleSheet.create({
   },
   activeText: {
     color: "#0f0f0f",
+  },
+  privateContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  privateText: {
+    fontSize: 18,
+    color: "#888",
+    fontWeight: "bold",
   },
 });
