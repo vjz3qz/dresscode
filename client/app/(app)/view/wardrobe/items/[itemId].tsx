@@ -41,10 +41,7 @@ export default function ItemView() {
         );
         if (!fetchedItem.s3_key) return;
         if (!session) return;
-        fetchedItem.image_url = await fetchImageUrl(
-          fetchedItem.s3_key || "",
-          session
-        );
+        fetchedItem.image_url = await fetchImageUrl(fetchedItem.s3_key || "");
         setItem(fetchedItem);
       } catch (error: any) {
         console.error("Error fetching item:", error.message);
