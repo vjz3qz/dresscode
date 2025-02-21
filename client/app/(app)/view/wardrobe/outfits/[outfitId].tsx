@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Share,
   Image,
+  TextInput,
 } from "react-native";
 import { Icon } from "@rneui/themed";
 import { useLocalSearchParams } from "expo-router";
@@ -16,7 +17,10 @@ import { Outfit } from "@/types";
 import { fetchOutfitById } from "@/api/fetchOutfits";
 import { useSession } from "@/contexts/SessionContext";
 import { fetchImageUrl } from "@/api/FetchImageUrl";
+import { supabase } from "@/utils/Supabase";
 import { router } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
+import { ScrollView } from "react-native-gesture-handler";
 
 const { height, width } = Dimensions.get("window");
 
@@ -33,9 +37,7 @@ export default function OutfitView() {
         let fetchedOutfit = await fetchOutfitById(
           Number(Array.isArray(outfitId) ? outfitId[0] : outfitId)
         );
-        // get outfit image url
-        if (!fetchedOutfit.s3_key) return;
-        if (!session) return;
+        if (!fetchedOutfit.s3_key || !session) return;
         fetchedOutfit.image_url = await fetchImageUrl(
           fetchedOutfit.s3_key || ""
         );
@@ -51,20 +53,26 @@ export default function OutfitView() {
     loadOutfit();
   }, []);
 
+  const handleSave = async () => {
+    if (!outfit || session?.user.id !== outfit.user_id) return;
+    let outfitToSave = { ...outfit };
+    delete (outfitToSave as any).image_url;
+
+    const { error } = await supabase
+      .from("outfits")
+      .update(outfitToSave)
+      .eq("id", outfitToSave.id);
+
+    if (error) {
+      console.error("Error saving outfit:", error.message);
+    }
+  };
+
   const handleShare = async () => {
     try {
-      const result = await Share.share({
+      await Share.share({
         message: `Check out this outfit: ${outfit?.name || "Outfit"}`,
       });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          console.log("Shared with activity type:", result.activityType);
-        } else {
-          console.log("Shared successfully");
-        }
-      } else if (result.action === Share.dismissedAction) {
-        console.log("Share dismissed");
-      }
     } catch (error: any) {
       console.error("Error sharing:", error.message);
     }
@@ -78,15 +86,24 @@ export default function OutfitView() {
     );
   }
 
+  const isOwner = session?.user.id === outfit?.user_id;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.dismiss()}>
           <Text style={styles.closeIcon}>✕</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-          <Icon type="ionicon" name="send" color="black" size={24} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row" }}>
+          {isOwner && (
+            <TouchableOpacity onPress={handleSave} style={styles.shareButton}>
+              <Text style={{ fontSize: 16, color: "blue" }}>Save</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+            <Icon type="ionicon" name="send" color="black" size={24} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.imageContainer}>
@@ -118,13 +135,50 @@ export default function OutfitView() {
         <Text style={styles.tabText}>Details</Text>
       </View>
 
-      <View style={styles.detailsContainer}>
-        <Text style={styles.detailTitle}>Name</Text>
-        <Text style={styles.detailText}>{outfit?.name}</Text>
-        <View style={styles.divider} />
-        <Text style={styles.detailTitle}>Description</Text>
-        <Text style={styles.detailText}>{outfit?.description}</Text>
-      </View>
+      <ScrollView style={styles.detailsContainer}>
+        {[
+          { title: "Name", key: "name" },
+          { title: "Description", key: "description" },
+          { title: "Occasion", key: "occasion" },
+          { title: "Style", key: "style" },
+          { title: "Season", key: "season" },
+        ].map((field) => (
+          <View key={field.key}>
+            <Text style={styles.detailTitle}>{field.title}</Text>
+            <TextInput
+              style={styles.detailTextInput}
+              value={outfit ? (outfit as any)[field.key] || "" : ""}
+              onChangeText={(text) =>
+                isOwner &&
+                setOutfit(outfit ? { ...outfit, [field.key]: text } : null)
+              }
+              editable={isOwner}
+              placeholder={`Enter ${field.title.toLowerCase()}`}
+              placeholderTextColor="#b0b0b0"
+            />
+            <View style={styles.divider} />
+          </View>
+        ))}
+
+        {isOwner && (
+          <>
+            <Text>Public</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setOutfit(
+                  outfit ? { ...outfit, is_public: !outfit.is_public } : null
+                );
+              }}
+            >
+              {outfit?.is_public ? (
+                <Entypo name="lock-open" size={24} color="black" />
+              ) : (
+                <Entypo name="lock" size={24} color="black" />
+              )}
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -198,9 +252,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 4,
   },
-  detailText: {
+  detailTextInput: {
     fontSize: 16,
     color: "#000",
+    paddingVertical: 4,
+    paddingTop: 12,
+    paddingHorizontal: 12,
     marginBottom: 12,
   },
   divider: {
