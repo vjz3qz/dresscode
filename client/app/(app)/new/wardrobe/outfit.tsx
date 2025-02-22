@@ -1,8 +1,15 @@
 import * as MediaLibrary from "expo-media-library";
 import { captureRef } from "react-native-view-shot";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
-import { View, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Animated,
+  Easing,
+} from "react-native";
 import { StyleSheet } from "react-native";
 import { Item } from "@/types";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -17,12 +24,25 @@ export default function NewOutfitScreen() {
   const imageRefs = useRef<(DraggableImageRef | null)[]>([]); // Array of refs for DraggableImage components
   const [status, requestPermission] = MediaLibrary.usePermissions();
   const viewRef = useRef(null); // Reference for capturing the entire outfit view
+  const [loading, setLoading] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const sheetRef = useRef<BottomSheetMethods>(null);
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   if (status === null) {
     requestPermission();
   }
 
   async function save() {
+    setLoading(true);
     // Capture metadata first
     const updatedItems = selectedItems.map((item, index) => {
       const ref = imageRefs.current[index];
@@ -56,13 +76,13 @@ export default function NewOutfitScreen() {
       router.dismiss();
     } catch (error) {
       console.error("Error capturing screenshot:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
-  const sheetRef = useRef<BottomSheetMethods>(null);
-
   return (
-    <View style={{ flex: 1, backgroundColor: "#f8f8f8" }}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.dismiss()}>
           <Text style={styles.closeIcon}>✕</Text>
@@ -93,18 +113,30 @@ export default function NewOutfitScreen() {
             setSelectedItems([]);
             imageRefs.current = [];
           }}
+          disabled={loading}
         >
           <Text style={styles.icon}>⏪</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={save}>
-          <Text style={styles.saveButtonText}>Save</Text>
+
+        <TouchableOpacity
+          style={[styles.saveButton, loading && styles.disabledButton]}
+          onPress={save}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="black" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save</Text>
+          )}
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => {
             setSelectedItems(selectedItems.slice(0, -1));
             imageRefs.current = imageRefs.current.slice(0, -1);
           }}
+          disabled={loading}
         >
           <Text style={styles.icon}>↩️</Text>
         </TouchableOpacity>
@@ -113,6 +145,7 @@ export default function NewOutfitScreen() {
       <TouchableOpacity
         style={styles.bottomSheetButton}
         onPress={() => sheetRef.current?.open()}
+        disabled={loading}
       >
         <Text style={styles.bottomSheetButtonText}>Add Items</Text>
       </TouchableOpacity>
@@ -136,11 +169,15 @@ export default function NewOutfitScreen() {
           tableName={"items"}
         />
       </BottomSheet>
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f8f8",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -193,6 +230,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6b7280",
     fontWeight: "bold",
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   bottomSheetButton: {
     backgroundColor: "black",
