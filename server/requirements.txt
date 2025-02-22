@@ -1,4 +1,4 @@
-rembg
+backgroundremover
 boto3
 fastapi
 uvicorn
