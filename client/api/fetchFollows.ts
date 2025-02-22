@@ -8,7 +8,7 @@ export async function fetchFollowingProfiles(
   try {
     followingList = await fetchFollowingList(userId);
   } catch (error) {
-    console.log("Error fetching follows:", error);
+    console.error("Error fetching follows:", error);
     return []; // Return an empty array on error
   }
 
@@ -17,7 +17,7 @@ export async function fetchFollowingProfiles(
     .select("*")
     .in("id", followingList);
   if (error) {
-    console.log("Error fetching follows:", error);
+    console.error("Error fetching follows:", error);
     return []; // Return an empty array on error
   }
 
@@ -31,7 +31,7 @@ export async function fetchFollowerProfiles(
   try {
     followerList = await fetchFollowerList(userId);
   } catch (error) {
-    console.log("Error fetching follows:", error);
+    console.error("Error fetching follows:", error);
     return []; // Return an empty array on error
   }
 
@@ -40,7 +40,7 @@ export async function fetchFollowerProfiles(
     .select("*")
     .in("id", followerList);
   if (error) {
-    console.log("Error fetching follows:", error);
+    console.error("Error fetching follows:", error);
     return []; // Return an empty array on error
   }
 
@@ -52,11 +52,12 @@ async function fetchFollowingList(userId: string): Promise<string[]> {
     .from("follows")
     .select("*")
     .eq("follower_id", userId);
+  console.log("data", data);
   if (error) {
     console.log("Error fetching follow list:", error);
     return []; // Return an empty array on error
   }
-  return data.map((follow) => follow.followed_id);
+  return data.map((follow) => follow.following_id);
 }
 
 async function fetchFollowerList(userId: string): Promise<string[]> {
