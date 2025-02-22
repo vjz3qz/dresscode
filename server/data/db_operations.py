@@ -15,3 +15,8 @@ def get_outfits(user_id, outfit_ids):
     response = supabase.table("outfits").select("*").eq("user_id", user_id).in_("id", outfit_ids).execute()
     data = response.data
     return data
+
+def get_all_items(user_id):
+    response = supabase.table("items").select("*").eq("user_id", user_id).execute()
+    data = response.data
+    return data
