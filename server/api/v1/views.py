@@ -102,7 +102,11 @@ async def closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict
 
 
 @router.get("/style-for-occasion")
-async def style_for_occasion(occasion: Optional[str] = Query(...), token_payload: dict = Depends(validate_token)):
+async def style_for_occasion(
+    occasion: Optional[str] = Query(
+        None, # ... makes it required in fastapi
+        description="The occasion for which we want style suggestions. Defaults to 'chill day at home' if not provided."
+    ), token_payload: dict = Depends(validate_token)):
     """_summary_
 
     Args:
