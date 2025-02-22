@@ -1,6 +1,15 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import React, { useState, useRef } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  Animated,
+  Easing,
+  ActivityIndicator,
+} from "react-native";
 import { router } from "expo-router";
 
 export default function Camera({
@@ -11,7 +20,18 @@ export default function Camera({
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const cameraRef = useRef(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   if (!permission) {
     return <View />;
@@ -49,8 +69,16 @@ export default function Camera({
     }
   }
 
+  async function handleUpload() {
+    if (photoUri) {
+      setLoading(true);
+      await uploadPicture(photoUri);
+      setLoading(false);
+    }
+  }
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <TouchableOpacity
         style={styles.closeButton}
         onPress={() => router.dismiss()}
@@ -66,15 +94,21 @@ export default function Camera({
             <TouchableOpacity
               style={styles.retakeButton}
               onPress={() => setPhotoUri(null)}
+              disabled={loading}
             >
               <Text style={styles.retakeButtonText}>↺</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.uploadButton}
-              onPress={() => uploadPicture(photoUri)}
+              style={[styles.uploadButton, loading && styles.disabledButton]}
+              onPress={handleUpload}
+              disabled={loading}
             >
-              <Text style={styles.uploadButtonText}>Upload</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="black" />
+              ) : (
+                <Text style={styles.uploadButtonText}>Upload</Text>
+              )}
             </TouchableOpacity>
           </View>
         </>
@@ -94,7 +128,7 @@ export default function Camera({
           </View>
         </CameraView>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -178,16 +212,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: "stretch",
   },
-  actionButton: {
-    padding: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    marginBottom: 10,
-    alignItems: "center",
-  },
-  actionButtonText: {
-    color: "white",
-    fontSize: 18,
-  },
   actionContainer: {
     position: "absolute",
     bottom: 30,
@@ -222,5 +246,8 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
