@@ -107,14 +107,16 @@ export default function FeedScreen() {
       user: {
         id: "1",
         username: "varun",
-        avatar_url: "https://via.placeholder.com/40",
-        gender: "Other",
-        age: 12,
+        avatar_url:
+          "https://ytfwgtbpdxaotawaostn.supabase.co/storage/v1/object/sign/images/1740186532128.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvMTc0MDE4NjUzMjEyOC5qcGciLCJpYXQiOjE3NDAxODc0MjUsImV4cCI6MTc0MDc5MjIyNX0.OI0a3449PHP4FuCDzo9l1Sjw6Gp7B6qCUPB8bE2QsqA",
+        gender: "male",
+        age: 21,
         preferences: [],
         brands: [],
       },
-      imageUrl: "https://www.wearegecko.co.uk/media/50316/mountain-3.jpg",
-      caption: "Today's outfit! 🌟 #ootd #fashion",
+      imageUrl:
+        "https://ytfwgtbpdxaotawaostn.supabase.co/storage/v1/object/sign/images/IMG_6610.JPG?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvSU1HXzY2MTAuSlBHIiwiaWF0IjoxNzQwMTg3Mzg4LCJleHAiOjE3NDA3OTIxODh9.2xnd6avEKrH0K-BdME7BAn4rHkIWHFzRqsGtYBk4NZs",
+      caption: "Today's outfit #ootd #fashion",
       likes: 124,
       comments: 8,
       timestamp: "2h",
@@ -145,8 +147,6 @@ export default function FeedScreen() {
           <Ionicons name="people-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
-
-      <FollowSuggestions />
 
       <ScrollView>
         {posts.map((post) => (
@@ -212,6 +212,7 @@ export default function FeedScreen() {
             </View>
           </View>
         ))}
+        <FollowSuggestions />
       </ScrollView>
     </SafeAreaView>
   );
