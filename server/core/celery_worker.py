@@ -1,10 +1,11 @@
 """This module contains the Celery worker tasks for the Supplier Outbound service."""
 
+import json
 import os
 import threading
 from celery import Celery
 from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3, get_image_url_s3
-from data.db_operations import get_outfits
+from data.db_operations import get_outfits, get_all_items
 from core.chat_model import OpenAIChatClient
 
 
@@ -63,6 +64,34 @@ def closet_wrapped(user_id, outfit_ids):
         This should be upbeat, and not negative.""",
         urls)
     return image_response
+
+@celery.task(name="tasks.style_for_occasion")
+def style_for_occasion(user_id, occasion):
+    # fetch outfit urls
+    items = get_all_items(user_id)
+    for item in items:
+        url_fetch = get_image_url_s3(item["s3_key"])
+        if "error" not in url_fetch:
+            item["image_url"] = url_fetch["url"]
+    # feed to chat
+    result = client.pick_outfit_for_occasion(
+        occasion,
+        items)
+    
+    selected_items = result["selected_items"]
+
+    # Convert Pydantic items to dicts so we can JSON-encode them
+    current_selection_dicts = []
+    for item in selected_items:
+        # If 'item' is a Pydantic model, convert to dict
+        current_selection_dicts.append(item.model_dump())
+    notes = result["notes"]
+    result_dict = {
+        "selected_items": current_selection_dicts,
+        "notes": notes,
+    }
+    return result_dict
+    # return json.dumps(result_dict)
 
 
 
