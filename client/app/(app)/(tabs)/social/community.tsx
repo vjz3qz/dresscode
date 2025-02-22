@@ -11,6 +11,7 @@ import {
   ScrollView,
   // Added alias for horizontal scroll view
   ScrollView as ScrollViewRN,
+  RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -103,18 +104,24 @@ export default function CommunityScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [followers, setFollowers] = useState<Profile[]>([]);
   const [following, setFollowing] = useState<Profile[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { session } = useSession();
 
   useEffect(() => {
-    async function fetchData() {
-      if (!session || !session.user.id) return;
+    fetchData();
+  }, [session]);
+
+  const fetchData = async () => {
+    if (!session || !session.user.id) return;
+    try {
       const followersData = await fetchFollowerProfiles(session.user.id);
       setFollowers(followersData);
       const followingData = await fetchFollowingProfiles(session.user.id);
       setFollowing(followingData);
+    } catch (error) {
+      console.error("Error fetching community data:", error);
     }
-    fetchData();
-  }, [session]);
+  };
 
   const handleSync = (type: "contacts" | "facebook") => {
     console.log("Sync", type);
@@ -122,6 +129,12 @@ export default function CommunityScreen() {
 
   const handleInvite = () => {
     console.log("Invite friends");
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
   };
 
   return (
@@ -164,7 +177,12 @@ export default function CommunityScreen() {
       </View>
 
       {/* Main Content */}
-      <ScrollView style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.syncSection}>
           <TouchableOpacity
             style={styles.syncButton}
