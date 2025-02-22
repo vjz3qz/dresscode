@@ -43,28 +43,39 @@ export default function NewOutfitScreen() {
 
   async function save() {
     setLoading(true);
-    // Capture metadata first
-    const updatedItems = selectedItems.map((item, index) => {
-      const ref = imageRefs.current[index];
-      if (ref) {
-        const { x, y, size } = ref.getPositionAndSize();
-        return { ...item, x, y, size };
-      }
-      return item;
-    });
 
-    // Capture the screenshot
     try {
+      // Ensure the viewRef is correctly set
+      if (!viewRef.current) {
+        console.error("View reference is null");
+        setLoading(false);
+        return;
+      }
+
+      // Capture metadata for draggable images
+      const updatedItems = selectedItems.map((item, index) => {
+        const ref = imageRefs.current[index];
+        if (ref) {
+          const { x, y, size } = ref.getPositionAndSize();
+          return { ...item, x, y, size };
+        }
+        return item;
+      });
+
+      // Capture the screenshot of the outfit canvas
       const screenshotUri = await captureRef(viewRef, {
-        height: 800, // Customize based on your view size
+        result: "tmpfile",
+        format: "png",
         quality: 1,
       });
 
+      console.log("Screenshot captured at:", screenshotUri);
+
       // Save screenshot to media library
       await MediaLibrary.saveToLibraryAsync(screenshotUri);
-      console.log("Screenshot saved:", screenshotUri);
+      console.log("Screenshot saved successfully!");
 
-      // Save both metadata and screenshot URI
+      // Save outfit with metadata and screenshot
       await saveOutfit(
         {
           name: "New Outfit",
@@ -92,7 +103,7 @@ export default function NewOutfitScreen() {
       </View>
 
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <View style={styles.canvasContainer} ref={viewRef}>
+        <View style={styles.canvasContainer} ref={viewRef} collapsable={false}>
           {selectedItems.map((item, index) => (
             <DraggableImage
               key={item.id}
@@ -198,7 +209,6 @@ const styles = StyleSheet.create({
   },
   canvasContainer: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
   },
   controlsContainer: {
     flexDirection: "row",
