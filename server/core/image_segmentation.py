@@ -1,7 +1,7 @@
 import os
 import boto3
 from backgroundremover.bg import remove
-from PIL import Image
+from PIL import Image, ExifTags
 from io import BytesIO
 from botocore.exceptions import NoCredentialsError
 
@@ -48,8 +48,29 @@ def process_image_s3(bucket_name, input_key, output_key):
     # Remove the background using backgroundremover
     output_bytes = remove(input_bytes)
     
+    # Convert output bytes back to an image
+    output_image = Image.open(BytesIO(output_bytes))
+    
+    # Correct orientation if needed AFTER cutout
+    try:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == 'Orientation':
+                break
+        exif = input_image._getexif()
+        if exif is not None:
+            orientation = exif.get(orientation)
+            if orientation == 3:
+                output_image = output_image.rotate(180, expand=True)
+            elif orientation == 6:
+                output_image = output_image.rotate(270, expand=True)
+            elif orientation == 8:
+                output_image = output_image.rotate(90, expand=True)
+    except (AttributeError, KeyError, IndexError):
+        pass  # Image does not have EXIF orientation data
+    
     # Save the result to a BytesIO object
-    output_buffer = BytesIO(output_bytes)
+    output_buffer = BytesIO()
+    output_image.save(output_buffer, format='PNG')
     output_buffer.seek(0)
     
     # Upload the processed image back to S3
