@@ -19,10 +19,7 @@ import { fetchItemById } from "@/api/fetchItems";
 import { useSession } from "@/contexts/SessionContext";
 import { fetchImageUrl } from "@/api/FetchImageUrl";
 import { router } from "expo-router";
-import {
-  ScrollView,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import { supabase } from "@/utils/Supabase";
 import * as FileSystem from "expo-file-system";
 
@@ -110,96 +107,91 @@ export default function ItemView() {
   const isOwner = session?.user.id === item?.user_id;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.dismiss()}>
-            <Text style={styles.closeIcon}>✕</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.dismiss()}>
+          <Text style={styles.closeIcon}>✕</Text>
+        </TouchableOpacity>
+        <View style={{ flexDirection: "row" }}>
+          <TouchableOpacity onPress={handleSave} style={styles.shareButton}>
+            <Text style={{ fontSize: 16, color: "blue" }}>Save</Text>
           </TouchableOpacity>
-          <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity onPress={handleSave} style={styles.shareButton}>
-              <Text style={{ fontSize: 16, color: "blue" }}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-              <Icon type="ionicon" name="send" color="black" size={24} />
-            </TouchableOpacity>
+          <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+            <Icon type="ionicon" name="send" color="black" size={24} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.imageContainer}>
+        <Icon
+          type="ionicon"
+          name="eye-outline"
+          color="gray"
+          size={24}
+          style={styles.eyeIcon}
+        />
+        <Icon
+          type="ionicon"
+          name="heart-outline"
+          color="gray"
+          size={24}
+          style={styles.heartIcon}
+        />
+        {item && (
+          <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+        )}
+      </View>
+
+      <View style={styles.tabsContainer}>
+        <Text style={[styles.tabText, styles.activeTab]}>About</Text>
+        <Text style={styles.tabText}>Styling</Text>
+        <Text style={styles.tabText}>Details</Text>
+      </View>
+
+      <ScrollView style={styles.detailsContainer}>
+        {[
+          { title: "Name", key: "name" },
+          { title: "Type", key: "type" },
+          { title: "Color", key: "color" },
+          { title: "Size", key: "size" },
+          { title: "Brand", key: "brand" },
+          { title: "Material", key: "material" },
+          { title: "Condition", key: "condition" },
+          { title: "Fit", key: "fit" },
+        ].map((field) => (
+          <View key={field.key}>
+            <Text style={styles.detailTitle}>{field.title}</Text>
+            <TextInput
+              style={styles.detailTextInput}
+              value={item ? (item as any)[field.key] || "" : ""}
+              onChangeText={(text) =>
+                isOwner && setItem(item ? { ...item, [field.key]: text } : null)
+              }
+              editable={isOwner}
+              placeholder={`Enter ${field.title.toLowerCase()}`}
+              placeholderTextColor="#b0b0b0"
+            />
+            <View style={styles.divider} />
           </View>
-        </View>
-
-        <View style={styles.imageContainer}>
-          <Icon
-            type="ionicon"
-            name="eye-outline"
-            color="gray"
-            size={24}
-            style={styles.eyeIcon}
-          />
-          <Icon
-            type="ionicon"
-            name="heart-outline"
-            color="gray"
-            size={24}
-            style={styles.heartIcon}
-          />
-          {item && (
-            <Image source={{ uri: item.image_url }} style={styles.itemImage} />
-          )}
-        </View>
-
-        <View style={styles.tabsContainer}>
-          <Text style={[styles.tabText, styles.activeTab]}>About</Text>
-          <Text style={styles.tabText}>Styling</Text>
-          <Text style={styles.tabText}>Details</Text>
-        </View>
-
-        <ScrollView style={styles.detailsContainer}>
-          {[
-            { title: "Name", key: "name" },
-            { title: "Type", key: "type" },
-            { title: "Color", key: "color" },
-            { title: "Size", key: "size" },
-            { title: "Brand", key: "brand" },
-            { title: "Material", key: "material" },
-            { title: "Condition", key: "condition" },
-            { title: "Fit", key: "fit" },
-          ].map((field) => (
-            <View key={field.key}>
-              <Text style={styles.detailTitle}>{field.title}</Text>
-              <TextInput
-                style={styles.detailTextInput}
-                value={item ? (item as any)[field.key] || "" : ""}
-                onChangeText={(text) =>
-                  isOwner &&
-                  setItem(item ? { ...item, [field.key]: text } : null)
-                }
-                editable={isOwner}
-                placeholder={`Enter ${field.title.toLowerCase()}`}
-                placeholderTextColor="#b0b0b0"
-              />
-              <View style={styles.divider} />
-            </View>
-          ))}
-          {isOwner && (
-            <>
-              <Text>Public</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setItem(
-                    item ? { ...item, is_public: !item.is_public } : null
-                  );
-                }}
-              >
-                {item?.is_public ? (
-                  <Entypo name="lock-open" size={24} color="black" />
-                ) : (
-                  <Entypo name="lock" size={24} color="black" />
-                )}
-              </TouchableOpacity>
-            </>
-          )}
-        </ScrollView>
-      </SafeAreaView>
-    </GestureHandlerRootView>
+        ))}
+        {isOwner && (
+          <>
+            <Text>Public</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setItem(item ? { ...item, is_public: !item.is_public } : null);
+              }}
+            >
+              {item?.is_public ? (
+                <Entypo name="lock-open" size={24} color="black" />
+              ) : (
+                <Entypo name="lock" size={24} color="black" />
+              )}
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

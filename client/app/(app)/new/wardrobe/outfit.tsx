@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native";
 import { Item } from "@/types";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
 import GridView from "@/components/GridViews/GridView";
 import { router, useLocalSearchParams } from "expo-router";
@@ -102,20 +101,18 @@ export default function NewOutfitScreen() {
         <View style={{ width: 30 }} />
       </View>
 
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <View style={styles.canvasContainer} ref={viewRef} collapsable={false}>
-          {selectedItems.map((item, index) => (
-            <DraggableImage
-              key={item.id}
-              ref={(ref) => (imageRefs.current[index] = ref)}
-              imageUri={item.image_url || ""}
-              initialX={item.x}
-              initialY={item.y}
-              initialSize={item.size}
-            />
-          ))}
-        </View>
-      </GestureHandlerRootView>
+      <View style={styles.canvasContainer} ref={viewRef} collapsable={false}>
+        {selectedItems.map((item, index) => (
+          <DraggableImage
+            key={item.id}
+            ref={(ref) => (imageRefs.current[index] = ref)}
+            imageUri={item.image_url || ""}
+            initialX={item.x}
+            initialY={item.y}
+            initialSize={item.size}
+          />
+        ))}
+      </View>
 
       <View style={styles.controlsContainer}>
         <TouchableOpacity
