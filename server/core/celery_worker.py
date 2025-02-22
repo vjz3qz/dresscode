@@ -35,9 +35,9 @@ def upload_task(file_content, file_name, file_content_type):
         dict: The result of the upload.
     """
     upload_file_obj_to_s3(file_content, file_name, file_content_type)
-    process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
+    # process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
     # add_item(file_name, "clothing", "processed_" + file_name)
-    return {"filename": "processed_" + file_name, "status": "file uploaded successfully"}
+    return {"filename": file_name, "status": "file uploaded successfully"}
 
 @celery.task(name="tasks.get_image_url")
 def get_image_url_task(key):
