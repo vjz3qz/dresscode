@@ -1,7 +1,7 @@
 """This module contains the API endpoints for the application."""
 
 import json
-from typing import List
+from typing import List, Optional
 from celery import uuid
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, Body, File, Query, Request, UploadFile
@@ -96,6 +96,23 @@ async def closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict
     # call celery
     user_id = token_payload.get("sub")
     task = celery.send_task("tasks.closet_wrapped", args=[user_id, outfit_ids])
+    return return_task(task)
+
+
+
+
+@router.get("/style-for-occasion")
+async def style_for_occasion(occasion: Optional[str] = Query(...), token_payload: dict = Depends(validate_token)):
+    """_summary_
+
+    Args:
+        occasion (str, optional): _description_. Defaults to Query(...).
+    """
+    # call celery
+    user_id = token_payload.get("sub")
+    if occasion is None:
+        occasion = "chill day at home"
+    task = celery.send_task("tasks.style_for_occasion", args=[user_id, occasion])
     return return_task(task)
 
 
