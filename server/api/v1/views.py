@@ -114,7 +114,7 @@ async def style_for_occasion(
     """
     # call celery
     user_id = token_payload.get("sub")
-    if occasion is None:
+    if occasion is None or occasion == "":
         occasion = "chill day at home"
     task = celery.send_task("tasks.style_for_occasion", args=[user_id, occasion])
     return return_task(task)
