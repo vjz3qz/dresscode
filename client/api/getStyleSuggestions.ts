@@ -4,8 +4,8 @@ import axios from "axios";
 import { axiosParamSerializer } from "@/utils/AxiosParamSerializer";
 import { SuggestedOutfit } from "@/types";
 
-// Function to fetch outfits from the Supabase table
-export async function getStyleSuggestions(): Promise<SuggestedOutfit[]> {
+// Function to fetch suggested outfit from the Supabase table
+export async function getSuggestedOutfits(): Promise<SuggestedOutfit[]> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -24,8 +24,8 @@ export async function getStyleSuggestions(): Promise<SuggestedOutfit[]> {
   return data as SuggestedOutfit[];
 }
 
-// Function to fetch outfits from the Supabase table
-export async function queueStyleSuggestion(occasion: string): Promise<void> {
+// Function to queue outfit suggestions to the Supabase table
+export async function queueSuggestedOutfitJob(occasion: string): Promise<void> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
