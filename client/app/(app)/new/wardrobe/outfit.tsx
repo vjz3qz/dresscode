@@ -21,7 +21,7 @@ import DraggableImage, {
 import GridView from "@/components/GridViews/GridView";
 import { router, useLocalSearchParams } from "expo-router";
 import { saveOutfit } from "@/api/SaveOutfit";
-import { getStyleSuggestions } from "@/api/getStyleSuggestions";
+import { getStyleSuggestions } from "@/api/suggestOutfits";
 import { fetchItemById } from "@/api/fetchItems";
 import Modal from "@/ui/Modal";
 import { addImageUrls } from "@/api/FetchImageUrl";
