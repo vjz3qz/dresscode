@@ -1,6 +1,6 @@
 import * as MediaLibrary from "expo-media-library";
 import { captureRef } from "react-native-view-shot";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import BottomSheet, { type BottomSheetMethods } from "@devvie/bottom-sheet";
 import {
   View,
@@ -44,7 +44,6 @@ export default function NewOutfitScreen() {
   const [suggestedOutfits, setSuggestedOutfits] = useState<SuggestedOutfit[]>(
     []
   );
-  const [occasion, setOccasion] = useState("");
   const [activeTab, setActiveTab] = useState<"queue" | "ready">("queue");
   const imageRefs = useRef<(DraggableImageRef | null)[]>([]);
   const [status, requestPermission] = MediaLibrary.usePermissions();
@@ -91,19 +90,6 @@ export default function NewOutfitScreen() {
       setSuggestedOutfits(suggestionsWithItems);
     } catch (error) {
       console.error("Error fetching style suggestions:", error);
-    }
-  };
-
-  const queueNewSuggestion = async () => {
-    if (occasion) {
-      try {
-        const newOccasion = occasion;
-        setOccasion("");
-        await queueSuggestedOutfitJob(newOccasion);
-        fetchStyleSuggestions(); // Refresh the list of suggestions
-      } catch (error) {
-        console.error("Error queueing suggestion:", error);
-      }
     }
   };
 
@@ -170,6 +156,24 @@ export default function NewOutfitScreen() {
   };
 
   function QueueTab() {
+    const [occasion, setOccasion] = useState("");
+    const [isQueueing, setIsQueueing] = useState(false);
+
+    const queueNewSuggestion = async () => {
+      if (occasion) {
+        try {
+          setIsQueueing(true);
+          await queueSuggestedOutfitJob(occasion);
+          setOccasion("");
+          await fetchStyleSuggestions();
+        } catch (error) {
+          console.error("Error queueing suggestion:", error);
+        } finally {
+          setIsQueueing(false);
+        }
+      }
+    };
+
     return (
       <ScrollView>
         <Text style={styles.suggestionsTitle}>Queue New Suggestion</Text>
@@ -183,9 +187,11 @@ export default function NewOutfitScreen() {
           <TouchableOpacity
             style={styles.queueButton}
             onPress={queueNewSuggestion}
-            disabled={!occasion || loading}
+            disabled={!occasion || isQueueing}
           >
-            <Text style={styles.queueButtonText}>Queue</Text>
+            <Text style={styles.queueButtonText}>
+              {isQueueing ? "Queueing..." : "Queue"}
+            </Text>
           </TouchableOpacity>
         </View>
 
