@@ -2,10 +2,12 @@ import { fetchSession } from "@/utils/FetchSession";
 import { supabase } from "@/utils/Supabase";
 import axios from "axios";
 import { axiosParamSerializer } from "@/utils/AxiosParamSerializer";
-import { SuggestedOutfit } from "@/types";
+import { SuggestedOutfit, SuggestedOutfitJobStatuses } from "@/types";
 
 // Function to fetch suggested outfit from the Supabase table
-export async function getSuggestedOutfits(): Promise<SuggestedOutfit[]> {
+export async function getSuggestedOutfits(
+  statuses: SuggestedOutfitJobStatuses[] = ["ready"]
+): Promise<SuggestedOutfit[]> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -14,7 +16,7 @@ export async function getSuggestedOutfits(): Promise<SuggestedOutfit[]> {
     .from("suggested_outfits")
     .select("*")
     .eq("user_id", session.user.id)
-    .eq("status", "ready");
+    .in("status", statuses);
 
   if (error) {
     console.error("Error fetching outfits:", error);
