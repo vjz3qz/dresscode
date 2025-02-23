@@ -34,6 +34,7 @@ export async function queueStyleSuggestion(occasion?: string): Promise<void> {
   const suggestedOutfitForQueue: SuggestedOutfit = {
     user_id: session.user.id,
     occasion: occasion || "chill day",
+    status: "queued",
   };
   // Add the S3 key to the outfit metadata and save the outfit to Supabase
   const { data, error } = await supabase
