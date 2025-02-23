@@ -9,20 +9,36 @@ import {
   ActivityIndicator,
   Animated,
   Easing,
+  ScrollView,
+  Image,
+  Dimensions,
 } from "react-native";
 import { StyleSheet } from "react-native";
-import { Item } from "@/types";
-import DraggableImage, { DraggableImageRef } from "@/components/DraggableImage";
+import type { Item } from "@/types";
+import DraggableImage, {
+  type DraggableImageRef,
+} from "@/components/DraggableImage";
 import GridView from "@/components/GridViews/GridView";
 import { router, useLocalSearchParams } from "expo-router";
 import { saveOutfit } from "@/api/SaveOutfit";
+import { getStyleSuggestions } from "@/api/getStyleSuggestions";
+import { fetchItemById } from "@/api/fetchItems";
+import Modal from "@/ui/Modal";
+import { addImageUrls } from "@/api/FetchImageUrl";
+type ExtendedItem = Item & {
+  reason?: string; // Adjust the type if you have a more specific definition
+};
+const { height, width } = Dimensions.get("window");
 
 export default function NewOutfitScreen() {
-  const { fromCalendar, selectedDate } = useLocalSearchParams(); // TODO: add to specified date after creating outfits
-  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
-  const imageRefs = useRef<(DraggableImageRef | null)[]>([]); // Array of refs for DraggableImage components
+  const { fromCalendar, selectedDate } = useLocalSearchParams();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<ExtendedItem[]>([]);
+  const [suggestedItems, setSuggestedItems] = useState<ExtendedItem[]>([]);
+  const [notes, setNotes] = useState<string>("");
+  const imageRefs = useRef<(DraggableImageRef | null)[]>([]);
   const [status, requestPermission] = MediaLibrary.usePermissions();
-  const viewRef = useRef(null); // Reference for capturing the entire outfit view
+  const viewRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const sheetRef = useRef<BottomSheetMethods>(null);
@@ -34,7 +50,26 @@ export default function NewOutfitScreen() {
       easing: Easing.out(Easing.exp),
       useNativeDriver: true,
     }).start();
-  }, []);
+
+    fetchStyleSuggestions();
+  }, [fadeAnim]);
+
+  const fetchStyleSuggestions = async () => {
+    try {
+      const suggestions = await getStyleSuggestions();
+      const items = await Promise.all(
+        suggestions.selected_items.map(async (item) => {
+          const fetchedItem = await fetchItemById(item.id.toString());
+          return { ...fetchedItem, reason: item.reason };
+        })
+      );
+      const itemsWithImages = await addImageUrls(items);
+      setSuggestedItems(itemsWithImages);
+      setNotes(suggestions.notes);
+    } catch (error) {
+      console.error("Error fetching style suggestions:", error);
+    }
+  };
 
   if (status === null) {
     requestPermission();
@@ -91,6 +126,13 @@ export default function NewOutfitScreen() {
     }
   }
 
+  const addSuggestedItem = (item: ExtendedItem) => {
+    item.x = Math.random() * 200;
+    item.y = Math.random() * 200;
+    item.size = 100;
+    setSelectedItems([...selectedItems, item]);
+  };
+
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.header}>
@@ -101,6 +143,34 @@ export default function NewOutfitScreen() {
         <View style={{ width: 30 }} />
       </View>
 
+      <Modal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        transparent
+      >
+        <ScrollView style={styles.suggestionsContainer}>
+          <Text style={styles.suggestionsTitle}>Suggested Items</Text>
+          {suggestedItems.map((item) => (
+            <View key={item.id} style={styles.suggestionItem}>
+              <Image
+                source={{ uri: item.image_url }}
+                style={styles.itemImage}
+              />
+
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemReason}>{item.reason}</Text>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => addSuggestedItem(item)}
+              >
+                <Text style={styles.addButtonText}>Add to Outfit</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <Text style={styles.notesTitle}>Stylist Notes</Text>
+          <Text style={styles.notes}>{notes}</Text>
+        </ScrollView>
+      </Modal>
       <View style={styles.canvasContainer} ref={viewRef} collapsable={false}>
         {selectedItems.map((item, index) => (
           <DraggableImage
@@ -115,6 +185,15 @@ export default function NewOutfitScreen() {
       </View>
 
       <View style={styles.controlsContainer}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => {
+            setModalVisible(true);
+          }}
+          disabled={loading}
+        >
+          <Text style={styles.icon}>🤖</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => {
@@ -167,7 +246,7 @@ export default function NewOutfitScreen() {
         }}
       >
         <GridView
-          onClick={(item: Item) => {
+          onClick={(item: ExtendedItem) => {
             item.x = Math.random() * 200;
             item.y = Math.random() * 200;
             item.size = 100;
@@ -252,5 +331,57 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  suggestionsContainer: {
+    maxHeight: height * 0.7,
+    maxWidth: width * 0.7,
+  },
+  suggestionsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  suggestionItem: {
+    marginBottom: 10,
+    padding: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  itemReason: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 5,
+  },
+  addButton: {
+    backgroundColor: "#d3d3d3",
+    padding: 5,
+    borderRadius: 5,
+    marginTop: 5,
+    alignSelf: "flex-start",
+  },
+  addButtonText: {
+    color: "black",
+    fontWeight: "bold",
+  },
+  notesTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  notes: {
+    fontSize: 14,
+    color: "#333",
+  },
+  itemImage: {
+    width: width * 0.6,
+    height: width * 0.6,
+    resizeMode: "contain",
+    backgroundColor: "#f1f1f1",
+    borderRadius: 20,
   },
 });
