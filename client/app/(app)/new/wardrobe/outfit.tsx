@@ -208,9 +208,6 @@ export default function NewOutfitScreen() {
               <Text style={styles.itemName}>
                 Occasion: {suggestedOutfit.occasion}
               </Text>
-              <Text style={styles.itemReason}>
-                Status: {suggestedOutfit.status}
-              </Text>
               {suggestedOutfit.status === "ready" && (
                 <>
                   <Text style={styles.notesTitle}>Stylist Notes</Text>
