@@ -66,12 +66,11 @@ export default function NewOutfitScreen() {
 
   const fetchStyleSuggestions = async () => {
     try {
-      const suggestions = await getSuggestedOutfits();
+      const suggestions = await getSuggestedOutfits(["queued", "ready"]);
       const suggestionsWithItems = await Promise.all(
         // for each suggestion fetch all items
         suggestions.map(async (suggestedOutfit: SuggestedOutfit) => {
-          if (!suggestedOutfit.selected_items)
-            return { ...suggestedOutfit, selected_items: [] };
+          if (!suggestedOutfit.selected_items) return suggestedOutfit;
           // fetch all items
           const items = await Promise.all(
             (suggestedOutfit.selected_items as SelectedItem[]).map(
@@ -192,7 +191,7 @@ export default function NewOutfitScreen() {
 
         <Text style={styles.suggestionsTitle}>Queued Suggestions</Text>
         {suggestedOutfits
-          .filter((outfit) => outfit.status !== "ready")
+          .filter((outfit) => outfit.status === "queued")
           .map((suggestedOutfit) => (
             <View key={suggestedOutfit.id} style={styles.suggestionItem}>
               <Text style={styles.itemName}>
