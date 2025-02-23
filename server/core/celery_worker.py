@@ -101,6 +101,7 @@ def suggest_outfit_task(user_id, suggested_outfit_id):
     suggested_outfit = {
         **suggest_outfit_job,
         **result_dict,
+        "status": "ready"
     }
     response = complete_suggested_outfit_job(user_id, suggested_outfit_id, suggested_outfit)
     if response:
