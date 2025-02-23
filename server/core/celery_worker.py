@@ -5,7 +5,7 @@ import os
 import threading
 from celery import Celery
 from core.image_segmentation import process_image_s3, upload_file_obj_to_s3, upload_image_to_s3, get_image_url_s3
-from data.db_operations import get_outfits, get_all_items
+from data.db_operations import complete_suggested_outfit_job, get_outfits, get_all_items, get_suggested_outfit_job
 from core.chat_model import OpenAIChatClient
 
 
@@ -65,8 +65,15 @@ def closet_wrapped_task(user_id, outfit_ids):
         urls)
     return image_response
 
-@celery.task(name="tasks.style_for_occasion")
-def style_for_occasion(user_id, occasion):
+@celery.task(name="tasks.suggest_outfit")
+def suggest_outfit_task(user_id, suggested_outfit_id):
+    # fetch suggested outfit row
+    suggest_outfit_job = get_suggested_outfit_job(user_id, suggested_outfit_id)
+    if not suggest_outfit_job:
+        return 400
+    else:
+        suggest_outfit_job = suggest_outfit_job[0]
+    occasion = suggest_outfit_job["occasion"]
     # fetch outfit urls
     items = get_all_items(user_id)
     for item in items:
@@ -74,7 +81,7 @@ def style_for_occasion(user_id, occasion):
         if "error" not in url_fetch:
             item["image_url"] = url_fetch["url"]
     # feed to chat
-    result = client.pick_outfit_for_occasion(
+    result = client.suggest_outfit_for_occasion(
         occasion,
         items)
     
@@ -90,8 +97,16 @@ def style_for_occasion(user_id, occasion):
         "selected_items": current_selection_dicts,
         "notes": notes,
     }
-    return result_dict
-    # return json.dumps(result_dict)
+    # upload back to supabase
+    suggested_outfit = {
+        **suggest_outfit_job,
+        **result_dict,
+    }
+    response = complete_suggested_outfit_job(user_id, suggested_outfit_id, suggested_outfit)
+    if response:
+        return 200
+    else: 
+        return 500
 
 
 
