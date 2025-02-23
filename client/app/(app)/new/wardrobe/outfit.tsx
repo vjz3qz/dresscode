@@ -45,6 +45,7 @@ export default function NewOutfitScreen() {
     []
   );
   const [occasion, setOccasion] = useState("");
+  const [activeTab, setActiveTab] = useState<"queue" | "ready">("queue");
   const imageRefs = useRef<(DraggableImageRef | null)[]>([]);
   const [status, requestPermission] = MediaLibrary.usePermissions();
   const viewRef = useRef(null);
@@ -169,6 +170,79 @@ export default function NewOutfitScreen() {
     setSelectedItems([...selectedItems, item]);
   };
 
+  function QueueTab() {
+    return (
+      <ScrollView>
+        <Text style={styles.suggestionsTitle}>Queue New Suggestion</Text>
+        <View style={styles.queueContainer}>
+          <TextInput
+            style={styles.occasionInput}
+            value={occasion}
+            onChangeText={setOccasion}
+            placeholder="Enter occasion"
+          />
+          <TouchableOpacity
+            style={styles.queueButton}
+            onPress={queueNewSuggestion}
+            disabled={!occasion || loading}
+          >
+            <Text style={styles.queueButtonText}>Queue</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.suggestionsTitle}>Queued Suggestions</Text>
+        {suggestedOutfits
+          .filter((outfit) => outfit.status !== "ready")
+          .map((suggestedOutfit) => (
+            <View key={suggestedOutfit.id} style={styles.suggestionItem}>
+              <Text style={styles.itemName}>
+                Occasion: {suggestedOutfit.occasion}
+              </Text>
+              <Text style={styles.itemStatus}>
+                Status: {suggestedOutfit.status}
+              </Text>
+            </View>
+          ))}
+      </ScrollView>
+    );
+  }
+
+  function ReadyTab() {
+    return (
+      <ScrollView>
+        <Text style={styles.suggestionsTitle}>Ready Suggestions</Text>
+        {suggestedOutfits
+          .filter((outfit) => outfit.status === "ready")
+          .map((suggestedOutfit) => (
+            <View key={suggestedOutfit.id} style={styles.suggestionItem}>
+              <Text style={styles.itemName}>
+                Occasion: {suggestedOutfit.occasion}
+              </Text>
+              <Text style={styles.notesTitle}>Stylist Notes</Text>
+              <Text style={styles.notes}>{suggestedOutfit.notes}</Text>
+              {suggestedOutfit.items &&
+                suggestedOutfit.items.map((item: ExtendedItem) => (
+                  <View key={item.id} style={styles.selectedItemContainer}>
+                    <Image
+                      source={{ uri: item.image_url }}
+                      style={styles.itemImage}
+                    />
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemReason}>{item.reason}</Text>
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={() => addSuggestedItem(item)}
+                    >
+                      <Text style={styles.addButtonText}>Add to Outfit</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+            </View>
+          ))}
+      </ScrollView>
+    );
+  }
+
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.header}>
@@ -184,58 +258,23 @@ export default function NewOutfitScreen() {
         onClose={() => setModalVisible(false)}
         transparent
       >
-        <ScrollView style={styles.suggestionsContainer}>
-          <Text style={styles.suggestionsTitle}>Queue New Suggestion</Text>
-          <View style={styles.queueContainer}>
-            <TextInput
-              style={styles.occasionInput}
-              value={occasion}
-              onChangeText={setOccasion}
-              placeholder="Enter occasion"
-            />
+        <View style={styles.modalContent}>
+          <View style={styles.tabContainer}>
             <TouchableOpacity
-              style={styles.queueButton}
-              onPress={queueNewSuggestion}
-              disabled={!occasion || loading}
+              style={[styles.tab, activeTab === "queue" && styles.activeTab]}
+              onPress={() => setActiveTab("queue")}
             >
-              <Text style={styles.queueButtonText}>Queue</Text>
+              <Text style={styles.tabText}>Queue</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "ready" && styles.activeTab]}
+              onPress={() => setActiveTab("ready")}
+            >
+              <Text style={styles.tabText}>Ready</Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.suggestionsTitle}>Suggested Outfits</Text>
-          {suggestedOutfits.map((suggestedOutfit) => (
-            <View key={suggestedOutfit.id} style={styles.suggestionItem}>
-              <Text style={styles.itemName}>
-                Occasion: {suggestedOutfit.occasion}
-              </Text>
-              {suggestedOutfit.status === "ready" && (
-                <>
-                  <Text style={styles.notesTitle}>Stylist Notes</Text>
-                  <Text style={styles.notes}>{suggestedOutfit.notes}</Text>
-                  {suggestedOutfit.items &&
-                    suggestedOutfit.items.map((item: ExtendedItem) => (
-                      <View key={item.id} style={styles.selectedItemContainer}>
-                        <Image
-                          source={{ uri: item.image_url }}
-                          style={styles.itemImage}
-                        />
-                        <Text style={styles.itemName}>{item.name}</Text>
-                        <Text style={styles.itemReason}>{item.reason}</Text>
-                        <TouchableOpacity
-                          style={styles.addButton}
-                          onPress={() => addSuggestedItem(item)}
-                        >
-                          <Text style={styles.addButtonText}>
-                            Add to Outfit
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                </>
-              )}
-            </View>
-          ))}
-        </ScrollView>
+          {activeTab === "queue" ? <QueueTab /> : <ReadyTab />}
+        </View>
       </Modal>
       <View style={styles.canvasContainer} ref={viewRef} collapsable={false}>
         {selectedItems.map((item, index) => (
@@ -477,5 +516,33 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#f0f0f0",
     borderRadius: 5,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    height: height * 0.7,
+    width: width * 0.7,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: "black",
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  itemStatus: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 5,
   },
 });
