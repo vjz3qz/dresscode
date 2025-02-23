@@ -137,6 +137,13 @@ export type SelectedItem = {
   reason: string;
 };
 
+export type SuggestedOutfitJobStatuses =
+  | "ready"
+  | "queued"
+  | "error"
+  | "accepted"
+  | "rejected";
+
 export type SuggestedOutfit = {
   id?: number;
   created_at?: string;
@@ -145,5 +152,5 @@ export type SuggestedOutfit = {
   selected_items?: SelectedItem[];
   items?: ExtendedItem[];
   notes?: string;
-  status?: "ready" | "queued" | "error" | "accepted" | "rejected";
+  status?: SuggestedOutfitJobStatuses;
 };
