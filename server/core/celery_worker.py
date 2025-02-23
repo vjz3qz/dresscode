@@ -52,7 +52,7 @@ def get_image_url_task(key):
     return get_image_url_s3(key)
 
 @celery.task(name="tasks.closet_wrapped")
-def closet_wrapped(user_id, outfit_ids):
+def closet_wrapped_task(user_id, outfit_ids):
     # fetch outfit urls
     outfits = get_outfits(user_id, outfit_ids)
     url_fetches = [get_image_url_s3(outfit["s3_key"]) for outfit in outfits]
