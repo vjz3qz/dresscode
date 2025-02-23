@@ -127,3 +127,18 @@ export type TableTypes = {
   outfits: Outfit;
   // calendar_events: CalendarEvent;
 };
+
+type SelectedItem = {
+  id: number;
+  reason: string;
+};
+
+export type SuggestedOutfit = {
+  id?: number;
+  created_at?: string;
+  user_id?: string;
+  occasion: string; // e.g., "work", "dinner", "date"
+  selected_items?: SelectedItem[];
+  notes?: string;
+  status?: "ready" | "queued" | "error" | "accepted" | "rejected";
+};
