@@ -5,7 +5,7 @@ export default function LandingPage() {
   useEffect(() => {
     router.replace("/(app)/(tabs)/wardrobe"); // Redirect to the wardrobe page
   }, []);
-  return <ComingSoonScreen></ComingSoonScreen>;
+  return <ComingSoonScreen />;
 }
 
 // import React from "react";
