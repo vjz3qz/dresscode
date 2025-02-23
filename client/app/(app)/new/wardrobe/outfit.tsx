@@ -409,7 +409,6 @@ const styles = StyleSheet.create({
   },
   suggestionItem: {
     marginBottom: 10,
-    padding: 10,
     backgroundColor: "white",
     borderRadius: 5,
   },
