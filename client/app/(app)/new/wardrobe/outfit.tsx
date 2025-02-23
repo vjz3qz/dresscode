@@ -1,6 +1,6 @@
 import * as MediaLibrary from "expo-media-library";
 import { captureRef } from "react-native-view-shot";
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import BottomSheet, { type BottomSheetMethods } from "@devvie/bottom-sheet";
 import {
   View,
@@ -179,23 +179,27 @@ export default function NewOutfitScreen() {
       <ScrollView>
         <Text style={styles.suggestionsTitle}>Queue New Suggestion</Text>
         <View style={styles.queueContainer}>
+          <Text style={styles.label}>Occasion</Text>
           <TextInput
             style={styles.occasionInput}
             value={occasion}
             onChangeText={setOccasion}
-            placeholder="Enter occasion"
+            placeholder="Describe the occasion..."
             multiline
-            numberOfLines={10}
-            textAlignVertical="top" // Ensures text starts from the top
+            numberOfLines={6}
+            textAlignVertical="top"
           />
           <View style={styles.queueButtonContainer}>
             <TouchableOpacity
-              style={styles.queueButton}
+              style={[
+                styles.queueButton,
+                (!occasion || isQueueing) && styles.disabledButton,
+              ]}
               onPress={queueNewSuggestion}
               disabled={!occasion || isQueueing}
             >
               <Text style={styles.queueButtonText}>
-                {isQueueing ? "Queueing..." : "Queue"}
+                {isQueueing ? "Queueing..." : "Queue Suggestion"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -437,9 +441,6 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     fontWeight: "bold",
   },
-  disabledButton: {
-    opacity: 0.6,
-  },
   bottomSheetButton: {
     backgroundColor: "black",
     paddingVertical: 30,
@@ -476,15 +477,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   addButton: {
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#B0C4DE",
     padding: 5,
     borderRadius: 5,
     marginTop: 5,
     alignSelf: "flex-start",
   },
   addButtonText: {
-    color: "black",
-    fontWeight: "bold",
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
   },
   notesTitle: {
     fontSize: 18,
@@ -500,7 +502,7 @@ const styles = StyleSheet.create({
     width: width * 0.6,
     height: width * 0.6,
     resizeMode: "contain",
-    backgroundColor: "#f1f1f1",
+    backgroundColor: "#ccdcf0",
     borderRadius: 20,
   },
   queueContainer: {
@@ -508,32 +510,55 @@ const styles = StyleSheet.create({
     flexDirection: "column", // Ensure items are stacked vertically
     gap: 10, // Adds vertical spacing between children
   },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: "#333",
+  },
   occasionInput: {
     flex: 1,
-    height: 200,
-    borderColor: "gray",
+    height: 120,
+    borderColor: "#E0E0E0",
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 10,
     paddingHorizontal: 10,
     fontSize: 16,
+    backgroundColor: "#F9F9F9",
+    marginBottom: 16,
   },
   queueButtonContainer: {
     alignSelf: "flex-start",
   },
   queueButton: {
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#4A90E2",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   queueButtonText: {
-    color: "black",
-    fontWeight: "bold",
-    textAlign: "center",
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.6,
+    backgroundColor: "#B0C4DE",
+    shadowOpacity: 0,
+    elevation: 0,
   },
   selectedItemContainer: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: "#f0f0f0",
+    alignItems: "center",
     borderRadius: 5,
   },
   modalContent: {
