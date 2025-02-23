@@ -20,3 +20,13 @@ def get_all_items(user_id):
     response = supabase.table("items").select("*").eq("user_id", user_id).execute()
     data = response.data
     return data
+
+def get_suggested_outfit_job(user_id, suggested_outfit_id):
+    response = supabase.table("suggested_outfits").select("*").eq("user_id", user_id).eq("id", suggested_outfit_id).execute() 
+    data = response.data
+    return data
+
+def complete_suggested_outfit_job(user_id, suggested_outfit_id, suggested_outfit):
+    response = supabase.table("suggested_outfits").update(suggested_outfit).eq("user_id", user_id).eq("id", suggested_outfit_id).execute() 
+    data = response.data
+    return data
