@@ -97,8 +97,9 @@ export default function NewOutfitScreen() {
   const queueNewSuggestion = async () => {
     if (occasion) {
       try {
-        await queueSuggestedOutfitJob(occasion);
+        const newOccasion = occasion;
         setOccasion("");
+        await queueSuggestedOutfitJob(newOccasion);
         fetchStyleSuggestions(); // Refresh the list of suggestions
       } catch (error) {
         console.error("Error queueing suggestion:", error);
