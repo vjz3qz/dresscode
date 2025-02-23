@@ -128,7 +128,11 @@ export type TableTypes = {
   // calendar_events: CalendarEvent;
 };
 
-type SelectedItem = {
+export type ExtendedItem = Item & {
+  reason?: string;
+};
+
+export type SelectedItem = {
   id: number;
   reason: string;
 };
@@ -139,6 +143,7 @@ export type SuggestedOutfit = {
   user_id?: string;
   occasion: string; // e.g., "work", "dinner", "date"
   selected_items?: SelectedItem[];
+  items?: ExtendedItem[];
   notes?: string;
   status?: "ready" | "queued" | "error" | "accepted" | "rejected";
 };
