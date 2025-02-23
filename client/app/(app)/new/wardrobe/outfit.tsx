@@ -34,6 +34,7 @@ import {
 import { fetchItemById } from "@/api/fetchItems";
 import Modal from "@/ui/Modal";
 import { addImageUrls } from "@/api/FetchImageUrl";
+import AccordionItem from "@/components/AccordianItem";
 
 const { height, width } = Dimensions.get("window");
 
@@ -213,14 +214,16 @@ export default function NewOutfitScreen() {
         {suggestedOutfits
           .filter((suggestedOutfit) => suggestedOutfit.status === "queued")
           .map((suggestedOutfit) => (
-            <View key={suggestedOutfit.id} style={styles.suggestionItem}>
-              <Text style={styles.itemName}>
-                Occasion: {suggestedOutfit.occasion}
-              </Text>
-              <Text style={styles.itemStatus}>
-                Status: {suggestedOutfit.status}
-              </Text>
-            </View>
+            <AccordionItem title={"Occasion: " + suggestedOutfit.occasion}>
+              <View key={suggestedOutfit.id} style={styles.suggestionItem}>
+                <Text style={styles.itemName}>
+                  Occasion: {suggestedOutfit.occasion}
+                </Text>
+                <Text style={styles.itemStatus}>
+                  Status: {suggestedOutfit.status}
+                </Text>
+              </View>
+            </AccordionItem>
           ))}
       </ScrollView>
     );
@@ -233,30 +236,32 @@ export default function NewOutfitScreen() {
         {suggestedOutfits
           .filter((outfit) => outfit.status === "ready")
           .map((suggestedOutfit) => (
-            <View key={suggestedOutfit.id} style={styles.suggestionItem}>
-              <Text style={styles.itemName}>
-                Occasion: {suggestedOutfit.occasion}
-              </Text>
-              <Text style={styles.notesTitle}>Stylist Notes</Text>
-              <Text style={styles.notes}>{suggestedOutfit.notes}</Text>
-              {suggestedOutfit.items &&
-                suggestedOutfit.items.map((item: ExtendedItem) => (
-                  <View key={item.id} style={styles.selectedItemContainer}>
-                    <Image
-                      source={{ uri: item.image_url }}
-                      style={styles.itemImage}
-                    />
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style={styles.itemReason}>{item.reason}</Text>
-                    <TouchableOpacity
-                      style={styles.addButton}
-                      onPress={() => addSuggestedItem(item)}
-                    >
-                      <Text style={styles.addButtonText}>Add to Outfit</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-            </View>
+            <AccordionItem title={"Occasion: " + suggestedOutfit.occasion}>
+              <View key={suggestedOutfit.id} style={styles.suggestionItem}>
+                <Text style={styles.itemName}>
+                  Occasion: {suggestedOutfit.occasion}
+                </Text>
+                <Text style={styles.notesTitle}>Stylist Notes</Text>
+                <Text style={styles.notes}>{suggestedOutfit.notes}</Text>
+                {suggestedOutfit.items &&
+                  suggestedOutfit.items.map((item: ExtendedItem) => (
+                    <View key={item.id} style={styles.selectedItemContainer}>
+                      <Image
+                        source={{ uri: item.image_url }}
+                        style={styles.itemImage}
+                      />
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemReason}>{item.reason}</Text>
+                      <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => addSuggestedItem(item)}
+                      >
+                        <Text style={styles.addButtonText}>Add to Outfit</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+              </View>
+            </AccordionItem>
           ))}
       </ScrollView>
     );
