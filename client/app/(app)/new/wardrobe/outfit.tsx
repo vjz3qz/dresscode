@@ -184,21 +184,30 @@ export default function NewOutfitScreen() {
             value={occasion}
             onChangeText={setOccasion}
             placeholder="Enter occasion"
+            multiline
+            numberOfLines={10}
+            textAlignVertical="top" // Ensures text starts from the top
           />
-          <TouchableOpacity
-            style={styles.queueButton}
-            onPress={queueNewSuggestion}
-            disabled={!occasion || isQueueing}
-          >
-            <Text style={styles.queueButtonText}>
-              {isQueueing ? "Queueing..." : "Queue"}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.queueButtonContainer}>
+            <TouchableOpacity
+              style={styles.queueButton}
+              onPress={queueNewSuggestion}
+              disabled={!occasion || isQueueing}
+            >
+              <Text style={styles.queueButtonText}>
+                {isQueueing ? "Queueing..." : "Queue"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <Text style={styles.suggestionsTitle}>Queued Suggestions</Text>
+        {suggestedOutfits.filter(
+          (suggestedOutfit) => suggestedOutfit.status === "queued"
+        ).length > 0 && (
+          <Text style={styles.suggestionsTitle}>Queued Suggestions</Text>
+        )}
         {suggestedOutfits
-          .filter((outfit) => outfit.status === "queued")
+          .filter((suggestedOutfit) => suggestedOutfit.status === "queued")
           .map((suggestedOutfit) => (
             <View key={suggestedOutfit.id} style={styles.suggestionItem}>
               <Text style={styles.itemName}>
@@ -495,18 +504,21 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   queueContainer: {
-    flexDirection: "row",
-    alignItems: "center",
     marginBottom: 20,
+    flexDirection: "column", // Ensure items are stacked vertically
+    gap: 10, // Adds vertical spacing between children
   },
   occasionInput: {
     flex: 1,
-    height: 40,
+    height: 200,
     borderColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginRight: 10,
+    fontSize: 16,
+  },
+  queueButtonContainer: {
+    alignSelf: "flex-start",
   },
   queueButton: {
     backgroundColor: "#d3d3d3",
@@ -516,6 +528,7 @@ const styles = StyleSheet.create({
   queueButtonText: {
     color: "black",
     fontWeight: "bold",
+    textAlign: "center",
   },
   selectedItemContainer: {
     marginTop: 10,
