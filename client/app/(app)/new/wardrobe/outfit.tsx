@@ -163,8 +163,9 @@ export default function NewOutfitScreen() {
       if (occasion) {
         try {
           setIsQueueing(true);
-          await queueSuggestedOutfitJob(occasion);
+          const queuedOccasion = occasion;
           setOccasion("");
+          await queueSuggestedOutfitJob(queuedOccasion);
           await fetchStyleSuggestions();
         } catch (error) {
           console.error("Error queueing suggestion:", error);
