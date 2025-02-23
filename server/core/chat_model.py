@@ -60,7 +60,7 @@ class OpenAIChatClient:
         return response.choices[0].message.content
 
 
-    def pick_outfit_for_occasion(self, occasion, items, batch_size=5, max_tokens=3000):
+    def suggest_outfit_for_occasion(self, occasion, items, batch_size=5, max_tokens=3000):
         """
         Iteratively processes a large list of clothing items in batches, building an outfit
         suitable for the given 'occasion.' The final selection is returned in the structured
