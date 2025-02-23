@@ -1,7 +1,7 @@
 import * as MediaLibrary from "expo-media-library";
 import { captureRef } from "react-native-view-shot";
 import React, { useRef, useState, useEffect } from "react";
-import BottomSheet, { BottomSheetMethods } from "@devvie/bottom-sheet";
+import BottomSheet, { type BottomSheetMethods } from "@devvie/bottom-sheet";
 import {
   View,
   Text,
@@ -12,30 +12,39 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  TextInput,
 } from "react-native";
 import { StyleSheet } from "react-native";
-import type { Item } from "@/types";
+import type {
+  ExtendedItem,
+  Item,
+  SelectedItem,
+  SuggestedOutfit,
+} from "@/types";
 import DraggableImage, {
   type DraggableImageRef,
 } from "@/components/DraggableImage";
 import GridView from "@/components/GridViews/GridView";
 import { router, useLocalSearchParams } from "expo-router";
 import { saveOutfit } from "@/api/SaveOutfit";
-import { getStyleSuggestions } from "@/api/suggestOutfits";
+import {
+  getSuggestedOutfits,
+  queueSuggestedOutfitJob,
+} from "@/api/suggestOutfits";
 import { fetchItemById } from "@/api/fetchItems";
 import Modal from "@/ui/Modal";
 import { addImageUrls } from "@/api/FetchImageUrl";
-type ExtendedItem = Item & {
-  reason?: string; // Adjust the type if you have a more specific definition
-};
+
 const { height, width } = Dimensions.get("window");
 
 export default function NewOutfitScreen() {
   const { fromCalendar, selectedDate } = useLocalSearchParams();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItems, setSelectedItems] = useState<ExtendedItem[]>([]);
-  const [suggestedItems, setSuggestedItems] = useState<ExtendedItem[]>([]);
-  const [notes, setNotes] = useState<string>("");
+  const [suggestedOutfits, setSuggestedOutfits] = useState<SuggestedOutfit[]>(
+    []
+  );
+  const [occasion, setOccasion] = useState("");
   const imageRefs = useRef<(DraggableImageRef | null)[]>([]);
   const [status, requestPermission] = MediaLibrary.usePermissions();
   const viewRef = useRef(null);
@@ -56,18 +65,44 @@ export default function NewOutfitScreen() {
 
   const fetchStyleSuggestions = async () => {
     try {
-      const suggestions = await getStyleSuggestions();
-      const items = await Promise.all(
-        suggestions.selected_items.map(async (item) => {
-          const fetchedItem = await fetchItemById(item.id.toString());
-          return { ...fetchedItem, reason: item.reason };
+      const suggestions = await getSuggestedOutfits();
+      const suggestionsWithItems = await Promise.all(
+        // for each suggestion fetch all items
+        suggestions.map(async (suggestedOutfit: SuggestedOutfit) => {
+          if (!suggestedOutfit.selected_items)
+            return { ...suggestedOutfit, selected_items: [] };
+          // fetch all items
+          const items = await Promise.all(
+            (suggestedOutfit.selected_items as SelectedItem[]).map(
+              async (item: SelectedItem): Promise<ExtendedItem> => {
+                const fetchedItem: Item = await fetchItemById(
+                  item.id.toString()
+                );
+                return { ...fetchedItem, reason: item.reason } as ExtendedItem;
+              }
+            )
+          );
+          // get images
+          const itemsWithImages = await addImageUrls(items);
+          // map the fetched items back
+          return { ...suggestedOutfit, items: itemsWithImages };
         })
       );
-      const itemsWithImages = await addImageUrls(items);
-      setSuggestedItems(itemsWithImages);
-      setNotes(suggestions.notes);
+      setSuggestedOutfits(suggestionsWithItems);
     } catch (error) {
       console.error("Error fetching style suggestions:", error);
+    }
+  };
+
+  const queueNewSuggestion = async () => {
+    if (occasion) {
+      try {
+        await queueSuggestedOutfitJob(occasion);
+        setOccasion("");
+        fetchStyleSuggestions(); // Refresh the list of suggestions
+      } catch (error) {
+        console.error("Error queueing suggestion:", error);
+      }
     }
   };
 
@@ -149,26 +184,59 @@ export default function NewOutfitScreen() {
         transparent
       >
         <ScrollView style={styles.suggestionsContainer}>
-          <Text style={styles.suggestionsTitle}>Suggested Items</Text>
-          {suggestedItems.map((item) => (
-            <View key={item.id} style={styles.suggestionItem}>
-              <Image
-                source={{ uri: item.image_url }}
-                style={styles.itemImage}
-              />
+          <Text style={styles.suggestionsTitle}>Queue New Suggestion</Text>
+          <View style={styles.queueContainer}>
+            <TextInput
+              style={styles.occasionInput}
+              value={occasion}
+              onChangeText={setOccasion}
+              placeholder="Enter occasion"
+            />
+            <TouchableOpacity
+              style={styles.queueButton}
+              onPress={queueNewSuggestion}
+              disabled={!occasion || loading}
+            >
+              <Text style={styles.queueButtonText}>Queue</Text>
+            </TouchableOpacity>
+          </View>
 
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemReason}>{item.reason}</Text>
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => addSuggestedItem(item)}
-              >
-                <Text style={styles.addButtonText}>Add to Outfit</Text>
-              </TouchableOpacity>
+          <Text style={styles.suggestionsTitle}>Suggested Outfits</Text>
+          {suggestedOutfits.map((suggestedOutfit) => (
+            <View key={suggestedOutfit.id} style={styles.suggestionItem}>
+              <Text style={styles.itemName}>
+                Occasion: {suggestedOutfit.occasion}
+              </Text>
+              <Text style={styles.itemReason}>
+                Status: {suggestedOutfit.status}
+              </Text>
+              {suggestedOutfit.status === "ready" && (
+                <>
+                  <Text style={styles.notesTitle}>Stylist Notes</Text>
+                  <Text style={styles.notes}>{suggestedOutfit.notes}</Text>
+                  {suggestedOutfit.items &&
+                    suggestedOutfit.items.map((item: ExtendedItem) => (
+                      <View key={item.id} style={styles.selectedItemContainer}>
+                        <Image
+                          source={{ uri: item.image_url }}
+                          style={styles.itemImage}
+                        />
+                        <Text style={styles.itemName}>{item.name}</Text>
+                        <Text style={styles.itemReason}>{item.reason}</Text>
+                        <TouchableOpacity
+                          style={styles.addButton}
+                          onPress={() => addSuggestedItem(item)}
+                        >
+                          <Text style={styles.addButtonText}>
+                            Add to Outfit
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                </>
+              )}
             </View>
           ))}
-          <Text style={styles.notesTitle}>Stylist Notes</Text>
-          <Text style={styles.notes}>{notes}</Text>
         </ScrollView>
       </Modal>
       <View style={styles.canvasContainer} ref={viewRef} collapsable={false}>
@@ -383,5 +451,34 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     backgroundColor: "#f1f1f1",
     borderRadius: 20,
+  },
+  queueContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  occasionInput: {
+    flex: 1,
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginRight: 10,
+  },
+  queueButton: {
+    backgroundColor: "#d3d3d3",
+    padding: 10,
+    borderRadius: 5,
+  },
+  queueButtonText: {
+    color: "black",
+    fontWeight: "bold",
+  },
+  selectedItemContainer: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
   },
 });
