@@ -101,12 +101,8 @@ async def closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict
 
 
 
-@router.get("/style-for-occasion")
-async def style_for_occasion(
-    occasion: Optional[str] = Query(
-        None, # ... makes it required in fastapi
-        description="The occasion for which we want style suggestions. Defaults to 'chill day at home' if not provided."
-    ), token_payload: dict = Depends(validate_token)):
+@router.get("/suggest-outfit")
+async def suggest_outfit(suggested_outfit_id: str = Query(...), token_payload: dict = Depends(validate_token)):
     """_summary_
 
     Args:
@@ -114,9 +110,7 @@ async def style_for_occasion(
     """
     # call celery
     user_id = token_payload.get("sub")
-    if occasion is None or occasion == "":
-        occasion = "chill day at home"
-    task = celery.send_task("tasks.style_for_occasion", args=[user_id, occasion])
+    task = celery.send_task("tasks.suggest_outfit", args=[user_id, suggested_outfit_id])
     return return_task(task)
 
 
