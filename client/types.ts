@@ -153,5 +153,5 @@ export type SuggestedOutfit = {
   items?: ExtendedItem[];
   notes?: string;
   status?: SuggestedOutfitJobStatuses;
-  feedback: string;
+  feedback?: string;
 };
