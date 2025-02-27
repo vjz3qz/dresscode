@@ -1,5 +1,6 @@
+import datetime
 import json
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 from openai import OpenAI
 
@@ -10,6 +11,20 @@ class SelectedItem(BaseModel):
 class OutfitSelection(BaseModel):
     selected_items: List[SelectedItem]
     notes: str
+
+
+from pydantic import BaseModel, Field
+from typing import Optional, List
+
+class ExtractedItem(BaseModel):
+    color: Optional[str] = Field(None, description="Primary color of the item")
+    brand: Optional[str] = Field(None, description="Brand name of the item")
+    category: Optional[str] = Field(None, description="Category of the item (e.g., tops, pants, shoes, accessory)")
+    season: Optional[List[str]] = Field(None, description="Applicable seasons for the item (e.g., ['winter', 'fall'])")
+    material: Optional[str] = Field(None, description="Fabric or material type of the item")
+    style: Optional[List[str]] = Field(None, description="Applicable styles of the item (e.g., ['casual', 'formal'])")
+    condition: Optional[str] = Field(None, description="Condition of the item (e.g., 'new', 'worn', 'vintage')")
+
 
 
 class OpenAIChatClient:
@@ -58,6 +73,41 @@ class OpenAIChatClient:
             max_tokens=max_tokens
         )
         return response.choices[0].message.content
+    
+    def extract_item_information(self, item_image_url, max_tokens=3000):
+        system_prompt = """You're a fashion advisor. Your task is to analyze and categorize an image of clothing with precision.
+
+1. Determine the fabric (cotton, denim, wool, silk, etc.) of the item.
+2. Identify the color of the item 
+3. Identify the pattern of the item (e.g., stripes, polka dots, floral, etc.) 
+4. Describe the item in detail
+5. Identify any relevant attributes such as style (formal, casual, athletic, vintage, etc.), season (e.g., winter coat, summer dress), occasion (formal, casual, etc.), brand, and any other details that could help in recommending outfits later on. Consolidate these attributes into tags that add unique value and do not overlap with the category, fabric, or color.
+
+Be specific and thorough in your analysis to ensure accurate and useful recommendations.
+
+ALWAYS return valid JSON according to the schema."""
+
+        messages = [
+            {"role": "developer", "content": system_prompt}
+        ]
+        messages.append({
+            "role": "user", "content": [{"type": "image_url", "image_url": {"url": item_image_url}}]
+        })
+            
+        completion = self.client.beta.chat.completions.parse(
+            model=self.model,
+            messages=messages,
+            response_format=ExtractedItem,
+            max_tokens=max_tokens
+        )
+        if completion.choices[0].message.refusal:
+            # The model refused for safety or policy reasons
+            print("Model refused with message:", completion.choices[0].message.refusal)
+            return None
+        else:
+            extracted_item = completion.choices[0].message.parsed
+            return extracted_item
+
 
 
     def suggest_outfit_for_occasion(self, occasion, items, batch_size=5, max_tokens=3000):
