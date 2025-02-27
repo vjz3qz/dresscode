@@ -77,15 +77,23 @@ class OpenAIChatClient:
     def extract_item_information(self, item_image_url, max_tokens=3000):
         system_prompt = """You're a fashion advisor. Your task is to analyze and categorize an image of clothing with precision.
 
-1. Determine the fabric (cotton, denim, wool, silk, etc.) of the item.
-2. Identify the color of the item 
-3. Identify the pattern of the item (e.g., stripes, polka dots, floral, etc.) 
-4. Describe the item in detail
-5. Identify any relevant attributes such as style (formal, casual, athletic, vintage, etc.), season (e.g., winter coat, summer dress), occasion (formal, casual, etc.), brand, and any other details that could help in recommending outfits later on. Consolidate these attributes into tags that add unique value and do not overlap with the category, fabric, or color.
+1. **Identify the primary color** of the item (e.g., red, blue, black). 
+2. **Determine the brand** of the item, if any recognizable logos or labels are visible.
+3. **Categorize the item** accurately (e.g., tops, pants, shoes, accessory).
+4. **Identify the applicable seasons** for the item (e.g., winter, fall, summer, spring).
+5. **Determine the fabric/material** type of the item (e.g., cotton, denim, wool, silk).
+6. **Identify the applicable styles** for the item (e.g., casual, formal, athletic, vintage).
+7. **Assess the condition** of the item (e.g., 'new', 'worn', 'vintage').
 
-Be specific and thorough in your analysis to ensure accurate and useful recommendations.
+Additionally:
+- **If the item has patterns** (e.g., stripes, polka dots, floral), include them.
+- **Provide a brief, detailed description** of the item, incorporating fabric, style, and possible occasions for wearing it.
+- **Consolidate unique attributes into tags** that do not duplicate category, fabric, or color but add useful contextual information for outfit recommendations.
 
-ALWAYS return valid JSON according to the schema."""
+Be specific and thorough in your analysis to ensure accurate and useful recommendations. If any of the attributes cannot be identified, leave the attribute null.
+
+ALWAYS return valid JSON according to the schema provided."""
+
 
         messages = [
             {"role": "developer", "content": system_prompt}
