@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "dresscode",
+    "name": "DressCode",
     "slug": "dresscode",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./assets/images/logo.png",
+    "scheme": "dresscode",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -13,7 +13,24 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.dresscode.dresscode",
+      "supportsTablet": true,
+      "requireFullScreen": true,
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires access to the camera to allow users to upload outfit images.",
+        "NSMicrophoneUsageDescription": "This app requires access to the microphone for voice-based features.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload images.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs permission to save images to your photo library.",
+        "NSUserTrackingUsageDescription": "This app collects user activity data to improve recommendations.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "associatedDomains": [
+        "applinks:yourapp.com",
+        "applinks:auth.dresscode.com",
+        "applinks:yourapp.com",
+        "applinks:auth.dresscode.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
