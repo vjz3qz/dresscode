@@ -31,7 +31,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="explore"
         options={{
           title: "explore",
           tabBarIcon: ({ color, focused }) => (
@@ -57,7 +57,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wardrobe"
+        name="index"
         options={{
           title: "wardrobe",
           tabBarIcon: ({ color, focused }) => (
