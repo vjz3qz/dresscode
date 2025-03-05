@@ -93,12 +93,12 @@ export default function profilePage() {
                 {/* <TouchableOpacity style={styles.circleButton}>
                   <Ionicons name="bookmark-outline" size={24} color="#333" />
                 </TouchableOpacity> */}
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={styles.circleButton}
                   onPress={() => setModalVisible(true)}
                 >
                   <Ionicons name="analytics-outline" size={24} color="#333" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             )}
           </View>
