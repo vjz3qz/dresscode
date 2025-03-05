@@ -30,7 +30,7 @@ export default function TabLayout() {
         headerShown: false,
       }}
     >
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="explore"
         options={{
           title: "explore",
@@ -42,7 +42,7 @@ export default function TabLayout() {
             />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="social"
         options={{
