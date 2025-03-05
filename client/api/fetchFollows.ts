@@ -52,7 +52,6 @@ async function fetchFollowingList(userId: string): Promise<string[]> {
     .from("follows")
     .select("*")
     .eq("follower_id", userId);
-  console.log("data", data);
   if (error) {
     console.log("Error fetching follow list:", error);
     return []; // Return an empty array on error
