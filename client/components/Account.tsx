@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   Alert,
   Button,
+  Share,
+  Linking,
 } from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { Input } from "@rneui/themed";
@@ -110,6 +112,32 @@ export default function Account() {
       }
     }
   }
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message:
+          "Check out this awesome app! Download it here: https://yourappdownloadlink.com",
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log("Shared with activity type: ", result.activityType);
+        } else {
+          console.log("Shared successfully");
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log("Share dismissed");
+      }
+    } catch (error) {
+      console.error("Error sharing app:", error);
+    }
+  };
+
+  const phoneNumber = process.env.EXPO_PUBLIC_PHONE_NUMBER;
+
+  const makeCall = () => {
+    Linking.openURL(`sms:${phoneNumber}`); // Opens the messaging app with options
+  };
 
   return updateProfilePageOpen ? (
     <UpdateProfilePage
@@ -130,16 +158,16 @@ export default function Account() {
       >
         <Text style={styles.buttonText}>Edit your profile</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
+      {/* <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Edit your measurements</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={onShare}>
         <Text style={styles.buttonText}>Invite a friend</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Brand Blacklist</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
+      </TouchableOpacity> */}
+      <TouchableOpacity style={styles.button} onPress={makeCall}>
         <Text style={styles.buttonText}>Leave Feedback</Text>
       </TouchableOpacity>
       <TouchableOpacity
