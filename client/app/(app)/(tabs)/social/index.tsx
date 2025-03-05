@@ -1,219 +1,283 @@
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  Image,
+  SafeAreaView,
   TouchableOpacity,
+  TextInput,
+  ScrollView,
+  RefreshControl,
+  Dimensions,
+  Animated,
+  Easing,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/Avatar";
-import { router } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView as ScrollViewRN } from "react-native";
+import type { Profile } from "@/types";
+import { fetchFollowingProfiles } from "@/api/fetchFollows";
 import { fetchSuggestedProfiles } from "@/api/fetchProfiles";
-import { Profile } from "@/types";
 import { handleFollow, handleUnfollow } from "@/api/handleFollows";
 import { useSession } from "@/contexts/SessionContext";
 
-interface Post {
-  id: string;
-  user: Profile;
-  imageUrl: string;
-  caption: string;
-  likes: number;
-  comments: number;
-  timestamp: string;
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.42;
+const CARD_MARGIN = 10;
+
+function ProfileCard({
+  profile,
+  onPress,
+  onFollowPress,
+  isFollowing = false,
+}: {
+  profile: Profile;
+  onPress: () => void;
+  onFollowPress: () => void;
+  isFollowing: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      style={styles.profileCard}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={styles.cardImageContainer}>
+        <Avatar
+          size={CARD_WIDTH - 20}
+          url={profile.avatar_url ?? null}
+          circle={false}
+        />
+      </View>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardName} numberOfLines={1}>
+          {profile.display_name || profile.username}
+        </Text>
+        <Text style={styles.cardUsername} numberOfLines={1}>
+          @{profile.username}
+        </Text>
+        <TouchableOpacity
+          style={[styles.followButton, isFollowing && styles.followingButton]}
+          onPress={onFollowPress}
+        >
+          <Text
+            style={[
+              styles.followButtonText,
+              isFollowing && styles.followingButtonText,
+            ]}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
 }
 
-function FollowSuggestions() {
-  const [suggestedUsers, setSuggestedUsers] = useState<Profile[]>([]);
-  const [following, setFollowing] = useState<{ [key: string]: boolean }>({});
-  const { session } = useSession();
-
-  useEffect(() => {
-    async function getSuggestedUsers() {
-      const fetchedProfiles: Profile[] = await fetchSuggestedProfiles();
-      setSuggestedUsers(fetchedProfiles);
-
-      // Initialize following state
-      const initialFollowingState: { [key: string]: boolean } = {};
-      fetchedProfiles.forEach((user) => {
-        initialFollowingState[user.id ?? ""] = false; // Assume not following initially
-      });
-      setFollowing(initialFollowingState);
-    }
-    getSuggestedUsers();
-  }, []);
-
-  const toggleFollow = async (userId: string) => {
-    if (following[userId]) {
-      await handleUnfollow(session?.user?.id ?? "", userId);
-    } else {
-      await handleFollow(session?.user?.id ?? "", userId);
-    }
-    setFollowing((prev) => ({ ...prev, [userId]: !prev[userId] }));
-  };
+function ProfileSection({
+  title,
+  profiles,
+  followingState,
+  onFollowToggle,
+  onProfilePress,
+}: {
+  title: any;
+  profiles: Profile[];
+  followingState: any;
+  onFollowToggle: (id: string) => void;
+  onProfilePress: (id: string) => void;
+}) {
+  if (!profiles || profiles.length === 0) return null;
 
   return (
-    <View style={styles.suggestionsContainer}>
-      <Text style={styles.suggestionsTitle}>Suggested for you</Text>
-      <ScrollViewRN horizontal showsHorizontalScrollIndicator={false}>
-        {suggestedUsers.map((user) => (
-          <TouchableOpacity
-            key={user.id}
-            style={styles.suggestionItem}
-            onPress={() => {
-              router.push({
-                pathname: "/view/profiles/[profileId]",
-                params: { profileId: user.id ?? "" },
-              });
-            }}
-          >
-            <Avatar size={60} url={user.avatar_url ?? null} />
-            <Text style={styles.suggestionUsername}>{user.username}</Text>
-
-            <TouchableOpacity
-              style={
-                following[user.id ?? ""]
-                  ? styles.unfollowButton
-                  : styles.followButton
-              }
-              onPress={() => toggleFollow(user.id ?? "")}
-            >
-              <Text
-                style={
-                  following[user.id ?? ""]
-                    ? styles.unfollowButtonText
-                    : styles.followButtonText
-                }
-              >
-                {following[user.id ?? ""] ? "Unfollow" : "Follow"}
-              </Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.profilesRow}
+      >
+        {profiles.map((profile: Profile) => (
+          <ProfileCard
+            key={profile.id}
+            profile={profile}
+            isFollowing={followingState[profile.id ?? ""]}
+            onFollowPress={() => onFollowToggle(profile.id ?? "")}
+            onPress={() => onProfilePress(profile.id ?? "")}
+          />
         ))}
-      </ScrollViewRN>
+      </ScrollView>
     </View>
   );
 }
 
-export default function FeedScreen() {
-  // Dummy data - replace with real data from your API
-  const posts: Post[] = [
-    {
-      id: "1",
-      user: {
-        id: "1",
-        username: "varun",
-        avatar_url:
-          "https://ytfwgtbpdxaotawaostn.supabase.co/storage/v1/object/sign/images/1740186532128.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvMTc0MDE4NjUzMjEyOC5qcGciLCJpYXQiOjE3NDAxODc0MjUsImV4cCI6MTc0MDc5MjIyNX0.OI0a3449PHP4FuCDzo9l1Sjw6Gp7B6qCUPB8bE2QsqA",
-        gender: "male",
-        age: 21,
-        preferences: [],
-        brands: [],
-      },
-      imageUrl:
-        "https://ytfwgtbpdxaotawaostn.supabase.co/storage/v1/object/sign/images/IMG_6610.JPG?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvSU1HXzY2MTAuSlBHIiwiaWF0IjoxNzQwMTg3Mzg4LCJleHAiOjE3NDA3OTIxODh9.2xnd6avEKrH0K-BdME7BAn4rHkIWHFzRqsGtYBk4NZs",
-      caption: "Today's outfit #ootd #fashion",
-      likes: 124,
-      comments: 8,
-      timestamp: "2h",
-    },
-    // Add more posts...
-  ];
+export default function SocialScreen() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestedProfiles, setSuggestedProfiles] = useState<Profile[]>([]);
+  const [popularProfiles, setPopularProfiles] = useState<Profile[]>([]);
+  const [followingProfiles, setFollowingProfiles] = useState<Profile[]>([]);
+  const [followingState, setFollowingState] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [refreshing, setRefreshing] = useState(false);
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const { session } = useSession();
 
-  const handleLike = (postId: string) => {
-    // Implement like logic
-    console.log("Like post:", postId);
+  const fetchData = useCallback(async () => {
+    if (!session || !session.user.id) return;
+    try {
+      // Fetch suggested profiles
+      const suggested = await fetchSuggestedProfiles();
+      setSuggestedProfiles(suggested);
+
+      // For demo purposes, let's create a "popular" section from the same data
+      // In a real app, you'd have a separate API call
+      setPopularProfiles(suggested.slice().reverse());
+
+      // Fetch profiles the user is following
+      const following = await fetchFollowingProfiles(session.user.id);
+      setFollowingProfiles(following);
+
+      // Initialize following state
+      const followState: { [key: string]: boolean } = {};
+      [...suggested, ...following].forEach((profile) => {
+        // Assume all profiles in following list are being followed
+        const isInFollowingList = following.some((p) => p.id === profile.id);
+        followState[profile.id ?? ""] = isInFollowingList;
+      });
+      setFollowingState(followState);
+    } catch (error) {
+      console.error("Error fetching profiles:", error);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+
+    fetchData();
+  }, [fadeAnim, fetchData]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  }, [fetchData]);
+
+  const handleFollowToggle = async (profileId: string) => {
+    if (!session || !session.user.id) return;
+
+    try {
+      if (followingState[profileId]) {
+        await handleUnfollow(session.user.id, profileId);
+      } else {
+        await handleFollow(session.user.id, profileId);
+      }
+
+      // Update local state
+      setFollowingState((prev) => ({
+        ...prev,
+        [profileId]: !prev[profileId],
+      }));
+
+      // Refresh following list if needed
+      if (followingState[profileId]) {
+        // If we just unfollowed, remove from following list
+        setFollowingProfiles((prev) => prev.filter((p) => p.id !== profileId));
+      } else {
+        // If we just followed, add to following list
+        const profileToAdd = [...suggestedProfiles, ...popularProfiles].find(
+          (p) => p.id === profileId
+        );
+        if (
+          profileToAdd &&
+          !followingProfiles.some((p) => p.id === profileId)
+        ) {
+          setFollowingProfiles((prev) => [...prev, profileToAdd]);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    }
   };
 
-  const handleComment = (postId: string) => {
-    // Implement comment logic
-    console.log("Comment on post:", postId);
+  const navigateToProfile = (profileId: string) => {
+    router.push({
+      pathname: "/view/profiles/[profileId]",
+      params: { profileId },
+    });
   };
 
-  const handleShare = (postId: string) => {
-    // Implement share logic
-    console.log("Share post:", postId);
+  const navigateToCommunity = () => {
+    router.push("/social/community");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Feed</Text>
-        <TouchableOpacity onPress={() => router.push("/social/community")}>
-          <Ionicons name="people-outline" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Discover</Text>
+          <TouchableOpacity
+            onPress={navigateToCommunity}
+            style={styles.communityButton}
+          >
+            <Ionicons name="people-outline" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
 
-      <ScrollView>
-        {posts.map((post) => (
-          <View key={post.id} style={styles.post}>
-            <View style={styles.postHeader}>
-              <TouchableOpacity
-                style={styles.userInfo}
-                onPress={() => {
-                  router.push({
-                    pathname: "/view/profiles/[profileId]",
-                    params: { profileId: post.user.id ?? "" },
-                  });
-                }}
-              >
-                <Avatar size={40} url={post.user.avatar_url ?? null} />
-                <Text style={styles.username}>{post.user.username}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
+        {/* Search */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#6b7280" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search for people..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#6b7280"
+          />
+        </View>
 
-            <Image source={{ uri: post.imageUrl }} style={styles.postImage} />
+        {/* Main Content */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Following Section */}
+          <ProfileSection
+            title="People You Follow"
+            profiles={followingProfiles}
+            followingState={followingState}
+            onFollowToggle={handleFollowToggle}
+            onProfilePress={navigateToProfile}
+          />
 
-            <View style={styles.postActions}>
-              <View style={styles.leftActions}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleLike(post.id)}
-                >
-                  <Ionicons name="heart-outline" size={24} color="#000" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleComment(post.id)}
-                >
-                  <Ionicons name="chatbubble-outline" size={24} color="#000" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleShare(post.id)}
-                >
-                  <Ionicons name="paper-plane-outline" size={24} color="#000" />
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity>
-                <Ionicons name="bookmark-outline" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
+          {/* Suggested Section */}
+          <ProfileSection
+            title="Suggested For You"
+            profiles={suggestedProfiles}
+            followingState={followingState}
+            onFollowToggle={handleFollowToggle}
+            onProfilePress={navigateToProfile}
+          />
 
-            <View style={styles.postContent}>
-              <Text style={styles.likes}>{post.likes} likes</Text>
-              <View style={styles.captionContainer}>
-                <Text style={styles.username}>{post.user.username}</Text>
-                <Text style={styles.caption}> {post.caption}</Text>
-              </View>
-              <TouchableOpacity>
-                <Text style={styles.comments}>
-                  View all {post.comments} comments
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.timestamp}>{post.timestamp}</Text>
-            </View>
-          </View>
-        ))}
-        <FollowSuggestions />
-      </ScrollView>
+          {/* Popular Section */}
+          {/* <ProfileSection
+            title="Popular Profiles"
+            profiles={popularProfiles}
+            followingState={followingState}
+            onFollowToggle={handleFollowToggle}
+            onProfilePress={navigateToProfile}
+          /> */}
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -221,120 +285,132 @@ export default function FeedScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#EAE6E5",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
   },
-  post: {
-    marginBottom: 16,
+  communityButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  postHeader: {
+  searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    backgroundColor: "#fff",
+    marginHorizontal: 20,
+    marginVertical: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  username: {
-    marginLeft: 8,
-    fontWeight: "600",
-  },
-  postImage: {
-    width: "100%",
-    aspectRatio: 1,
-  },
-  postActions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  leftActions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  actionButton: {
-    marginRight: 16,
-  },
-  postContent: {
-    paddingHorizontal: 12,
-  },
-  likes: {
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  captionContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  caption: {
+  searchInput: {
     flex: 1,
-  },
-  comments: {
-    color: "#666",
-    marginTop: 4,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
-  },
-  suggestionsContainer: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  suggestionsTitle: {
+    marginLeft: 10,
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-    paddingHorizontal: 16,
+    color: "#333",
   },
-  suggestionItem: {
+  scrollContent: {
+    paddingBottom: 30,
+  },
+  section: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 20,
+    marginBottom: 15,
+    color: "#333",
+  },
+  profilesRow: {
+    paddingLeft: 20,
+    paddingRight: 10,
+  },
+  profileCard: {
+    width: CARD_WIDTH,
+    marginRight: CARD_MARGIN,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  cardImageContainer: {
     alignItems: "center",
-    marginRight: 16,
-    width: 80,
+    paddingTop: 10,
   },
-  suggestionUsername: {
-    fontSize: 12,
-    marginTop: 4,
+  cardContent: {
+    padding: 12,
+    alignItems: "center",
+  },
+  cardName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#333",
+  },
+  cardUsername: {
+    fontSize: 14,
+    color: "#666",
     marginBottom: 8,
     textAlign: "center",
   },
   followButton: {
-    backgroundColor: "#0095f6",
-    paddingHorizontal: 14,
+    backgroundColor: "#333",
+    paddingHorizontal: 15,
     paddingVertical: 6,
-    borderRadius: 4,
+    borderRadius: 20,
+    width: "100%",
+    alignItems: "center",
   },
   followButtonText: {
     color: "#fff",
-    fontSize: 12,
     fontWeight: "600",
+    fontSize: 14,
   },
-  unfollowButton: {
-    backgroundColor: "#f5f5f5",
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 4,
+  followingButton: {
+    backgroundColor: "#EAE6E5",
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
-  unfollowButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
+  followingButtonText: {
+    color: "#333",
   },
 });
