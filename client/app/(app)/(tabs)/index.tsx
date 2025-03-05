@@ -70,9 +70,9 @@ export default function WardrobeScreen() {
           <View style={styles.avatarContainer}>
             <Avatar size={80} url={avatarUrl} circle />
             <View style={{ flexDirection: "row" }}>
-              <TouchableOpacity style={styles.circleButton}>
+              {/* <TouchableOpacity style={styles.circleButton}>
                 <Ionicons name="bookmark-outline" size={24} color="#333" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity
                 style={styles.circleButton}
                 onPress={() => setModalVisible(true)}
@@ -109,7 +109,7 @@ export default function WardrobeScreen() {
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      {/* <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#6b7280" />
         <TextInput
           style={styles.searchInput}
@@ -117,7 +117,7 @@ export default function WardrobeScreen() {
           placeholderTextColor="#6b7280"
         />
         <Ionicons name="mic-outline" size={20} color="#6b7280" />
-      </View>
+      </View> */}
 
       {/* GridViews */}
       {tabIndex === 2 ? (

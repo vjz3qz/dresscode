@@ -90,9 +90,9 @@ export default function profilePage() {
             <Avatar size={80} url={profile?.avatar_url ?? ""} circle />
             {profile?.is_public && (
               <View style={{ flexDirection: "row" }}>
-                <TouchableOpacity style={styles.circleButton}>
+                {/* <TouchableOpacity style={styles.circleButton}>
                   <Ionicons name="bookmark-outline" size={24} color="#333" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity
                   style={styles.circleButton}
                   onPress={() => setModalVisible(true)}
@@ -144,7 +144,7 @@ export default function profilePage() {
           </View>
 
           {/* Search Bar */}
-          <View style={styles.searchContainer}>
+          {/* <View style={styles.searchContainer}>
             <Ionicons name="search" size={20} color="#6b7280" />
             <TextInput
               style={styles.searchInput}
@@ -152,7 +152,7 @@ export default function profilePage() {
               placeholderTextColor="#6b7280"
             />
             <Ionicons name="mic-outline" size={20} color="#6b7280" />
-          </View>
+          </View> */}
 
           {/* GridViews */}
           {tabIndex === 2 ? (
