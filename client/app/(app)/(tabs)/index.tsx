@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    // marginHorizontal: 20,
+    marginHorizontal: 6,
   },
   modalContent: {
     backgroundColor: "white",
