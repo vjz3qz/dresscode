@@ -260,22 +260,22 @@ export default function SocialScreen() {
           />
 
           {/* Suggested Section */}
-          <ProfileSection
+          {/* <ProfileSection
             title="Suggested For You"
             profiles={suggestedProfiles}
             followingState={followingState}
             onFollowToggle={handleFollowToggle}
             onProfilePress={navigateToProfile}
-          />
+          /> */}
 
           {/* Popular Section */}
-          {/* <ProfileSection
+          <ProfileSection
             title="Popular Profiles"
             profiles={popularProfiles}
             followingState={followingState}
             onFollowToggle={handleFollowToggle}
             onProfilePress={navigateToProfile}
-          /> */}
+          />
         </ScrollView>
       </Animated.View>
     </SafeAreaView>
