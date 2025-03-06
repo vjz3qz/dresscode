@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -8,14 +8,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Animated,
+  Easing,
 } from "react-native";
 import { Image } from "expo-image";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // for local caching
-import { Look, Outfit, TableTypes } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { Look, Outfit, TableTypes } from "@/types";
 import { fetchLooks, loadLooksWithOutfits } from "@/api/FetchLooks";
 import { useSession } from "@/contexts/SessionContext";
+import { Ionicons } from "@expo/vector-icons";
 
-const { height, width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+const ITEM_MARGIN = 6;
+const LOOK_WIDTH = (width - 13 - ITEM_MARGIN * 4) / 2; // 40 for container padding, ITEM_MARGIN*4 for margins between items
 
 export default function LookGridView({
   onLookClick,
@@ -31,16 +36,29 @@ export default function LookGridView({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
-  const REFRESH_COOLDOWN = 10000; // Cooldown time in milliseconds (e.g., 10 seconds)
+  // Cache settings
+  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour
+  const REFRESH_COOLDOWN = 10000; // 10 seconds
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
   const fetchAndCacheLooks = useCallback(
     async (isRefreshing = false) => {
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `looks_${tableName}_${session.user.id}_${profileId}`;
+      const cacheKey = `looks_${tableName}_${session.user.id}_${
+        profileId || ""
+      }`;
       const cachedLooks = await AsyncStorage.getItem(cacheKey);
 
       if (cachedLooks && !isRefreshing) {
@@ -89,13 +107,13 @@ export default function LookGridView({
         setRefreshing(false);
       }
     },
-    [tableName, session]
+    [tableName, session, profileId]
   );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchAndCacheLooks();
-    }, 300); // Debounce the fetch by 300ms to avoid excessive requests
+    }, 300); // Debounce the fetch by 300ms
 
     return () => clearTimeout(timer);
   }, [tableName, fetchAndCacheLooks]);
@@ -103,61 +121,60 @@ export default function LookGridView({
   const onRefresh = useCallback(() => {
     const now = Date.now();
     if (lastRefreshTime && now - lastRefreshTime < REFRESH_COOLDOWN) {
-      // If within cooldown period, do not refresh
       console.log("Refresh is throttled. Please wait before refreshing again.");
       setRefreshing(false);
       return;
     }
 
     setRefreshing(true);
-    setLastRefreshTime(now); // Update the last refresh time
+    setLastRefreshTime(now);
     fetchAndCacheLooks(true);
   }, [fetchAndCacheLooks, lastRefreshTime]);
 
   const renderOutfitGrid = (outfits: Outfit[]) => {
     const firstFourOutfits = outfits.slice(0, 4); // Get up to the first 4 outfits
+    const outfitSize = (LOOK_WIDTH - 24) / 2; // Size for each outfit thumbnail
 
-    const rows: Outfit[][] = [];
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < 2; j++) {
-        if (!rows[i]) rows[i] = [];
-        rows[i].push({
-          id: i + j + Math.floor(Math.random() * 1000),
-          image_url: "",
-        } as Outfit); // Placeholder outfit
-      }
-    }
+    // Create a 2x2 grid structure
+    const grid: Outfit[][] = [
+      [undefined as unknown as Outfit, undefined as unknown as Outfit],
+      [undefined as unknown as Outfit, undefined as unknown as Outfit],
+    ];
 
-    let k = 0;
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < 2; j++) {
-        if (k >= firstFourOutfits.length) break;
-        rows[i][j] = firstFourOutfits[k];
-        k++;
-      }
-    }
+    // Fill the grid with available outfits
+    firstFourOutfits.forEach((outfit, index) => {
+      const row = Math.floor(index / 2);
+      const col = index % 2;
+      grid[row][col] = outfit;
+    });
 
     return (
-      <View style={styles.gridContainer}>
-        {rows.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.row}>
-            {row.map((outfit) =>
-              outfit.image_url ? (
-                <View key={outfit.id} style={styles.cell}>
+      <View style={styles.outfitGridContainer}>
+        {grid.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.outfitRow}>
+            {row.map((outfit, colIndex) => (
+              <View
+                key={`${rowIndex}-${colIndex}`}
+                style={[
+                  styles.outfitCell,
+                  { width: outfitSize, height: outfitSize },
+                  colIndex % 2 === 0
+                    ? styles.leftOutfitCell
+                    : styles.rightOutfitCell,
+                ]}
+              >
+                {outfit ? (
                   <Image
-                    source={{
-                      uri: outfit.image_url,
-                    }}
-                    style={styles.gridImage}
+                    source={{ uri: outfit.image_url }}
+                    style={styles.outfitImage}
+                    contentFit="cover"
+                    transition={300}
                   />
-                </View>
-              ) : (
-                <View
-                  key={outfit.id}
-                  style={[styles.cell, styles.placeholderCell]}
-                />
-              )
-            )}
+                ) : (
+                  <View style={styles.emptyOutfitCell} />
+                )}
+              </View>
+            ))}
           </View>
         ))}
       </View>
@@ -167,115 +184,151 @@ export default function LookGridView({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6b7280" />
+        <ActivityIndicator size="large" color="#333" />
+        <Text style={styles.loadingText}>Loading looks...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {looks.length === 0 ? (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>
-            No {tableName} found. Add some {tableName}!
-          </Text>
-        </View>
-      ) : (
-        looks.map((look, index) => (
-          <TouchableOpacity
-            key={look.id}
-            style={styles.lookContainer}
-            onPress={() => onLookClick(look, index)}
-          >
-            {renderOutfitGrid(look.outfits || [])}
-            <View style={styles.textContainer}>
-              <Text style={styles.lookTitle}>{look.name}</Text>
-            </View>
-          </TouchableOpacity>
-        ))
-      )}
-    </ScrollView>
+    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {looks.length === 0 ? (
+          <View style={styles.emptyStateContainer}>
+            <Ionicons name="albums-outline" size={60} color="#ccc" />
+            <Text style={styles.emptyStateTitle}>No looks found</Text>
+            <Text style={styles.emptyStateText}>
+              Create a look by combining your favorite outfits
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.looksContainer}>
+            {looks.map((look, index) => (
+              <TouchableOpacity
+                key={look.id}
+                style={styles.lookCard}
+                onPress={() => onLookClick(look, index)}
+                activeOpacity={0.8}
+              >
+                {renderOutfitGrid(look.outfits || [])}
+                <View style={styles.lookInfoContainer}>
+                  <Text style={styles.lookName} numberOfLines={1}>
+                    {look.name || "Unnamed Look"}
+                  </Text>
+                  <Text style={styles.outfitCount}>
+                    {look.outfits?.length || 0} outfits
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 10,
     paddingBottom: 20,
+  },
+  looksContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
   },
-  lookContainer: {
-    marginHorizontal: "1.5%",
-    height: height / 4.35,
-    width: width / 2.29,
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#fff",
+  lookCard: {
+    width: LOOK_WIDTH,
     marginBottom: 20,
-    elevation: 2,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "white",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  textContainer: {
-    marginTop: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 5,
+  outfitGridContainer: {
+    padding: 8,
   },
-  lookTitle: {
+  outfitRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  outfitCell: {
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#f0f0f0",
+  },
+  leftOutfitCell: {
+    marginRight: 4,
+  },
+  rightOutfitCell: {
+    marginLeft: 4,
+  },
+  outfitImage: {
+    width: "100%",
+    height: "100%",
+  },
+  emptyOutfitCell: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+  },
+  lookInfoContainer: {
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
+  lookName: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 2,
+    color: "#333",
+    marginBottom: 4,
   },
-  gridContainer: {
-    flexDirection: "column",
-    padding: 5,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  cell: {
-    flex: 1,
-    margin: 4,
-    alignItems: "center",
-  },
-  gridImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 5,
-    borderWidth: 0.5,
-    borderColor: "#ddd",
-  },
-  placeholderCell: {
-    width: 77,
-    height: 77,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 5,
-    borderWidth: 0.5,
-    borderColor: "#ddd",
+  outfitCount: {
+    fontSize: 14,
+    color: "#666",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
-  noDataContainer: {
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
+  emptyStateContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 40,
+    minHeight: 300,
   },
-  noDataText: {
-    fontSize: 20,
-    color: "#6b7280",
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
   },
 });
