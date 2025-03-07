@@ -5,7 +5,7 @@ export async function fetchSession() {
     const {
       data: { session },
       error,
-    } = await supabase.auth.getSession(); // hangs if either env variables are null or supabase does not populate
+    } = await supabase.auth.getSession(); // TODO hangs if either env variables are null or supabase does not populate
     if (error) throw error;
     return session;
   } catch (error) {

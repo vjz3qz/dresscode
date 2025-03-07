@@ -83,6 +83,7 @@ export default function GridView({
 
       // Fetch new data if cache is expired or doesn't exist
       try {
+        // TODO check here if not hitting backend
         const objects = await fetchAllImageUrls(tableName, profileId);
         const filteredObjects = objects.filter(
           (obj: Item | Outfit | Look) =>
