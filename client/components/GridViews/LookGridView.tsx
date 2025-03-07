@@ -19,7 +19,7 @@ import { useSession } from "@/contexts/SessionContext";
 import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
-const ITEM_MARGIN = 6;
+const ITEM_MARGIN = 10;
 const LOOK_WIDTH = (width * 0.94 - ITEM_MARGIN * 4) / 2; // 40 for container padding, ITEM_MARGIN*4 for margins between items
 
 export default function LookGridView({
