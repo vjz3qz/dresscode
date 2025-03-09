@@ -1,4 +1,4 @@
-# DressCode 👠
+# DressCode
 
 todo:
 complete social feature
