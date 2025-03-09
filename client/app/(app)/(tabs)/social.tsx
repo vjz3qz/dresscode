@@ -16,10 +16,8 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/Avatar";
 import type { Profile } from "@/types";
-import { fetchFollowingProfiles } from "@/api/fetchFollows";
-import { fetchSuggestedProfiles } from "@/api/fetchProfiles";
-import { handleFollow, handleUnfollow } from "@/api/handleFollows";
 import { useSession } from "@/contexts/SessionContext";
+import { useFollow } from "@/contexts/FollowContext";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.42;
@@ -81,9 +79,9 @@ function ProfileSection({
   onFollowToggle,
   onProfilePress,
 }: {
-  title: any;
+  title: string;
   profiles: Profile[];
-  followingState: any;
+  followingState: { [key: string]: boolean };
   onFollowToggle: (id: string) => void;
   onProfilePress: (id: string) => void;
 }) {
@@ -113,43 +111,17 @@ function ProfileSection({
 
 export default function SocialScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestedProfiles, setSuggestedProfiles] = useState<Profile[]>([]);
-  const [popularProfiles, setPopularProfiles] = useState<Profile[]>([]);
-  const [followingProfiles, setFollowingProfiles] = useState<Profile[]>([]);
-  const [followingState, setFollowingState] = useState<{
-    [key: string]: boolean;
-  }>({});
   const [refreshing, setRefreshing] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
+  const {
+    followingState,
+    followingProfiles,
+    suggestedProfiles,
+    popularProfiles,
+    toggleFollow,
+    refreshFollowData,
+  } = useFollow();
   const { session } = useSession();
-
-  const fetchData = useCallback(async () => {
-    if (!session || !session.user.id) return;
-    try {
-      // Fetch suggested profiles
-      const suggested = await fetchSuggestedProfiles();
-      setSuggestedProfiles(suggested);
-
-      // For demo purposes, let's create a "popular" section from the same data
-      // In a real app, you'd have a separate API call
-      setPopularProfiles(suggested.slice().reverse());
-
-      // Fetch profiles the user is following
-      const following = await fetchFollowingProfiles(session.user.id);
-      setFollowingProfiles(following);
-
-      // Initialize following state
-      const followState: { [key: string]: boolean } = {};
-      [...suggested, ...following].forEach((profile) => {
-        // Assume all profiles in following list are being followed
-        const isInFollowingList = following.some((p) => p.id === profile.id);
-        followState[profile.id ?? ""] = isInFollowingList;
-      });
-      setFollowingState(followState);
-    } catch (error) {
-      console.error("Error fetching profiles:", error);
-    }
-  }, [session]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -158,51 +130,16 @@ export default function SocialScreen() {
       easing: Easing.out(Easing.exp),
       useNativeDriver: true,
     }).start();
-
-    fetchData();
-  }, [fadeAnim, fetchData]);
+  }, [fadeAnim]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchData();
+    await refreshFollowData();
     setRefreshing(false);
-  }, [fetchData]);
+  }, [refreshFollowData]);
 
   const handleFollowToggle = async (profileId: string) => {
-    if (!session || !session.user.id) return;
-
-    try {
-      if (followingState[profileId]) {
-        await handleUnfollow(session.user.id, profileId);
-      } else {
-        await handleFollow(session.user.id, profileId);
-      }
-
-      // Update local state
-      setFollowingState((prev) => ({
-        ...prev,
-        [profileId]: !prev[profileId],
-      }));
-
-      // Refresh following list if needed
-      if (followingState[profileId]) {
-        // If we just unfollowed, remove from following list
-        setFollowingProfiles((prev) => prev.filter((p) => p.id !== profileId));
-      } else {
-        // If we just followed, add to following list
-        const profileToAdd = [...suggestedProfiles, ...popularProfiles].find(
-          (p) => p.id === profileId
-        );
-        if (
-          profileToAdd &&
-          !followingProfiles.some((p) => p.id === profileId)
-        ) {
-          setFollowingProfiles((prev) => [...prev, profileToAdd]);
-        }
-      }
-    } catch (error) {
-      console.error("Error toggling follow:", error);
-    }
+    await toggleFollow(profileId);
   };
 
   const navigateToProfile = (profileId: string) => {
