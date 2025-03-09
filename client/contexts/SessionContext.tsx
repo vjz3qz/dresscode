@@ -27,10 +27,12 @@ export const useSession = () => {
   return context;
 };
 
-export const SessionProvider = ({
-  children,
-}: {
+interface SessionProviderProps {
   children: React.ReactNode;
+}
+
+export const SessionProvider: React.FC<SessionProviderProps> = ({
+  children,
 }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState("");
