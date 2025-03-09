@@ -223,8 +223,8 @@ export default function profilePage() {
           </View>
         </Modal>
 
-        {/* Upload Button */}
-        <UploadButton onPress={onPlusButtonClick} />
+        {/* Upload Button: TODO style your friends */}
+        {/* <UploadButton onPress={onPlusButtonClick} /> */}
       </Animated.View>
     </SafeAreaView>
   );
