@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#333",
     paddingHorizontal: 15,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 8,
     width: "100%",
     alignItems: "center",
   },
