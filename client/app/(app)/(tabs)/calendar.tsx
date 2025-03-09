@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import React, { useState, useEffect, useRef } from "react";
 import { Agenda } from "react-native-calendars";
 import {
-  SafeAreaView,
+  // SafeAreaView,
   View,
   StyleSheet,
   Text,
@@ -11,6 +11,10 @@ import {
   Animated,
   Easing,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { supabase } from "@/utils/Supabase";
 import type { CalendarEvent } from "@/types";
 import { Image } from "expo-image";
@@ -36,6 +40,7 @@ export default function CalendarScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -256,9 +261,9 @@ export default function CalendarScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-        {/* Header */}
+    <>
+      {/* Header with top safe area */}
+      <SafeAreaView style={{ backgroundColor: "#EAE6E5" }} edges={["top"]}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Your Outfit Calendar</Text>
           <TouchableOpacity onPress={refreshItems} style={styles.refreshButton}>
@@ -269,41 +274,46 @@ export default function CalendarScreen() {
             )}
           </TouchableOpacity>
         </View>
+      </SafeAreaView>
 
-        <Agenda
-          items={items}
-          loadItemsForMonth={loadItemsForMonth}
-          selected={new Date().toISOString().split("T")[0]}
-          renderItem={renderItem}
-          renderEmptyDate={renderEmptyDate}
-          showClosingKnob={true}
-          theme={{
-            backgroundColor: "#EAE6E5",
-            calendarBackground: "#EAE6E5",
-            agendaKnobColor: "#333",
-            selectedDayBackgroundColor: "#333",
-            dotColor: "#333",
-            todayTextColor: "#333",
-            agendaDayTextColor: "#333",
-            agendaDayNumColor: "#333",
-            agendaTodayColor: "#333",
-            monthTextColor: "#333",
-            textSectionTitleColor: "#333",
-            textDisabledColor: "#999",
-            dayTextColor: "#333",
-            textMonthFontWeight: "bold",
-            textDayFontSize: 14,
-            textMonthFontSize: 16,
-            textDayHeaderFontSize: 14,
-          }}
-        />
+      {/* Agenda container without extra top padding */}
+      <View style={{ flex: 1, backgroundColor: "#EAE6E5" }}>
+        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+          <Agenda
+            items={items}
+            loadItemsForMonth={loadItemsForMonth}
+            selected={new Date().toISOString().split("T")[0]}
+            renderItem={renderItem}
+            renderEmptyDate={renderEmptyDate}
+            showClosingKnob={true}
+            theme={{
+              backgroundColor: "#EAE6E5",
+              calendarBackground: "#EAE6E5",
+              agendaKnobColor: "#333",
+              selectedDayBackgroundColor: "#333",
+              dotColor: "#333",
+              todayTextColor: "#333",
+              agendaDayTextColor: "#333",
+              agendaDayNumColor: "#333",
+              agendaTodayColor: "#333",
+              monthTextColor: "#333",
+              textSectionTitleColor: "#333",
+              textDisabledColor: "#999",
+              dayTextColor: "#333",
+              textMonthFontWeight: "bold",
+              textDayFontSize: 14,
+              textMonthFontSize: 16,
+              textDayHeaderFontSize: 14,
+            }}
+          />
+        </Animated.View>
 
         {modalVisible && <AddModal />}
 
         {/* Upload Button */}
         <UploadButton onPress={() => setModalVisible(!modalVisible)} />
-      </Animated.View>
-    </SafeAreaView>
+      </View>
+    </>
   );
 }
 
