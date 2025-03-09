@@ -113,6 +113,10 @@ function RootLayoutContent() {
           name="settings/editProfile"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="social/community"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
