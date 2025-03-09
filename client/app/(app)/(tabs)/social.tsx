@@ -28,12 +28,12 @@ const CARD_MARGIN = 10;
 function ProfileCard({
   profile,
   onPress,
-  onFollowPress,
+  onFollowTogglePress,
   isFollowing = false,
 }: {
   profile: Profile;
   onPress: () => void;
-  onFollowPress: () => void;
+  onFollowTogglePress: () => void;
   isFollowing: boolean;
 }) {
   return (
@@ -58,7 +58,7 @@ function ProfileCard({
         </Text>
         <TouchableOpacity
           style={[styles.followButton, isFollowing && styles.followingButton]}
-          onPress={onFollowPress}
+          onPress={onFollowTogglePress}
         >
           <Text
             style={[
@@ -102,7 +102,7 @@ function ProfileSection({
             key={profile.id}
             profile={profile}
             isFollowing={followingState[profile.id ?? ""]}
-            onFollowPress={() => onFollowToggle(profile.id ?? "")}
+            onFollowTogglePress={() => onFollowToggle(profile.id ?? "")}
             onPress={() => onProfilePress(profile.id ?? "")}
           />
         ))}
