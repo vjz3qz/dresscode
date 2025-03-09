@@ -334,6 +334,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 6,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#333",
     width: "100%",
     alignItems: "center",
   },
