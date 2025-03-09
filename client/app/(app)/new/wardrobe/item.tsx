@@ -6,7 +6,7 @@ import ImageGallery from "@/components/ImageGallery";
 import { useSession } from "@/contexts/SessionContext";
 import { saveItem } from "@/api/SaveItem";
 
-export default function WardrobeScreen() {
+export default function NewItemScreen() {
   const { session } = useSession();
   const [cameraOpen, setCameraOpen] = useState<boolean>(true);
   const [imageName, setImageName] = useState<string | null>(null);
