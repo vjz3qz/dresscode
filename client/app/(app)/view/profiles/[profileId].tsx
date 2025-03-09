@@ -20,6 +20,7 @@ import Avatar from "@/components/Avatar";
 import Modal from "@/ui/Modal";
 import { getClosetWrapped } from "@/api/getClosetWrapped";
 import { fetchProfileById } from "@/api/fetchProfiles";
+import { useFollow } from "@/contexts/FollowContext";
 
 const { height, width } = Dimensions.get("window");
 
@@ -31,12 +32,13 @@ const tabs: { name: string; tableName: keyof TableTypes; icon: string }[] = [
 
 export default function profilePage() {
   const { profileId } = useLocalSearchParams();
-  const [profile, setProfile] = useState<Profile | null>();
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [wrappedText, setWrappedText] = useState<string>(
     "Generating your closet wrapped..."
   );
+  const { followingState, toggleFollow, refreshFollowData } = useFollow();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -91,6 +93,9 @@ export default function profilePage() {
     router.push(paths[tabs[tabIndex].tableName] as Href);
   }
 
+  // Determine if the current profile is followed using our centralized follow state.
+  const isFollowing = profile ? followingState[profile.id ?? ""] : false;
+
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
@@ -123,6 +128,26 @@ export default function profilePage() {
             <Text style={styles.usernameText}>
               @{profile?.username || "username"}
             </Text>
+            <TouchableOpacity
+              style={[
+                styles.followButton,
+                isFollowing && styles.followingButton,
+              ]}
+              onPress={() => {
+                if (profile) {
+                  toggleFollow(profile.id ?? "");
+                }
+              }}
+            >
+              <Text
+                style={[
+                  styles.followButtonText,
+                  isFollowing && styles.followingButtonText,
+                ]}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -395,5 +420,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#888",
     fontWeight: "bold",
+  },
+  followButton: {
+    backgroundColor: "#333",
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 8,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#333",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  followButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  followingButton: {
+    backgroundColor: "#EAE6E5",
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  followingButtonText: {
+    color: "#333",
   },
 });
