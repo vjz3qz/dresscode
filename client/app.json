@@ -8,12 +8,12 @@
     "scheme": "dresscode",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/splash2.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#E4E2DE"
     },
     "ios": {
-      "bundleIdentifier": "com.dresscode.dresscode",
+      "bundleIdentifier": "com.dresscodeapp.dresscode",
       "supportsTablet": true,
       "requireFullScreen": true,
       "usesAppleSignIn": true,
@@ -34,8 +34,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/splash2.png",
+        "backgroundColor": "#E4E2DE"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -45,7 +45,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/splash2.png"
     },
     "plugins": [
       "expo-router",
