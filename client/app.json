@@ -72,5 +72,9 @@
       }
     },
     "owner": "vjz3qz"
+  },
+  "updates": {
+    "enabled": true,
+    "checkAutomatically": "ON_LOAD"
   }
 }
