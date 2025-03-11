@@ -59,7 +59,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-tab-view": "^4.0.3",
     "react-native-view-shot": "~4.0.3",
-    "react-native-web": "^0.19.13"
+    "react-native-web": "^0.19.13",
+    "expo-dev-client": "~5.0.12"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
