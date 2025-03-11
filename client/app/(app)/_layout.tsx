@@ -6,11 +6,11 @@ import {
 import { useFonts } from "expo-font";
 import { Redirect, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React from "react";
-import { SessionProvider, useSession } from "@/contexts/SessionContext"; // Import your session context
+import { SessionProvider, useSession } from "@/contexts/SessionContext";
 import { StatusBar, View } from "react-native";
 
 // Prevent splash screen from auto-hiding
@@ -19,30 +19,38 @@ SplashScreen.preventAutoHideAsync();
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
   const { session, loading, profileNotFound } = useSession();
+  console.log("loading", loading);
+  console.log("profileNotFound", profileNotFound);
+
   const [appReady, setAppReady] = useState(false);
+  console.log("appReady", appReady);
 
   const [fontsLoaded] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
+  // Set app as ready once fonts are loaded and auth state is determined
   useEffect(() => {
     if (fontsLoaded && !loading) {
       setAppReady(true);
     }
   }, [fontsLoaded, loading]);
 
-  const onLayoutRootView = useCallback(async () => {
+  // NEW: Hide the splash screen when the app is ready,
+  // regardless of what you render (even if it's a Redirect).
+  useEffect(() => {
     if (appReady) {
-      await SplashScreen.hideAsync();
+      console.log("App is ready. Hiding splash screen...");
+      SplashScreen.hideAsync();
     }
   }, [appReady]);
 
-  // Prevent rendering anything while waiting for fonts and auth state
+  // While waiting for fonts and auth, keep the splash visible
   if (!appReady) {
     return null; // Keeps the splash screen visible
   }
 
-  // Redirect logic after splash screen hides
+  // Redirect logic based on authentication state
 
   // Only require authentication within the (app) group's layout as users
   // need to be able to access the (auth) group and sign in again.
@@ -58,61 +66,58 @@ function RootLayoutContent() {
     <ThemeProvider value={DefaultTheme}>
       <StatusBar barStyle="dark-content" />
       {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
-      {/* Wrap Stack in a View and use onLayout here */}
-      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="new/wardrobe/item"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="new/wardrobe/outfit"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="new/wardrobe/look"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="new/calendarEvent"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="view/wardrobe/looks/[lookId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="view/wardrobe/items/[itemId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="view/wardrobe/outfits/[outfitId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="view/wardrobe/outfitsGridView"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="view/calendarEvents/[calendarEventId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="view/profiles/[profileId]"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="settings/editProfile"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="social/community"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </View>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="new/wardrobe/item"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="new/wardrobe/outfit"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="new/wardrobe/look"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="new/calendarEvent"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/wardrobe/looks/[lookId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/wardrobe/items/[itemId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/wardrobe/outfits/[outfitId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/wardrobe/outfitsGridView"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/calendarEvents/[calendarEventId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="view/profiles/[profileId]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="settings/editProfile"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="social/community"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="+not-found" />
+      </Stack>
     </ThemeProvider>
   );
 }
