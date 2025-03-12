@@ -35,10 +35,26 @@ def upload_task(file_content, file_name, file_content_type):
     Returns:
         dict: The result of the upload.
     """
-    upload_file_obj_to_s3(file_content, file_name, file_content_type)
-    # process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
-    # add_item(file_name, "clothing", "processed_" + file_name)
-    return {"filename": file_name, "status": "file uploaded successfully"}
+    try:
+        upload_file_obj_to_s3(file_content, file_name, file_content_type)
+        return {"file_name": file_name}
+    except Exception as e:
+        return {"error": str(e)}
+
+@celery.task(name="tasks.remove_background")
+def upload_task(file_name):
+    """
+    Remove the background from an image using remove bg library.
+    Args:
+        file_name: The file to process.
+    Returns:
+        status code: The status code of the request.
+    """
+    try:
+        process_image_s3("dresscode-ai", file_name, "processed_" + file_name)
+        return {"file_name": "processed_" + file_name}
+    except Exception as e:
+        return {"error": str(e)}
 
 @celery.task(name="tasks.get_image_url")
 def get_image_url_task(key):
@@ -49,6 +65,7 @@ def get_image_url_task(key):
     Returns:
         str: The URL of the image.
     """
+    # TODO put in json
     return get_image_url_s3(key)
 
 @celery.task(name="tasks.closet_wrapped")

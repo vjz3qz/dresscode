@@ -47,5 +47,5 @@ export async function uploadImageUri(uri: string) {
 
   const result = response.data;
 
-  return result["result"]["filename"];
+  return result["result"]["file_name"];
 }
