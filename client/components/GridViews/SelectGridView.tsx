@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -8,14 +8,19 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Animated,
+  Easing,
 } from "react-native";
 import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAllImageUrls } from "@/api/FetchImageUrl";
-import { Outfit, TableTypes } from "@/types";
+import type { Outfit, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
+import { Ionicons } from "@expo/vector-icons";
 
-const { height, width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+const ITEM_MARGIN = 6;
+const ITEM_WIDTH = (width * 0.94 - ITEM_MARGIN * 6) / 3; // 40 for container padding, ITEM_MARGIN*6 for margins between items
 
 export default function SelectGridView({
   tableName,
@@ -30,9 +35,20 @@ export default function SelectGridView({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
-  const REFRESH_COOLDOWN = 10000; // Cooldown time in milliseconds (e.g., 10 seconds)
+  // Cache settings
+  const CACHE_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour
+  const REFRESH_COOLDOWN = 10000; // 10 seconds
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
   const fetchAndCacheOutfits = useCallback(
     async (isRefreshing = false) => {
@@ -79,7 +95,7 @@ export default function SelectGridView({
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchAndCacheOutfits();
-    }, 300); // Debounce fetch by 300ms to avoid excessive refetching
+    }, 300); // Debounce fetch by 300ms
 
     return () => clearTimeout(timer);
   }, [tableName, fetchAndCacheOutfits]);
@@ -87,14 +103,13 @@ export default function SelectGridView({
   const onRefresh = useCallback(() => {
     const now = Date.now();
     if (lastRefreshTime && now - lastRefreshTime < REFRESH_COOLDOWN) {
-      // If within cooldown period, do not refresh
       console.log("Refresh is throttled. Please wait before refreshing again.");
       setRefreshing(false);
       return;
     }
 
     setRefreshing(true);
-    setLastRefreshTime(now); // Update the last refresh time
+    setLastRefreshTime(now);
     fetchAndCacheOutfits(true);
   }, [fetchAndCacheOutfits, lastRefreshTime]);
 
@@ -113,97 +128,191 @@ export default function SelectGridView({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6b7280" />
+        <ActivityIndicator size="large" color="#333" />
+        <Text style={styles.loadingText}>Loading {tableName}...</Text>
       </View>
     );
   }
 
   return (
-    <>
-      <Text style={styles.titleText}>Select {tableName}</Text>
+    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Select {tableName}</Text>
+        <Text style={styles.selectionCount}>
+          {selectedOutfits.length} selected
+        </Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        showsVerticalScrollIndicator={false}
       >
         {data.length === 0 ? (
-          <View style={styles.noDataContainer}>
-            <Text style={styles.noDataText}>
-              No {tableName} found. Add some {tableName}!
+          <View style={styles.emptyStateContainer}>
+            <Ionicons
+              name={
+                tableName === "outfits" ? "people-outline" : "albums-outline"
+              }
+              size={60}
+              color="#ccc"
+            />
+            <Text style={styles.emptyStateTitle}>No {tableName} found</Text>
+            <Text style={styles.emptyStateText}>
+              Add some {tableName} to your collection
             </Text>
           </View>
         ) : (
-          data.map((item) => {
-            const isSelected = selectedOutfits.some(
-              (selected) => selected.id === item.id
-            );
-            return (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => toggleSelection(item)}
-                style={[
-                  styles.imageContainer,
-                  isSelected && styles.selectedImageContainer,
-                ]}
-              >
-                <Image source={{ uri: item.image_url }} style={styles.image} />
-              </TouchableOpacity>
-            );
-          })
+          <View style={styles.gridContainer}>
+            {data.map((item) => {
+              const isSelected = selectedOutfits.some(
+                (selected) => selected.id === item.id
+              );
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() => toggleSelection(item)}
+                  style={[
+                    styles.gridItem,
+                    isSelected && styles.selectedGridItem,
+                  ]}
+                  activeOpacity={0.8}
+                >
+                  <Image
+                    source={{ uri: item.image_url }}
+                    style={styles.itemImage}
+                    contentFit="cover"
+                    transition={300}
+                  />
+                  {isSelected && (
+                    <View style={styles.checkmarkContainer}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        color="#333"
+                      />
+                    </View>
+                  )}
+                  {item.name && (
+                    <View style={styles.itemNameContainer}>
+                      <Text style={styles.itemName} numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         )}
       </ScrollView>
-    </>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleText: {
-    textAlign: "center",
-    fontSize: 20,
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  headerTitle: {
+    fontSize: 18,
     fontWeight: "bold",
-    color: "black",
+    color: "#333",
+  },
+  selectionCount: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: 20,
+  },
+  gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingVertical: 10,
+    justifyContent: "flex-start",
+    paddingHorizontal: 20,
   },
-  imageContainer: {
-    width: width / 3 - 10,
-    margin: 5,
-    borderRadius: 10,
+  gridItem: {
+    width: ITEM_WIDTH,
+    height: ITEM_WIDTH * 1.2,
+    margin: ITEM_MARGIN,
+    borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#f8f8f8",
-    elevation: 2,
+    backgroundColor: "white",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    position: "relative",
+  },
+  selectedGridItem: {
     borderWidth: 2,
-    borderColor: "transparent",
+    borderColor: "#333",
   },
-  selectedImageContainer: {
-    borderColor: "gray",
-  },
-  image: {
+  itemImage: {
     width: "100%",
-    height: height / 6,
-    resizeMode: "cover",
+    height: "100%",
+    backgroundColor: "#f0f0f0",
+  },
+  checkmarkContainer: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 2,
+  },
+  itemNameContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  itemName: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "500",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
-  noDataContainer: {
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
+  emptyStateContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 40,
+    minHeight: 300,
   },
-  noDataText: {
-    fontSize: 20,
-    color: "#6b7280",
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
   },
 });
