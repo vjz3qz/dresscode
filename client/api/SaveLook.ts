@@ -9,10 +9,10 @@ export async function saveLook(look: Look, outfits: Outfit[]) {
     throw new Error("No active session");
   }
   try {
-    // const s3Key = await uploadImageUri(screenshotUri);
+    // const imageKey = await uploadImageUri(screenshotUri);
 
     // // Add the S3 key to the look metadata and save the look to Supabase
-    // look.s3_key = s3Key;
+    // look.s3_key = imageKey;
 
     const { data, error } = await supabase.from("looks").insert(look).select();
 

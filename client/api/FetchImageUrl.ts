@@ -94,11 +94,11 @@ export async function addImageUrls(data: any[]) {
 
   let objects: any[] = [];
   for (let i = 0; i < data.length; i++) {
-    const s3Key = data[i]["s3_key"];
-    if (!s3Key) {
+    const imageKey = data[i]["s3_key"];
+    if (!imageKey) {
       continue;
     }
-    data[i]["image_url"] = imageUrls[s3Key] || ""; // Add the URL if it exists
+    data[i]["image_url"] = imageUrls[imageKey] || ""; // Add the URL if it exists
     objects.push(data[i]);
   }
 
