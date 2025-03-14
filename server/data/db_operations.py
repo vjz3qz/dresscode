@@ -8,7 +8,7 @@ supabase: Client = create_client(url, key)
 
 def add_item(name, type, key):
     supabase.table("items").insert(
-        {"name": name, "type": type, "s3_key": key}
+        {"name": name, "type": type, "image_key": key}
     ).execute()
 
 def get_outfits(user_id, outfit_ids):

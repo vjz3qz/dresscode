@@ -52,10 +52,10 @@ export default function CreateEventScreen() {
           Number(Array.isArray(outfitId) ? outfitId[0] : outfitId)
         );
         // get outfit image url
-        if (!fetchedOutfit.s3_key) return;
+        if (!fetchedOutfit.image_key) return;
         if (!session) return;
         fetchedOutfit.image_url = await fetchImageUrl(
-          fetchedOutfit.s3_key || ""
+          fetchedOutfit.image_key || ""
         );
         setOutfit(fetchedOutfit);
       } catch (error: any) {

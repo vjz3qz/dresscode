@@ -44,9 +44,11 @@ export default function ItemView() {
         const fetchedItem = await fetchItemById(
           Array.isArray(itemId) ? itemId[0] : itemId
         );
-        if (!fetchedItem.s3_key) return;
+        if (!fetchedItem.image_key) return;
         if (!session) return;
-        fetchedItem.image_url = await fetchImageUrl(fetchedItem.s3_key || "");
+        fetchedItem.image_url = await fetchImageUrl(
+          fetchedItem.image_key || ""
+        );
         setItem(fetchedItem);
       } catch (error: any) {
         console.error("Error fetching item:", error.message);

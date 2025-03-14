@@ -12,7 +12,7 @@ export async function saveItem(item: Item, screenshotUri: string) {
     const imageKey = await uploadImageUri(screenshotUri);
 
     // Add the S3 key to the outfit metadata and save the outfit to Supabase
-    item.s3_key = imageKey;
+    item.image_key = imageKey;
     const { data, error } = await supabase.from("items").insert(item).select();
 
     if (error) {

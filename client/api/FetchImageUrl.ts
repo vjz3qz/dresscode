@@ -89,12 +89,12 @@ export async function fetchAllImageUrls<T extends keyof TableTypes>(
 }
 
 export async function addImageUrls(data: any[]) {
-  const imageNames = data.map((item) => item["s3_key"]).filter(Boolean);
+  const imageNames = data.map((item) => item["image_key"]).filter(Boolean);
   const imageUrls = await fetchImageUrls(imageNames);
 
   let objects: any[] = [];
   for (let i = 0; i < data.length; i++) {
-    const imageKey = data[i]["s3_key"];
+    const imageKey = data[i]["image_key"];
     if (!imageKey) {
       continue;
     }

@@ -44,9 +44,9 @@ export default function OutfitView() {
         const fetchedOutfit = await fetchOutfitById(
           Number(Array.isArray(outfitId) ? outfitId[0] : outfitId)
         );
-        if (!fetchedOutfit.s3_key || !session) return;
+        if (!fetchedOutfit.image_key || !session) return;
         fetchedOutfit.image_url = await fetchImageUrl(
-          fetchedOutfit.s3_key || ""
+          fetchedOutfit.image_key || ""
         );
         setOutfit(fetchedOutfit);
       } catch (error: any) {

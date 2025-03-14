@@ -12,7 +12,7 @@ export async function saveLook(look: Look, outfits: Outfit[]) {
     // const imageKey = await uploadImageUri(screenshotUri);
 
     // // Add the S3 key to the look metadata and save the look to Supabase
-    // look.s3_key = imageKey;
+    // look.image_key = imageKey;
 
     const { data, error } = await supabase.from("looks").insert(look).select();
 

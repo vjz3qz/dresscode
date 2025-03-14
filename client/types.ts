@@ -24,7 +24,7 @@ export type Item = {
   created_at?: string;
   name: string;
   type: string;
-  s3_key?: string;
+  image_key?: string;
   user_id?: string;
   image_url?: string;
   x?: number;
@@ -50,7 +50,7 @@ export type Outfit = {
   created_at?: string;
   name: string;
   user_id?: string;
-  s3_key?: string;
+  image_key?: string;
   image_url?: string;
   description?: string;
   metadata: Item[];

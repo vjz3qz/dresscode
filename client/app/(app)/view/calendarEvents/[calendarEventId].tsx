@@ -76,10 +76,10 @@ export default function EventScreen() {
 
         const fetchedOutfit = await fetchOutfitById(outfitId);
         // get outfit image url
-        if (!fetchedOutfit.s3_key) return;
+        if (!fetchedOutfit.image_key) return;
         if (!session) return;
         fetchedOutfit.image_url = await fetchImageUrl(
-          fetchedOutfit.s3_key || ""
+          fetchedOutfit.image_key || ""
         );
         setOutfit(fetchedOutfit);
       } catch (error: any) {

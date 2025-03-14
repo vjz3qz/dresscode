@@ -72,7 +72,7 @@ def get_image_url_task(key):
 def get_closet_wrapped_task(user_id, outfit_ids):
     # fetch outfit urls
     outfits = get_outfits(user_id, outfit_ids)
-    url_fetches = [get_image_url_s3(outfit["s3_key"]) for outfit in outfits]
+    url_fetches = [get_image_url_s3(outfit["image_key"]) for outfit in outfits]
     urls = [ url_fetch["url"] for url_fetch in url_fetches if "error" not in url_fetch]
     # feed to chat
     image_response = client.send_image_query(
@@ -94,7 +94,7 @@ def suggest_outfit_task(user_id, suggested_outfit_id):
     # fetch outfit urls
     items = get_all_items(user_id)
     for item in items:
-        url_fetch = get_image_url_s3(item["s3_key"])
+        url_fetch = get_image_url_s3(item["image_key"])
         if "error" not in url_fetch:
             item["image_url"] = url_fetch["url"]
     # feed to chat
