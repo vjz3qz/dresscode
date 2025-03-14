@@ -20,3 +20,5 @@ supabase offline dev
 
 react-native-image-picker: select pics from camera roll
 Use react-native-fast-image for better caching & performance.
+
+- use async/update db/push notifications
