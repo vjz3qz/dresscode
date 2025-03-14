@@ -44,8 +44,8 @@ async def upload(file: UploadFile = File(...), token_payload: dict = Depends(val
     task = upload_task.apply(file_content, file_name, file_content_type)
     return task
 
-@router.post("/remove-background/{key}")
-async def remove_background(key: str, token_payload: dict = Depends(validate_token)):
+@router.post("/remove-background")
+async def remove_background(key: str = Query(...), token_payload: dict = Depends(validate_token)):
     """
     Get the URL of an image in the S3 bucket.
     Args:
