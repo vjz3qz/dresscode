@@ -88,8 +88,13 @@ export async function fetchAllImageUrls<T extends keyof TableTypes>(
   return objects;
 }
 
-export async function addImageUrls(data: any[]) {
-  const imageNames = data.map((item) => item["image_key"]).filter(Boolean);
+export async function addImageUrls(
+  data: any[],
+  getUnprocessed: boolean = false
+) {
+  const imageNames = data
+    .map((item) => item[getUnprocessed ? "unprocessed_image_key" : "image_key"])
+    .filter(Boolean);
   const imageUrls = await fetchImageUrls(imageNames);
 
   let objects: any[] = [];
@@ -98,7 +103,8 @@ export async function addImageUrls(data: any[]) {
     if (!imageKey) {
       continue;
     }
-    data[i]["image_url"] = imageUrls[imageKey] || ""; // Add the URL if it exists
+    data[i][getUnprocessed ? "unprocessed_image_url" : "image_url"] =
+      imageUrls[imageKey] || ""; // Add the URL if it exists
     objects.push(data[i]);
   }
 

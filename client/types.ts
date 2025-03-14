@@ -25,8 +25,10 @@ export type Item = {
   name: string;
   type: string;
   image_key?: string;
+  unprocessed_image_key?: string;
   user_id?: string;
   image_url?: string;
+  unprocessed_image_url?: string;
   x?: number;
   y?: number;
   size?: number;
