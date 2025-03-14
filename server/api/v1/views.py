@@ -10,6 +10,7 @@ import time
 import uuid
 
 from core.celery_worker import celery
+from core.celery_worker import remove_background_task, upload_task, get_image_url_task, suggest_outfit_task, get_closet_wrapped_task
 from utils.dependencies import validate_token
 
 router = APIRouter()
@@ -40,8 +41,20 @@ async def upload(file: UploadFile = File(...), token_payload: dict = Depends(val
     # randomly generate a file name
     file_name = str(uuid.uuid4()) + ".jpg"
     file_content_type = file.content_type
-    task = celery.send_task("tasks.upload", args=[file_content, file_name, file_content_type])
-    return return_task(task)
+    task = upload_task.apply(file_content, file_name, file_content_type)
+    return task
+
+@router.post("/remove-background/{key}")
+async def remove_background(key: str, token_payload: dict = Depends(validate_token)):
+    """
+    Get the URL of an image in the S3 bucket.
+    Args:
+        key (str): The name of the image file.
+    Returns:
+        JSONResponse: Returns the URL of the image.
+    """
+    task = remove_background_task.apply(key)
+    return task
 
 
 
@@ -54,8 +67,8 @@ async def get_image_url(key: str, token_payload: dict = Depends(validate_token))
     Returns:
         JSONResponse: Returns the URL of the image.
     """
-    task = celery.send_task("tasks.get_image_url", args=[key])
-    return return_task(task)
+    task = get_image_url_task.apply(key)
+    return task
 
 
 @router.get("/get-image-urls")
@@ -67,11 +80,11 @@ async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict 
     Returns:
         JSONResponse: Returns a dictionary containing filenames and their URLs.
     """
-    tasks = [celery.send_task("tasks.get_image_url", args=[filename]) for filename in filenames]
+    tasks = [get_image_url.apply(filename) for filename in filenames]
     results = {}
 
     for filename, task in zip(filenames, tasks):
-        task_result = return_task(task)
+        task_result = task
 
         # Extract content from JSONResponse
         content = task_result.body  # Access the internal _body attribute
@@ -86,8 +99,8 @@ async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict 
     return JSONResponse(content=results)
 
 
-@router.get("/closet-wrapped")
-async def closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict = Depends(validate_token)):
+@router.get("/get-closet-wrapped")
+async def get_closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict = Depends(validate_token)):
     """_summary_
 
     Args:
@@ -95,8 +108,8 @@ async def closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: dict
     """
     # call celery
     user_id = token_payload.get("sub")
-    task = celery.send_task("tasks.closet_wrapped", args=[user_id, outfit_ids])
-    return return_task(task)
+    task = get_closet_wrapped_task.apply(user_id, outfit_ids)
+    return task
 
 
 
@@ -110,8 +123,8 @@ async def suggest_outfit(suggested_outfit_id: str = Query(...), token_payload: d
     """
     # call celery
     user_id = token_payload.get("sub")
-    task = celery.send_task("tasks.suggest_outfit", args=[user_id, suggested_outfit_id])
-    return return_task(task)
+    task = suggest_outfit_task.apply(user_id, suggested_outfit_id)
+    return task
 
 
 def return_task(task):

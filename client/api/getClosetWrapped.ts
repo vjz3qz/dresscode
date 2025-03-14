@@ -26,7 +26,7 @@ export async function getClosetWrapped(userId?: string): Promise<string> {
     // hit wrapped
 
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-    const response = await axios.get(`${BACKEND_URL}/closet-wrapped`, {
+    const response = await axios.get(`${BACKEND_URL}/get-closet-wrapped`, {
       params: {
         outfit_ids: outfitIds, // Pass array of filenames as query params
       },

@@ -26,7 +26,7 @@ else:
 
 client = OpenAIChatClient()
 
-@celery.task(name="tasks.upload")
+@celery.task
 def upload_task(file_content, file_name, file_content_type):
     """
     Upload a file to S3.
@@ -41,8 +41,8 @@ def upload_task(file_content, file_name, file_content_type):
     except Exception as e:
         return {"error": str(e)}
 
-@celery.task(name="tasks.remove_background")
-def upload_task(file_name):
+@celery.task
+def remove_background_task(file_name):
     """
     Remove the background from an image using remove bg library.
     Args:
@@ -56,7 +56,7 @@ def upload_task(file_name):
     except Exception as e:
         return {"error": str(e)}
 
-@celery.task(name="tasks.get_image_url")
+@celery.task
 def get_image_url_task(key):
     """
     Get the URL of an image in the S3 bucket.
@@ -68,8 +68,8 @@ def get_image_url_task(key):
     # TODO put in json
     return get_image_url_s3(key)
 
-@celery.task(name="tasks.closet_wrapped")
-def closet_wrapped_task(user_id, outfit_ids):
+@celery.task
+def get_closet_wrapped_task(user_id, outfit_ids):
     # fetch outfit urls
     outfits = get_outfits(user_id, outfit_ids)
     url_fetches = [get_image_url_s3(outfit["s3_key"]) for outfit in outfits]
@@ -82,7 +82,7 @@ def closet_wrapped_task(user_id, outfit_ids):
         urls)
     return image_response
 
-@celery.task(name="tasks.suggest_outfit")
+@celery.task
 def suggest_outfit_task(user_id, suggested_outfit_id):
     # fetch suggested outfit row
     suggest_outfit_job = get_suggested_outfit_job(user_id, suggested_outfit_id)
