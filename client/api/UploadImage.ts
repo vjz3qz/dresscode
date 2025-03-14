@@ -21,7 +21,7 @@ async function convertUriToFormData(uri: string): Promise<FormData> {
     uri,
     name: `file.${fileType}`, // Provide a default name if needed
     type: `image/${fileType}`, // Use the file type from the URI or fallback
-  });
+  } as any);
 
   return formData;
 }
