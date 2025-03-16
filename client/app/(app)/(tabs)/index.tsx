@@ -11,7 +11,7 @@ import {
   Animated,
   Easing,
 } from "react-native";
-import { type Href, router } from "expo-router";
+import { type Href, router, useFocusEffect } from "expo-router";
 import type { Look, TableTypes } from "@/types";
 import { useSession } from "@/contexts/SessionContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,6 +35,14 @@ export default function WardrobeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [wrappedText, setWrappedText] = useState<string>(
     "Generating your closet wrapped..."
+  );
+  const [refresh, setRefresh] = useState(false);
+
+  // Toggling refresh (maybe using a focus effect)
+  useFocusEffect(
+    useCallback(() => {
+      setRefresh((prev) => !prev);
+    }, [])
   );
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -152,7 +160,7 @@ export default function WardrobeScreen() {
                 if (look.id)
                   router.push(`/view/wardrobe/looks/${look.id}` as Href);
               }}
-              tableName={tabs[tabIndex].tableName as keyof TableTypes}
+              refresh={refresh}
             />
           ) : (
             <GridView
@@ -162,6 +170,7 @@ export default function WardrobeScreen() {
                 )
               }
               tableName={tabs[tabIndex].tableName as keyof TableTypes}
+              refresh={refresh}
             />
           )}
         </View>
