@@ -24,7 +24,7 @@ export default function NewItemScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const cameraRef = useRef(null);
+  const cameraRef = useRef<CameraView | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
@@ -108,7 +108,7 @@ export default function NewItemScreen() {
       try {
         const options = { quality: 0.85, base64: false, exif: false };
         const photo = await cameraRef.current.takePictureAsync(options);
-        setPhotoUri(photo.uri);
+        setPhotoUri(photo?.uri ?? null);
       } catch (error) {
         console.error("Error taking picture:", error);
         Alert.alert("Error", "Failed to take picture. Please try again.");
