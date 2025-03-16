@@ -41,7 +41,10 @@ export default function WardrobeScreen() {
   // Toggling refresh (maybe using a focus effect)
   useFocusEffect(
     useCallback(() => {
-      setRefresh((prev) => !prev);
+      const timer = setTimeout(() => {
+        setRefresh((prev) => !prev);
+      }, 1000); // adjust the delay as needed
+      return () => clearTimeout(timer);
     }, [])
   );
   const fadeAnim = useRef(new Animated.Value(0)).current;
