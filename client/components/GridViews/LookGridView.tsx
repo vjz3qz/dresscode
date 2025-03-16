@@ -24,12 +24,12 @@ const LOOK_WIDTH = (width * 0.94 - ITEM_MARGIN * 4) / 2; // 40 for container pad
 
 export default function LookGridView({
   onLookClick,
-  tableName,
   profileId,
+  refresh = false, // default to false if not provided
 }: {
   onLookClick: (look: Look, index: number) => void;
-  tableName: keyof TableTypes;
   profileId?: string;
+  refresh?: boolean;
 }) {
   const { session } = useSession();
   const [looks, setLooks] = useState<Look[]>([]);
@@ -56,9 +56,7 @@ export default function LookGridView({
       if (!session) return;
 
       if (!isRefreshing) setLoading(true);
-      const cacheKey = `looks_${tableName}_${session.user.id}_${
-        profileId || ""
-      }`;
+      const cacheKey = `image_urls_looks_${session.user.id}_${profileId || ""}`;
       const cachedLooks = await AsyncStorage.getItem(cacheKey);
 
       if (cachedLooks && !isRefreshing) {
@@ -107,7 +105,7 @@ export default function LookGridView({
         setRefreshing(false);
       }
     },
-    [tableName, session, profileId]
+    [session, profileId]
   );
 
   useEffect(() => {
@@ -116,7 +114,7 @@ export default function LookGridView({
     }, 300); // Debounce the fetch by 300ms
 
     return () => clearTimeout(timer);
-  }, [tableName, fetchAndCacheLooks]);
+  }, [fetchAndCacheLooks, session, refresh]);
 
   const onRefresh = useCallback(() => {
     const now = Date.now();
