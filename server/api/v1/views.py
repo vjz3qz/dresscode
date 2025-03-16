@@ -41,8 +41,9 @@ async def upload(file: UploadFile = File(...), token_payload: dict = Depends(val
     # randomly generate a file name
     file_name = str(uuid.uuid4()) + ".jpg"
     file_content_type = file.content_type
-    task = upload_task.apply(file_content, file_name, file_content_type)
-    return task
+    task = upload_task.apply(args=(file_content, file_name, file_content_type))
+    result = task.get()   # This retrieves the result from your task
+    return JSONResponse(content=result)
 
 @router.post("/remove-background")
 async def remove_background(key: str = Query(...), token_payload: dict = Depends(validate_token)):
@@ -53,8 +54,9 @@ async def remove_background(key: str = Query(...), token_payload: dict = Depends
     Returns:
         JSONResponse: Returns the URL of the image.
     """
-    task = remove_background_task.apply(key)
-    return task
+    task = remove_background_task.apply(args=(key))
+    result = task.get()   # This retrieves the result from your task
+    return JSONResponse(content=result)
 
 
 
@@ -67,8 +69,9 @@ async def get_image_url(key: str, token_payload: dict = Depends(validate_token))
     Returns:
         JSONResponse: Returns the URL of the image.
     """
-    task = get_image_url_task.apply(key)
-    return task
+    task = get_image_url_task.apply(args=(key,))
+    result = task.get()   # This retrieves the result from your task
+    return JSONResponse(content=result)
 
 
 @router.get("/get-image-urls")
@@ -80,22 +83,20 @@ async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict 
     Returns:
         JSONResponse: Returns a dictionary containing filenames and their URLs.
     """
-    tasks = [get_image_url.apply(filename) for filename in filenames]
+    tasks = [get_image_url_task.apply(args=(filename,)) for filename in filenames]
     results = {}
 
     for filename, task in zip(filenames, tasks):
         task_result = task
 
         # Extract content from JSONResponse
-        content = task_result.body  # Access the internal _body attribute
-        content_data = json.loads(content.decode('utf-8'))  # Decode bytes to string and then load JSON
+        content_data = task_result.get()  # Access the internal _body attribute
 
         # Retrieve the URL if the task was successful
         if content_data.get('status') == 'complete':
             results[filename] = content_data.get('result', {}).get('url', '')
         else:
             results[filename] = ''  # Handle error case by setting an empty string or error message
-
     return JSONResponse(content=results)
 
 
@@ -108,8 +109,9 @@ async def get_closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: 
     """
     # call celery
     user_id = token_payload.get("sub")
-    task = get_closet_wrapped_task.apply(user_id, outfit_ids)
-    return task
+    task = get_closet_wrapped_task.apply(args=(user_id, outfit_ids))
+    result = task.get()   # This retrieves the result from your task
+    return JSONResponse(content=result)
 
 
 
@@ -123,8 +125,9 @@ async def suggest_outfit(suggested_outfit_id: str = Query(...), token_payload: d
     """
     # call celery
     user_id = token_payload.get("sub")
-    task = suggest_outfit_task.apply(user_id, suggested_outfit_id)
-    return task
+    task = suggest_outfit_task.apply(args=(user_id, suggested_outfit_id))
+    result = task.get()   # This retrieves the result from your task
+    return JSONResponse(content=result)
 
 
 def return_task(task):
