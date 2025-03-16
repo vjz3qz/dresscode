@@ -1,5 +1,7 @@
 """This module contains the API endpoints for the application."""
 
+
+from pydantic import BaseModel
 import json
 from typing import List, Optional
 from celery import uuid
@@ -45,8 +47,12 @@ async def upload(file: UploadFile = File(...), token_payload: dict = Depends(val
     result = task.get()   # This retrieves the result from your task
     return JSONResponse(content={"status": "complete", "result": result})
 
+class RemoveBackgroundPayload(BaseModel):
+    key: str
+    # Add other fields if needed
+
 @router.post("/remove-background")
-async def remove_background(key: str = Query(...), token_payload: dict = Depends(validate_token)):
+async def remove_background(payload: RemoveBackgroundPayload, token_payload: dict = Depends(validate_token)):
     """
     Get the URL of an image in the S3 bucket.
     Args:
@@ -54,7 +60,7 @@ async def remove_background(key: str = Query(...), token_payload: dict = Depends
     Returns:
         JSONResponse: Returns the URL of the image.
     """
-    task = remove_background_task.apply(args=(key,))
+    task = remove_background_task.apply(args=(payload.key,))
     result = task.get()   # This retrieves the result from your task
     return JSONResponse(content={"status": "complete", "result": result})
 

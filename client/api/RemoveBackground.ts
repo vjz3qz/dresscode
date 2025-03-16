@@ -11,16 +11,17 @@ export async function removeBackground(key: string) {
   }
 
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  const response = await axios.post(`${BACKEND_URL}/remove-background`, {
-    params: {
-      key,
-    },
-    paramsSerializer: axiosParamSerializer,
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${session.access_token}`,
-    },
-  });
+  const response = await axios.post(
+    `${BACKEND_URL}/remove-background`,
+    { key }, // This is the data payload
+    {
+      paramsSerializer: axiosParamSerializer,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
 
   if (response.status !== 200) {
     throw new Error(`Error uploading screenshot: ${response.statusText}`);
