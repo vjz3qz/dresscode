@@ -27,11 +27,13 @@ export default function GridView({
   tableName,
   rawData,
   profileId,
+  refresh = false, // default to false if not provided
 }: {
   onClick: (object: any, index: number) => void;
   tableName: keyof TableTypes;
   rawData?: any[];
   profileId?: string;
+  refresh?: boolean;
 }) {
   const { session } = useSession();
   const [data, setData] = useState<any[]>([]);
@@ -123,7 +125,7 @@ export default function GridView({
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timer);
-  }, [tableName, rawData, fetchAndCacheData, session]);
+  }, [tableName, rawData, fetchAndCacheData, session, refresh]);
 
   const onRefresh = useCallback(() => {
     const now = Date.now();
