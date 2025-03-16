@@ -54,7 +54,7 @@ async def remove_background(key: str = Query(...), token_payload: dict = Depends
     Returns:
         JSONResponse: Returns the URL of the image.
     """
-    task = remove_background_task.apply(args=(key))
+    task = remove_background_task.apply(args=(key,))
     result = task.get()   # This retrieves the result from your task
     return JSONResponse(content={"status": "complete", "result": result})
 
@@ -93,10 +93,10 @@ async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict 
         content_data = task_result.get()  # Access the internal _body attribute
 
         # Retrieve the URL if the task was successful
-        if content_data.get('status') == 'complete':
-            results[filename] = content_data.get('result', {}).get('url', '')
-        else:
+        if content_data.get('error'):
             results[filename] = ''  # Handle error case by setting an empty string or error message
+        else:
+            results[filename] = content_data.get('url', '')
     return JSONResponse(content={"status": "complete", "result": results})
 
 

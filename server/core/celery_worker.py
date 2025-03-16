@@ -66,7 +66,7 @@ def get_image_url_task(key):
         str: The URL of the image.
     """
     response = get_image_url_s3(key)
-    return {"status": "complete", "result": response}
+    return response
 
 @celery.task
 def get_closet_wrapped_task(user_id, outfit_ids):
