@@ -55,7 +55,7 @@ export async function fetchImageUrls(imageNames: string[]) {
       },
     });
 
-    return response.data; // This is expected to be an object with { filename: url }
+    return response.data["result"]; // This is expected to be an object with { filename: url }
   } catch (error) {
     // console.error("Error fetching image URLs:", error);
     return {};

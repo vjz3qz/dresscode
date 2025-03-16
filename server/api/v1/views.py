@@ -43,7 +43,7 @@ async def upload(file: UploadFile = File(...), token_payload: dict = Depends(val
     file_content_type = file.content_type
     task = upload_task.apply(args=(file_content, file_name, file_content_type))
     result = task.get()   # This retrieves the result from your task
-    return JSONResponse(content=result)
+    return JSONResponse(content={"status": "complete", "result": result})
 
 @router.post("/remove-background")
 async def remove_background(key: str = Query(...), token_payload: dict = Depends(validate_token)):
@@ -56,7 +56,7 @@ async def remove_background(key: str = Query(...), token_payload: dict = Depends
     """
     task = remove_background_task.apply(args=(key))
     result = task.get()   # This retrieves the result from your task
-    return JSONResponse(content=result)
+    return JSONResponse(content={"status": "complete", "result": result})
 
 
 
@@ -71,7 +71,7 @@ async def get_image_url(key: str, token_payload: dict = Depends(validate_token))
     """
     task = get_image_url_task.apply(args=(key,))
     result = task.get()   # This retrieves the result from your task
-    return JSONResponse(content=result)
+    return JSONResponse(content={"status": "complete", "result": result})
 
 
 @router.get("/get-image-urls")
@@ -97,7 +97,7 @@ async def get_image_urls(filenames: List[str] = Query(...), token_payload: dict 
             results[filename] = content_data.get('result', {}).get('url', '')
         else:
             results[filename] = ''  # Handle error case by setting an empty string or error message
-    return JSONResponse(content=results)
+    return JSONResponse(content={"status": "complete", "result": results})
 
 
 @router.get("/get-closet-wrapped")
@@ -111,7 +111,7 @@ async def get_closet_wrapped(outfit_ids: List[int] = Query(...), token_payload: 
     user_id = token_payload.get("sub")
     task = get_closet_wrapped_task.apply(args=(user_id, outfit_ids))
     result = task.get()   # This retrieves the result from your task
-    return JSONResponse(content=result)
+    return JSONResponse(content={"status": "complete", "result": result})
 
 
 
@@ -127,7 +127,7 @@ async def suggest_outfit(suggested_outfit_id: str = Query(...), token_payload: d
     user_id = token_payload.get("sub")
     task = suggest_outfit_task.apply(args=(user_id, suggested_outfit_id))
     result = task.get()   # This retrieves the result from your task
-    return JSONResponse(content=result)
+    return JSONResponse(content={"status": "complete", "result": result})
 
 
 def return_task(task):
