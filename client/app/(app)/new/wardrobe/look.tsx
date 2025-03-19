@@ -27,16 +27,15 @@ export default function NewLookScreen() {
   }
 
   async function save() {
-    const newLook: Look = {
+    const lookToSave: Look = {
       name: metadata.name,
       description: metadata.description,
     };
-    await saveLook(newLook, selectedOutfits);
-    router.dismiss();
+    const newLook = await saveLook(lookToSave, selectedOutfits);
+    router.replace(`/view/wardrobe/looks/${newLook.id}`);
   }
 
   function toggleView() {
-    // setShowMetadataForm(!showMetadataForm);() => sheetRef.current?.open()
     sheetRef.current?.open();
   }
 

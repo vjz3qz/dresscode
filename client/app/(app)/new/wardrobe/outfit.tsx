@@ -98,7 +98,7 @@ export default function NewOutfitScreen() {
     requestPermission();
   }
 
-  async function save() {
+  async function handleSave() {
     setLoading(true);
 
     try {
@@ -133,7 +133,7 @@ export default function NewOutfitScreen() {
       console.log("Screenshot saved successfully!");
 
       // Save outfit with metadata and screenshot
-      await saveOutfit(
+      const newOutfit = await saveOutfit(
         {
           name: "New Outfit",
           metadata: updatedItems,
@@ -141,7 +141,7 @@ export default function NewOutfitScreen() {
         screenshotUri
       );
 
-      router.dismiss();
+      router.replace(`/view/wardrobe/outfits/${newOutfit.id}`);
     } catch (error) {
       console.error("Error capturing screenshot:", error);
     } finally {
@@ -336,7 +336,7 @@ export default function NewOutfitScreen() {
 
         <TouchableOpacity
           style={[styles.saveButton, loading && styles.disabledButton]}
-          onPress={save}
+          onPress={handleSave}
           disabled={loading}
         >
           {loading ? (

@@ -51,8 +51,8 @@ export default function NewItemScreen() {
       try {
         setLoading(true);
         const item = { name: "", type: "clothing" };
-        await saveItem(item, photoUri);
-        router.dismiss();
+        const newItem = await saveItem(item, photoUri);
+        router.replace(`/view/wardrobe/items/${newItem.id}`);
       } catch (error) {
         console.error("Error saving the item:", error);
         Alert.alert("Error", "Failed to save the item. Please try again.");
