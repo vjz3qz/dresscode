@@ -3,7 +3,10 @@ import { supabase } from "@/utils/Supabase";
 import { uploadImageUri } from "@/api/UploadImage";
 import { fetchSession } from "@/utils/FetchSession";
 
-export async function saveOutfit(outfit: Outfit, screenshotUri: string) {
+export async function saveOutfit(
+  outfit: Outfit,
+  screenshotUri: string
+): Promise<Outfit> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -21,10 +24,14 @@ export async function saveOutfit(outfit: Outfit, screenshotUri: string) {
     if (error) {
       throw new Error(`Error saving outfit: ${error.message}`);
     }
+    if (!data || data.length === 0) {
+      throw new Error("Insert succeeded but no outfit was returned.");
+    }
 
     console.log("Outfit and screenshot saved successfully!");
-    return data;
+    return data[0];
   } catch (error) {
     console.error("Error saving outfit:", error);
+    throw error;
   }
 }
