@@ -4,7 +4,10 @@ import { uploadImageUri } from "@/api/UploadImage";
 import { fetchSession } from "@/utils/FetchSession";
 import { removeBackground } from "@/api/RemoveBackground";
 
-export async function saveItem(item: Item, screenshotUri: string) {
+export async function saveItem(
+  item: Item,
+  screenshotUri: string
+): Promise<Item> {
   const session = await fetchSession();
   if (!session) {
     throw new Error("No active session");
@@ -15,7 +18,7 @@ export async function saveItem(item: Item, screenshotUri: string) {
     // Add the S3 key to the outfit metadata and save the outfit to Supabase
     item.unprocessed_image_key = unprocessedImageKey;
 
-    // edit out the background
+    // Remove the background
     const imageKey = await removeBackground(unprocessedImageKey);
 
     item.image_key = imageKey;
@@ -25,10 +28,14 @@ export async function saveItem(item: Item, screenshotUri: string) {
     if (error) {
       throw new Error(`Error saving item: ${error.message}`);
     }
+    if (!data || data.length === 0) {
+      throw new Error("Insert succeeded but no item was returned.");
+    }
 
     console.log("Item and screenshot saved successfully!");
-    return data;
+    return data[0];
   } catch (error) {
     console.error("Error saving item:", error);
+    throw error;
   }
 }
